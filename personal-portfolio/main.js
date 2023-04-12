@@ -9,15 +9,14 @@ import {
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 
 import { dragInit } from "./js/dragControl";
-import { addProjects, cubes } from "./js/addProjects";
+import { addProjects, cubes, addMesh } from "./js/addProjects";
 import { mousePosition } from "./js/dragControl";
 import { createEnvironment } from "./js/utils";
 import { LaserBeam, add2Scene } from "./js/laserBeam";
-import { addDiv, css3DInit, cssScene, cssRenderer } from "./js/AddDiv";
 
 const clock = new THREE.Clock();
 let camera, scene, renderer;
-let scene2, renderer2;
+let CSSScene, CSSRenderer;
 
 let sphere, laserBeam;
 let light2;
@@ -63,7 +62,6 @@ function init() {
     camera.position.y = 3;
 
     scene = new THREE.Scene();
-    css3DInit();
 
     new RGBELoader()
         .setPath("assets/textures/hdr/")
@@ -117,15 +115,15 @@ function init() {
     dragInit();
 
     //SPAGHETTI CODE
-    scene2 = new THREE.Scene();
+    CSSScene = new THREE.Scene();
 
-    for (let i = 0; i < 10; i++) addMesh(20, 50);
+    for (let i = 0; i < 10; i++) addMesh(20, 50, CSSScene, scene);
 
-    renderer2 = new CSS3DRenderer();
-    renderer2.setSize(window.innerWidth, window.innerHeight);
-    renderer2.domElement.style.position = "absolute";
-    renderer2.domElement.style.top = 0;
-    document.body.appendChild(renderer2.domElement);
+    CSSRenderer = new CSS3DRenderer();
+    CSSRenderer.setSize(window.innerWidth, window.innerHeight);
+    CSSRenderer.domElement.style.position = "absolute";
+    CSSRenderer.domElement.style.top = 0;
+    document.body.appendChild(CSSRenderer.domElement);
 }
 
 function animate(msTime) {
@@ -150,44 +148,7 @@ function animate(msTime) {
     // camera.lookAt(scene.position);
 
     renderer.render(scene, camera);
-    renderer2.render(scene2, camera);
-
-    // cssRenderer.render(cssScene, camera);
-}
-
-function addMesh(w, h) {
-    const material = new THREE.MeshBasicMaterial({
-        color: 0x000000,
-        wireframe: true,
-        wireframeLinewidth: 1,
-        side: THREE.DoubleSide,
-    });
-
-    const element = document.createElement("div");
-    element.style.width = `${w}px`;
-    element.style.height = `${h}px`;
-    // element.style.opacity = i < 5 ? 0.5 : 1;
-    element.style.background = new THREE.Color(
-        Math.random() * 0xffffff
-    ).getStyle();
-
-    const object = new CSS3DObject(element);
-    object.position.x = Math.random() * 200 - 100;
-    object.position.y = Math.random() * 200 - 100;
-    object.position.z = Math.random() * 200 - 100;
-    object.rotation.x = Math.random();
-    object.rotation.y = Math.random();
-    object.rotation.z = Math.random();
-    object.scale.x = Math.random() + 0.5;
-    object.scale.y = Math.random() + 0.5;
-    scene2.add(object);
-
-    const geometry = new THREE.PlaneGeometry(w, h);
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.copy(object.position);
-    mesh.rotation.copy(object.rotation);
-    mesh.scale.copy(object.scale);
-    scene.add(mesh);
+    CSSRenderer.render(CSSScene, camera);
 }
 
 function onWindowResized() {

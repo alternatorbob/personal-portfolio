@@ -1,8 +1,48 @@
 import * as THREE from "three";
+import {
+    CSS3DRenderer,
+    CSS3DObject,
+} from "three/examples/jsm/renderers/CSS3DRenderer.js";
 import { camera, scene, sphere, sphereRadius } from "../main";
 
 export let cubes = [];
 export const distanceCoeff = 2000;
+
+export function addMesh(w, h, CSSScene, scene) {
+    const material = new THREE.MeshBasicMaterial({
+        color: 0x000000,
+        wireframe: true,
+        wireframeLinewidth: 1,
+        side: THREE.DoubleSide,
+    });
+
+    const element = document.createElement("div");
+    element.style.width = `${w}px`;
+    element.style.height = `${h}px`;
+    // element.style.opacity = i < 5 ? 0.5 : 1;
+    element.style.background = new THREE.Color(
+        Math.random() * 0xffffff
+    ).getStyle();
+
+    const object = new CSS3DObject(element);
+    object.position.x = Math.random() * 200 - 100;
+    object.position.y = Math.random() * 200 - 100;
+    object.position.z = Math.random() * 200 - 100;
+    object.rotation.x = Math.random();
+    object.rotation.y = Math.random();
+    object.rotation.z = Math.random();
+    object.scale.x = Math.random() + 0.5;
+    object.scale.y = Math.random() + 0.5;
+    CSSScene.add(object);
+
+    const geometry = new THREE.PlaneGeometry(w, h);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.copy(object.position);
+    mesh.rotation.copy(object.rotation);
+    mesh.scale.copy(object.scale);
+    mesh.lookAt(sphere.position);
+    scene.add(mesh);
+}
 
 export function addProjects(numCubes) {
     const size = 400; // Size of the cubes
