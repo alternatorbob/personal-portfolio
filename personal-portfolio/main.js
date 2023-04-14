@@ -8,11 +8,11 @@ import {
 
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 
-import { dragInit } from "./js/dragControl";
-import { addProjects, cubes, addMesh } from "./js/addProjects";
+import { dragInit } from "./js/dragControl.js";
+import { addProjects, cubes, addMesh } from "./js/addProjects.js";
 import { mousePosition } from "./js/dragControl";
-import { createEnvironment } from "./js/utils";
-import { LaserBeam, add2Scene } from "./js/laserBeam";
+import { createEnvironment } from "./js/utils.js";
+import { LaserBeam, add2Scene } from "./js/laserBeam.js";
 
 const clock = new THREE.Clock();
 let camera, scene, renderer;
