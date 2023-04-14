@@ -93,9 +93,9 @@ function onMouseMove(e) {
 
     lastMousePosition.copy(mousePosition);
 
-    for (let project of projects) {
-        project.position.applyQuaternion(mouseQuaternion);
-        project.lookAt(sphere.position);
+    for (let cube of cubes) {
+        cube.position.applyQuaternion(mouseQuaternion);
+        cube.lookAt(sphere.position);
     }
 
     if (hasCursorLeftScreen(e)) {

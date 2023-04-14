@@ -24,6 +24,10 @@ const camFar = 1500;
 export const sphereRadius = 3.75;
 export const numCubes = 10;
 
+// Define variables for the movement
+const amplitude = 0.1; // The amplitude of the sine wave
+const frequency = 0.5; // The frequency of the sine wave
+
 //Mouse event
 var mouse = {
     x: 0,
@@ -140,12 +144,27 @@ function animate(msTime) {
     for (let cube of cubes) {
         cube.lookAt(sphere.position);
     }
-    laserBeam.intersect(new THREE.Vector3(0, 1, -10), cubes);
+    laserBeam.intersect(new THREE.Vector3(0, 2, -10), cubes);
 
     // camera.position.x += (mouse.x * 30 - camera.position.x) * 0.05;
     camera.position.y += (mouse.y * 0.5 - camera.position.y + 3.5) * 0.01;
     camera.position.x += (-mouse.x * 0.5 - camera.position.x) * 0.02;
     // camera.lookAt(scene.position);
+
+    // Loop through the array of cubes and update their positions
+    for (let i = 0; i < cubes.length; i++) {
+        const cube = cubes[i];
+
+        // Define variables for the movement
+        const amplitude = 0.0001 + i * 0.005; // Increase amplitude with each cube
+        const frequency = 0.005 + i * 0.0001; // Increase frequency with each cube
+
+        // Update the cube's position with a sine wave
+        cube.position.x +=
+            Math.sin(Date.now() * frequency * 0.000001) * amplitude;
+        cube.position.y +=
+            Math.sin(Date.now() * frequency * 0.0001) * amplitude;
+    }
 
     renderer.render(scene, camera);
     CSSRenderer.render(CSSScene, camera);

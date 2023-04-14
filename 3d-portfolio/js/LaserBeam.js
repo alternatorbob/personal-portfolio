@@ -10,7 +10,7 @@ export class LaserBeam {
 
         this.object3d = new THREE.Object3D();
         this.reflectObject = null;
-        this.pointLight = new THREE.PointLight(0xff0000, 1, 4);
+        this.pointLight = new THREE.PointLight(0x0000ff, 4, 4);
 
         var raycaster = new THREE.Raycaster();
         var canvas = generateLaserBodyCanvas();
@@ -26,12 +26,12 @@ export class LaserBeam {
             depthWrite: false,
             transparent: true,
         });
-        var geometry = new THREE.PlaneGeometry(1, 0.1 * 5);
+        var geometry = new THREE.PlaneGeometry(1, 0.2 * 5);
         geometry.rotateY(0.5 * Math.PI);
 
         //use planes to simulate laserbeam
         var i,
-            nPlanes = 20;
+            nPlanes = 30;
         for (i = 0; i < nPlanes; i++) {
             var mesh = new THREE.Mesh(geometry, material);
             mesh.position.z = 1 / 2;
@@ -57,7 +57,6 @@ export class LaserBeam {
 
             //have collision
             if (intersectArray.length > 0) {
-                console.log(intersectArray[0].object.uuid);
                 this.object3d.scale.z = intersectArray[0].distance;
                 this.object3d.lookAt(intersectArray[0].point.clone());
                 this.pointLight.visible = true;
@@ -78,6 +77,10 @@ export class LaserBeam {
                     intersectArray[0].point.y + normalVector.y * 0.5;
                 this.pointLight.position.z =
                     intersectArray[0].point.z + normalVector.z * 0.5;
+
+                console.log(normalVector);
+                console.log("pointLight", this.pointLight.position);
+                // console.log("intersectPoint", intersectArray[0].point);
 
                 //calculation reflect vector
                 var reflectVector = new THREE.Vector3(

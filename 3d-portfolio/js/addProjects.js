@@ -20,7 +20,7 @@ export function addMesh(w, h, CSSScene, scene) {
     // material.blending = THREE.NoBlending;
 
     const size = 400; // Size of the cubes
-    const gridSize = 10; // Grid size
+    const gridSize = 50; // Grid size
 
     //POSITIONS
     // Define the grid of positions
@@ -84,8 +84,8 @@ export function addMesh(w, h, CSSScene, scene) {
 }
 
 export function addProjects(numCubes) {
-    const size = 2; // Size of the grid
-    const scale = 0.5; // Scale of the cubes
+    const size = 6; // Size of the grid
+    const scale = 2; // Scale of the cubes
     const gridSize = 10; // Grid size
 
     // Define the grid of positions
@@ -103,7 +103,9 @@ export function addProjects(numCubes) {
     for (let i = 0; i < numCubes; i++) {
         const cube = new THREE.Mesh(
             new THREE.BoxGeometry(14 * scale, 9 * scale, scale),
-            new THREE.MeshStandardMaterial()
+            new THREE.MeshPhongMaterial({
+                color: 0xffffff,
+            })
         );
 
         // Select a random position from the grid
@@ -119,6 +121,7 @@ export function addProjects(numCubes) {
 
         cube.position.copy(randomPosition);
         cube.lookAt(sphere.position);
+        cubes.push(cube);
         scene.add(cube);
     }
 }
