@@ -21,7 +21,7 @@ let sphere, laserBeam;
 let light2;
 
 const camFar = 1500;
-export const sphereRadius = 3.5;
+export const sphereRadius = 3.75;
 export const numCubes = 10;
 
 //Mouse event
@@ -107,15 +107,16 @@ function init() {
     sphere.castShadow = true;
     scene.add(sphere);
 
+    addProjects(numCubes);
+
     laserBeam = new LaserBeam({ reflectMax: 2 });
     laserBeam.object3d.position.set(0, 0, 0);
     add2Scene(scene, laserBeam);
     dragInit();
 
-    //SPAGHETTI CODE
     CSSScene = new THREE.Scene();
 
-    for (let i = 0; i < 10; i++) addMesh(20, 50, CSSScene, scene);
+    // for (let i = 0; i < 10; i++) addMesh(20, 50, CSSScene, scene);
 
     CSSRenderer = new CSS3DRenderer();
     CSSRenderer.setSize(window.innerWidth, window.innerHeight);
