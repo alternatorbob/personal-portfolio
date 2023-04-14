@@ -85,7 +85,6 @@ function init() {
     cubeCamera = new THREE.CubeCamera(1, camFar, cubeRenderTarget);
 
     const textureLoader = new THREE.TextureLoader();
-    const geometry = new THREE.IcosahedronGeometry(sphereRadius, 15);
     const roughnessMap = textureLoader.load(
         "assets/textures/mat/worn-shiny-metal-bl/worn-shiny-metal-Roughness.png"
     );
@@ -107,7 +106,7 @@ function init() {
         sphereMaterial
     );
     sphere.castShadow = true;
-    // scene.add(sphere);
+    scene.add(sphere);
 
     laserBeam = new LaserBeam({ reflectMax: 2 });
     laserBeam.object3d.position.set(0, 0, 0);
@@ -121,6 +120,7 @@ function init() {
 
     CSSRenderer = new CSS3DRenderer();
     CSSRenderer.setSize(window.innerWidth, window.innerHeight);
+    CSSRenderer.domElement.style.pointerEvents = "none";
     CSSRenderer.domElement.style.position = "absolute";
     CSSRenderer.domElement.style.top = 0;
     document.body.appendChild(CSSRenderer.domElement);
@@ -153,7 +153,7 @@ function animate(msTime) {
 
 function onWindowResized() {
     renderer.setSize(window.innerWidth, window.innerHeight);
-    cssRenderer.setSize(window.innerWidth, window.innerHeight);
+    CSSRenderer.setSize(window.innerWidth, window.innerHeight);
 
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
