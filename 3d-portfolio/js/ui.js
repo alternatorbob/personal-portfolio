@@ -27,6 +27,7 @@ export function uiSwitchState(mode) {
     }
 }
 
+//dispatch mouseup event to stop sphere drag when project is open
 const event = new MouseEvent("mouseup", {});
 
 export function addProjectCardToPage(project, parent) {
@@ -52,6 +53,10 @@ function createProjectCard(selectedProject) {
 
     const category = document.createElement("div");
     category.className = "project-category text-sm text-up";
+    category.textContent = project.categories
+        .map((category) => `${category} `)
+        .join(", ");
+
     titleGroup.appendChild(category);
 
     const title = document.createElement("div");

@@ -23,7 +23,6 @@ let camera, scene, renderer;
 let CSSScene, CSSRenderer;
 
 let sphere, laserBeam;
-let light2;
 
 const camFar = 1500;
 export const sphereRadius = 3.75;
@@ -85,12 +84,12 @@ function threeInit() {
 
     createEnvironment(scene);
 
-    const light = new THREE.AmbientLight(0xffffff, 1.6);
-    light2 = new THREE.DirectionalLight(0xff0000, 10.0);
-    light2.castShadow = true;
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
+    const redLight_1 = new THREE.DirectionalLight(0xff0000, 0.25);
+    redLight_1.castShadow = true;
 
-    light2.position.set(20, 1, 1); // set position to above
-    scene.add(light, light2);
+    redLight_1.position.set(0, 6, -15); // set position to above
+    scene.add(ambientLight, redLight_1);
 
     cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256);
     cubeRenderTarget.texture.type = THREE.HalfFloatType;
@@ -122,7 +121,7 @@ function threeInit() {
 
     addProjects(projects);
 
-    laserBeam = new LaserBeam({ reflectMax: 2, clock: clock });
+    laserBeam = new LaserBeam({ reflectMax: 0, clock: clock });
     laserBeam.object3d.position.set(0, 0, 0);
     add2Scene(scene, laserBeam);
     dragInit();

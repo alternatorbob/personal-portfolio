@@ -4,7 +4,6 @@ import {
     CSS3DObject,
 } from "three/examples/jsm/renderers/CSS3DRenderer.js";
 import { camera, scene, sphere, sphereRadius } from "../main";
-import { projects } from "./projects";
 
 export let cubes = [];
 export const distanceCoeff = 2000;
@@ -28,12 +27,33 @@ export function addProjects(projects) {
     const occupiedPositions = new Set();
 
     for (let i = 0; i < projects.length; i++) {
+        const loader = new THREE.TextureLoader();
+        const texture = loader.load(projects[i].images[0], (tex) => {
+            console.log(tex.image);
+        });
+        const material = new THREE.MeshStandardMaterial({ map: texture });
+
         const cube = new THREE.Mesh(
             new THREE.BoxGeometry(14 * scale, 9 * scale, scale),
-            new THREE.MeshPhongMaterial({
-                color: 0xffffff,
-            })
+            material
         );
+
+        // const imageAspectRatio = texture.image.width / texture.image.height;
+        // const cubeWidth = 1; // example value, adjust as needed
+        // const cubeHeight = cubeWidth / imageAspectRatio;
+
+        // const cube = new THREE.Mesh(
+        //     new THREE.BoxGeometry(cubeHeight, cubeWidth, 1),
+        //     material
+        // );
+
+        // OG;
+        // const cube = new THREE.Mesh(
+        //     new THREE.BoxGeometry(14 * scale, 9 * scale, scale),
+        //     new THREE.MeshPhongMaterial({
+        //         color: 0xffffff,
+        //     })
+        // );
 
         // Select a random position from the grid
         let randomPosition = null;

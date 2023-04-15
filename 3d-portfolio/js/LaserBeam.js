@@ -10,7 +10,7 @@ export class LaserBeam {
 
         this.object3d = new THREE.Object3D();
         this.reflectObject = null;
-        this.pointLight = new THREE.PointLight(0x0000ff, 4, 4);
+        this.pointLight = new THREE.PointLight(0xff0000, 0.75);
 
         let intersectionTime = 0;
         const clock = new THREE.Clock();
