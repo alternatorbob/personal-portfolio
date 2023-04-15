@@ -20,7 +20,7 @@ function createEnvironment(scene) {
         "/assets/textures/hdr/28.03.2023_fade_background.jpg"
     );
     const fadeBg = loader.load(
-        "/assets/textures/hdr/28.03.2023_fade_background.jpg",
+        "/assets/textures/hdr/28.03.2023_fade_background_S.jpg",
         (texture) => {
             // texture.rotation = Math.PI / 8;
             scene.background = texture;
