@@ -1,21 +1,43 @@
 import * as THREE from "three";
 import { camera, renderer, sphere } from "../main";
-import { cubes, projects } from "./addProjects";
+import { cubes } from "./addProjects";
 
 let isDragging = false;
 let lastMousePosition = new THREE.Vector2();
 export let mousePosition = new THREE.Vector2();
 let intersectionPoint;
+let cursorStyle = "none";
+
 const raycaster = new THREE.Raycaster();
 
 // Create a quaternion to store the sphere rotation
 const sphereRotation = new THREE.Quaternion();
 
 export function dragInit() {
+    renderer.domElement.addEventListener("mousemove", onMouseHover);
     renderer.domElement.addEventListener("mousedown", onMouseDown);
     renderer.domElement.addEventListener("mouseup", () => {
         isDragging = false;
+        renderer.domElement.style.cursor = "auto";
     });
+}
+
+function onMouseHover(e) {
+    raycaster.setFromCamera(
+        new THREE.Vector2(
+            (e.clientX / window.innerWidth) * 2 - 1,
+            (-e.clientY / window.innerHeight) * 2 + 1
+        ),
+        camera
+    );
+    const intersections = raycaster.intersectObject(sphere);
+    if (!isDragging) {
+        if (intersections.length > 0) {
+            renderer.domElement.style.cursor = "pointer";
+        } else {
+            renderer.domElement.style.cursor = "auto";
+        }
+    }
 }
 
 function onMouseDown(e) {
@@ -30,6 +52,7 @@ function onMouseDown(e) {
     if (intersections.length > 0) {
         intersectionPoint = intersections[0].point;
         isDragging = true;
+        renderer.domElement.style.cursor = "grab";
     }
 
     // Store the current mouse position
@@ -101,6 +124,7 @@ function onMouseMove(e) {
     if (hasCursorLeftScreen(e)) {
         isDragging = false;
         document.removeEventListener("mousemove", onMouseMove);
+        renderer.domElement.style.cursor = "auto";
     }
 }
 

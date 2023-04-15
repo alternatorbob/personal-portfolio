@@ -4,6 +4,15 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
 
+export function findObjectById(objectsArray, id) {
+    for (var object of objectsArray) {
+        if (object.id === id) {
+            return object;
+        }
+    }
+    return null;
+}
+
 function createEnvironment(scene) {
     // Load the 2D image as a texture
     const loader = new THREE.TextureLoader();

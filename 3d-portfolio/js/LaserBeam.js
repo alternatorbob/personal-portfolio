@@ -2,7 +2,7 @@ import * as THREE from "three";
 
 export class LaserBeam {
     constructor(iconfig) {
-        var config = {
+        let config = {
             length: 10000,
             reflectMax: 1,
         };
@@ -12,13 +12,16 @@ export class LaserBeam {
         this.reflectObject = null;
         this.pointLight = new THREE.PointLight(0x0000ff, 4, 4);
 
-        var raycaster = new THREE.Raycaster();
-        var canvas = generateLaserBodyCanvas();
-        var texture = new THREE.Texture(canvas);
+        let intersectionTime = 0;
+        const clock = new THREE.Clock();
+
+        let raycaster = new THREE.Raycaster();
+        let canvas = generateLaserBodyCanvas();
+        let texture = new THREE.Texture(canvas);
         texture.needsUpdate = true;
 
         //texture
-        var material = new THREE.MeshBasicMaterial({
+        let material = new THREE.MeshBasicMaterial({
             map: texture,
             blending: THREE.AdditiveBlending,
             color: 0x4444aa,
@@ -26,14 +29,14 @@ export class LaserBeam {
             depthWrite: false,
             transparent: true,
         });
-        var geometry = new THREE.PlaneGeometry(1, 0.2 * 5);
+        let geometry = new THREE.PlaneGeometry(1, 0.2 * 5);
         geometry.rotateY(0.5 * Math.PI);
 
         //use planes to simulate laserbeam
-        var i,
+        let i,
             nPlanes = 30;
         for (i = 0; i < nPlanes; i++) {
-            var mesh = new THREE.Mesh(geometry, material);
+            let mesh = new THREE.Mesh(geometry, material);
             mesh.position.z = 1 / 2;
             mesh.rotation.z = (i / nPlanes) * Math.PI;
             this.object3d.add(mesh);
@@ -52,8 +55,11 @@ export class LaserBeam {
                 direction.clone().normalize()
             );
 
-            var intersectArray = [];
+            let intersectArray = [];
             intersectArray = raycaster.intersectObjects(objectArray, true);
+
+            let activeIntersect = null;
+            let selectedProject = null;
 
             //have collision
             if (intersectArray.length > 0) {
@@ -61,11 +67,19 @@ export class LaserBeam {
                 this.object3d.lookAt(intersectArray[0].point.clone());
                 this.pointLight.visible = true;
 
+                intersectionTime += clock.getDelta();
+                activeIntersect = intersectArray[0].object.name;
+
+                if (intersectionTime >= 3) {
+                    selectedProject = activeIntersect;
+                    intersectionTime = 0;
+                }
+
                 //get normal vector
-                var normalMatrix = new THREE.Matrix3().getNormalMatrix(
+                let normalMatrix = new THREE.Matrix3().getNormalMatrix(
                     intersectArray[0].object.matrixWorld
                 );
-                var normalVector = intersectArray[0].face.normal
+                let normalVector = intersectArray[0].face.normal
                     .clone()
                     .applyMatrix3(normalMatrix)
                     .normalize();
@@ -78,12 +92,12 @@ export class LaserBeam {
                 this.pointLight.position.z =
                     intersectArray[0].point.z + normalVector.z * 0.5;
 
-                console.log(normalVector);
-                console.log("pointLight", this.pointLight.position);
+                // console.log(normalVector);
+                // console.log("pointLight", this.pointLight.position);
                 // console.log("intersectPoint", intersectArray[0].point);
 
                 //calculation reflect vector
-                var reflectVector = new THREE.Vector3(
+                let reflectVector = new THREE.Vector3(
                     intersectArray[0].point.x - this.object3d.position.x,
                     intersectArray[0].point.y - this.object3d.position.y,
                     intersectArray[0].point.z - this.object3d.position.z
@@ -106,10 +120,9 @@ export class LaserBeam {
                         objectArray
                     );
                 }
-            }
+            } else {
+                intersectionTime = 0;
 
-            //non collision
-            else {
                 this.object3d.scale.z = config.length;
                 this.pointLight.visible = false;
                 this.object3d.lookAt(
@@ -120,6 +133,11 @@ export class LaserBeam {
 
                 this.hiddenReflectObject();
             }
+
+            // console.log(intersectionTime);
+
+            // console.log("intersectionTime", intersectionTime);
+            return { intersectionTime, selectedProject };
         };
 
         this.hiddenReflectObject = function () {
@@ -133,12 +151,12 @@ export class LaserBeam {
         return;
 
         function generateLaserBodyCanvas() {
-            var canvas = document.createElement("canvas");
-            var context = canvas.getContext("2d");
+            let canvas = document.createElement("canvas");
+            let context = canvas.getContext("2d");
             canvas.width = 10;
             canvas.height = 64;
             // set gradient
-            var gradient = context.createLinearGradient(
+            let gradient = context.createLinearGradient(
                 0,
                 0,
                 canvas.width,
@@ -160,7 +178,6 @@ export class LaserBeam {
 
 export function add2Scene(scene, obj) {
     if (obj == null) return;
-    // console.log(obj);
     scene.add(obj.object3d);
     scene.add(obj.pointLight);
 

@@ -1,4 +1,5 @@
-import "./style.css";
+import "./css/style.css";
+import "./css/global_styles.css";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import {
@@ -9,11 +10,15 @@ import {
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 
 import { dragInit } from "./js/dragControl";
-import { addProjects, cubes, addMesh } from "./js/addProjects";
+import { addProjects, cubes } from "./js/addProjects";
+import { projects } from "./js/projects";
 import { createEnvironment } from "./js/utils";
 import { LaserBeam, add2Scene } from "./js/LaserBeam";
+import { addProjectCardToPage, uiSwitchState } from "./js/ui";
 
-const clock = new THREE.Clock();
+const mainContainer = document.querySelector(".main-container");
+export let wasSelected = false;
+
 let camera, scene, renderer;
 let CSSScene, CSSRenderer;
 
@@ -24,9 +29,8 @@ const camFar = 1500;
 export const sphereRadius = 3.75;
 export const numCubes = 10;
 
-// Define variables for the movement
-const amplitude = 0.1; // The amplitude of the sine wave
-const frequency = 0.5; // The frequency of the sine wave
+const clock = new THREE.Clock();
+export let intersectionTime = 0;
 
 //Mouse event
 var mouse = {
@@ -39,6 +43,10 @@ let cubeCamera, cubeRenderTarget;
 init();
 
 function init() {
+    threeInit();
+}
+
+function threeInit() {
     renderer = new THREE.WebGLRenderer({
         antialias: true,
         precision: "highp",
@@ -51,7 +59,8 @@ function init() {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.shadowMap.enabled = true;
 
-    document.body.appendChild(renderer.domElement);
+    renderer.domElement.classList.add("three-canvas");
+    document.body.insertBefore(renderer.domElement, document.body.firstChild);
 
     window.addEventListener("resize", onWindowResized);
 
@@ -111,9 +120,9 @@ function init() {
     sphere.castShadow = true;
     scene.add(sphere);
 
-    addProjects(numCubes);
+    addProjects(projects);
 
-    laserBeam = new LaserBeam({ reflectMax: 2 });
+    laserBeam = new LaserBeam({ reflectMax: 2, clock: clock });
     laserBeam.object3d.position.set(0, 0, 0);
     add2Scene(scene, laserBeam);
     dragInit();
@@ -133,23 +142,29 @@ function init() {
 function animate(msTime) {
     const time = clock.getElapsedTime();
 
-    const radius = 200; // radius of circular path
-    const angle = time * 0.5; // angle in radians, adjust the speed of rotation with a multiplication factor
+    if (!wasSelected) {
+        //project creation based on raycast
+        const { selectedProject } = laserBeam.intersect(
+            new THREE.Vector3(0, 2, -10),
+            cubes,
+            intersectionTime
+        );
 
-    // calculate x and z coordinates based on angle and radius
-    const x = Math.sin(angle) * radius;
-    const z = Math.cos(angle) * radius;
+        if (selectedProject) {
+            wasSelected = true;
+            addProjectCardToPage(selectedProject, mainContainer);
+            uiSwitchState("2d");
+        }
+    }
 
+    //scene objects animation
     cubeCamera.update(renderer, scene);
     for (let cube of cubes) {
         cube.lookAt(sphere.position);
     }
-    laserBeam.intersect(new THREE.Vector3(0, 2, -10), cubes);
 
-    // camera.position.x += (mouse.x * 30 - camera.position.x) * 0.05;
     camera.position.y += (mouse.y * 0.5 - camera.position.y + 3.5) * 0.01;
     camera.position.x += (-mouse.x * 0.5 - camera.position.x) * 0.02;
-    // camera.lookAt(scene.position);
 
     // Loop through the array of cubes and update their positions
     for (let i = 0; i < cubes.length; i++) {
@@ -167,7 +182,11 @@ function animate(msTime) {
     }
 
     renderer.render(scene, camera);
-    CSSRenderer.render(CSSScene, camera);
+    // CSSRenderer.render(CSSScene, camera);
+}
+
+export function reverseSelected() {
+    wasSelected = !wasSelected;
 }
 
 function onWindowResized() {

@@ -5,8 +5,48 @@
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>PORTFOLIO</title>
+
+        <link rel="stylesheet" href="css/init.css" />
     </head>
     <body>
+        <div id="fade"></div>
+        <script>
+            const fadeElement = document.querySelector("#fade");
+
+            setTimeout(function () {
+                fadeElement.classList.add("fade-out");
+            }, 770);
+
+            // Listen for the 'transitionend' event and remove the element once the fade-out animation is complete
+            fadeElement.addEventListener("transitionend", function () {
+                fadeElement.remove();
+            });
+        </script>
+
+        <div class="main-container">
+            <div class="navbar">
+                <div class="navbar-name text-lg">
+                    <div id="name">Bogdan Năstase</div>
+                    <div class="slide-div">→</div>
+                    <div class="slide-div">
+                        <a href="mailto:bogdan.nastase@ecal.ch">
+                            <img
+                                id="button-mail"
+                                src="/assets/UI/mail-button.png"
+                                alt=""
+                        /></a>
+                    </div>
+                </div>
+
+                <div class="button-invert button">
+                    <img src="/assets/UI/ball-button.png" alt="" />
+                </div>
+            </div>
+        </div>
+        <div class="invert"></div>
+        <div id="blur"></div>
+
         <script type="module" src="/main.js"></script>
+        <script type="module" src="js/ui.js"></script>
     </body>
 </html>

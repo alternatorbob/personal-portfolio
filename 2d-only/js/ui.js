@@ -116,11 +116,7 @@ nameDiv.addEventListener("mouseout", function () {
 
 buttonInvert.addEventListener("click", function () {
     const invert = document.querySelector(".invert");
-    if (invert.classList.contains("hide")) {
-        invert.classList.remove("hide");
-    } else {
-        invert.classList.add("hide");
-    }
+    invert.classList.toggle("hide"); // toggle the .hide class
 });
 
 // export function addGalleryInteraction() {
