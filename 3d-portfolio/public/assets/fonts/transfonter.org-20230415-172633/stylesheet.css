@@ -1,0 +1,18 @@
+@font-face {
+    font-family: 'Scto Grotesk A';
+    src: url('SctoGroteskA-Regular.woff2') format('woff2'),
+        url('SctoGroteskA-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Scto Grotesk A';
+    src: url('SctoGroteskA-Bold.woff2') format('woff2'),
+        url('SctoGroteskA-Bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
