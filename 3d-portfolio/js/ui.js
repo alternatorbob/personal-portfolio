@@ -84,18 +84,27 @@ function createProjectCard(selectedProject) {
     gallery.className = "project-gallery";
     card.appendChild(gallery);
 
-    const slideshow = document.createElement("div");
-    slideshow.className = "slideshow-container";
-    gallery.appendChild(slideshow);
+    const slideshowContainer = document.createElement("div");
+    slideshowContainer.className = "slideshow-container";
+    gallery.appendChild(slideshowContainer);
 
     const nextBtn = document.createElement("div");
     nextBtn.className = "button-next button";
     nextBtn.innerHTML = '<img src="/assets/UI/next-button.png" alt="" />';
     gallery.appendChild(nextBtn);
 
-    const { showNextImage, imageWrapper } = generateImageSlideshow(project);
-    slideshow.appendChild(imageWrapper);
-    nextBtn.addEventListener("click", showNextImage);
+    const slides = generateGallery(project, slideshowContainer);
+
+    nextBtn.addEventListener("click", showNextSlide);
+
+    let currentIndex = 0;
+    function showNextSlide() {
+        slides[currentIndex].classList.add("hidden");
+        // Calculate the index of the next slide
+        currentIndex = (currentIndex + 1) % slides.length;
+        // Show the next slide
+        slides[currentIndex].classList.remove("hidden");
+    }
 
     closeBtn.addEventListener("click", () => {
         // wasSelected = false;
@@ -106,41 +115,40 @@ function createProjectCard(selectedProject) {
     return card;
 }
 
-function generateImageSlideshow(project) {
-    const images = project.images;
-    let currentImageIndex = 0;
+function generateGallery(project, slideshowContainer) {
+    const images = project.content.images;
+    const videos = project.content.videos;
+    const gifs = project.content.gifs;
+
+    let slides = [];
+
+    let currentIndex = 0;
     let loopedOnce = false;
-    const numImages = images.length; // Include the duplicated first image
-    const imageWrapper = document.createElement("div");
-    imageWrapper.classList.add("image-wrapper");
-    imageWrapper.innerHTML = images
-        .map((image) => `<img src="${image}" alt="" />`)
-        .join("");
-    // imageWrapper.innerHTML += `<img src="${images[0]}" alt="" />`; // Duplicate the first image
 
-    // if (project.videos.length > 0 || project.gif !== null) {
-    //     project.videos.forEach((video) => {
-    //         console.log(video);
-    //         imageWrapper.innerHTML += video;
-    //     });
-    //     // console.log("project.videos", project.videos);
-    //     // console.log("project.gif", project.gif);
-    // }
+    let numSlides = images.length;
+    if (videos !== undefined && videos.length > 0) numSlides += videos.length;
+    if (gifs !== undefined && gifs.length > 0) numSlides += gifs.length;
 
-    function showNextImage() {
-        if (currentImageIndex === numImages - 1) {
-            currentImageIndex = 0;
-            loopedOnce = true;
-        } else {
-            currentImageIndex++;
+    console.log("slideshowContainer", slideshowContainer);
+
+    for (let i = 0; i < numSlides; i++) {
+        const slide = document.createElement("div");
+        slide.className = "slide";
+        if (i > 0) slide.classList.add("hidden");
+        if (i < images.length) {
+            slide.innerHTML = `<img src="${images[i]}" alt="" />`;
+        } else if ("videos" in project.content && videos.length > 0) {
+            slide.innerHTML = `${videos[i - images.length]}`;
+        } else if ("gifs" in project.content && gifs.length > 0) {
+            console.log("gifs", gifs);
+            slide.innerHTML = `<img src="${gifs[0]}" alt="" />`;
         }
 
-        imageWrapper.style.transform = `translateX(-${
-            currentImageIndex * 100
-        }%)`;
+        slideshowContainer.appendChild(slide);
+        slides.push(slide);
     }
 
-    return { showNextImage, imageWrapper };
+    return slides;
 }
 
 const buttonInvert = document.querySelector(".button-invert");

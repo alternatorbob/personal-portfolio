@@ -28,7 +28,7 @@ export function addProjects(projects) {
 
     for (let i = 0; i < projects.length; i++) {
         const loader = new THREE.TextureLoader();
-        const texture = loader.load(projects[i].images[0], (tex) => {
+        const texture = loader.load(projects[i].content.images[0], (tex) => {
             // console.log(tex.image);
         });
         const material = new THREE.MeshStandardMaterial({ map: texture });

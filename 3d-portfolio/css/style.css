@@ -1,12 +1,27 @@
 .main-container {
-    position: absolute;
+    /* position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 100%; */
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
     background-color: rgba(0, 0, 0, 0);
+    user-select: none;
+    pointer-events: none;
     z-index: 1;
 }
+
+/* display: flex;
+width: 100vw;
+height: 100vh;
+flex-direction: column;
+justify-content: flex-start;
+margin: 0 auto;
+user-select: none;
+pointer-events: none; */
 
 .three-canvas {
     position: absolute;
@@ -17,22 +32,12 @@
     z-index: 0;
 }
 
-.main-container {
-    display: flex;
-    width: 100vw;
-    height: 100vh;
-    flex-direction: column;
-    justify-content: flex-start;
-    margin: 0 auto;
-    user-select: none;
-    pointer-events: none;
-}
-
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     height: 132px;
+    flex-shrink: 0;
     width: 100%;
     padding: 0 48px;
     pointer-events: auto;
@@ -60,10 +65,11 @@
 }
 
 .project-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     width: 84%;
-    height: 90%;
+    height: 80vh;
     border-radius: 10px;
     background-color: #202020;
     padding: 24px;
@@ -79,6 +85,10 @@
     flex-basis: 30vw;
 }
 
+.project-title {
+    font-weight: bold;
+}
+
 .project-year {
     flex-basis: 10vw;
 }
@@ -91,10 +101,12 @@
     height: 100%;
     width: 100%;
     overflow: hidden;
-    margin-top: 100px;
+    /* margin-top: 100px; */
+    margin-top: 8%;
     gap: 10vw;
     display: flex;
     align-items: center;
+    max-height: calc(100vh - 200px);
 }
 
 .slideshow-container {
@@ -104,37 +116,17 @@
     overflow: hidden;
     /* transition: transform 0.25s; */
 }
-
-.image-wrapper {
-    width: 100%;
-    display: flex;
-    transition: transform 0.5s ease;
+.slide {
+    /* max-width: 80%; */
 }
 
-.image-wrapper img {
+.slide img {
     max-width: 100%;
-    height: 100%;
-    /* object-fit: cover; */
+    max-height: 100%;
     object-fit: contain;
-    border-radius: 2px;
-    margin-right: 10%;
-    position: relative;
-    z-index: 2000;
 }
 
-.grid-container {
-    display: flex;
-    flex-wrap: wrap;
-    /* justify-content: center; */
-}
-
-.grid-item {
-    margin: 10px;
-    height: 100px;
-    width: 300px;
-    background-color: #ccc;
-    border-radius: 2px;
-    padding: 10px;
-
-    cursor: pointer;
+.slide iframe {
+    width: 65vw;
+    height: 100%;
 }

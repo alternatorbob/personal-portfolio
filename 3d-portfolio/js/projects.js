@@ -10,7 +10,7 @@ export const projects = [
         content: {
             images: ["/projects/Agora_Installation/Agora_Cover.webp"],
             videos: [
-                `<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/817961154?h=f82903df49&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Agora_Installation"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>`,
+                `<iframe src="https://player.vimeo.com/video/817961154?h=f82903df49&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen  title="Agora_Installation"></iframe><script src="https://player.vimeo.com/api/player.js"></script>`,
             ],
         },
     },
@@ -31,8 +31,8 @@ export const projects = [
                 "/projects/ELPE/ELPE_5.webp",
             ],
             videos: [
-                `<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/817958514?h=f6ecc372e3&badge=0&autopause=0&player_id=0&app_id=58479/embed" allow="autoplay; fullscreen; picture-in-picture" frameborder="0" style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe></div>`,
-                `<div style="padding:57.93% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/817963150?h=678fa60a83&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="ELPE Logo Generator Demo"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>`,
+                `<iframe src="https://player.vimeo.com/video/817958514?h=f6ecc372e3&badge=0&autopause=0&player_id=0&app_id=58479/embed" allow="autoplay; fullscreen; picture-in-picture" frameborder="0"></iframe>`,
+                `<iframe src="https://player.vimeo.com/video/817963150?h=678fa60a83&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" title="ELPE Logo Generator Demo"></iframe><script src="https://player.vimeo.com/api/player.js"></script>`,
             ],
         },
     },
@@ -66,7 +66,7 @@ export const projects = [
                 "/projects/MIDI_Clock/MIDI_5.webp",
             ],
             videos: [
-                `<div style="padding:70.31% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/817949858?h=319cb0189d&badge=0&autopause=0&player_id=0&app_id=58479/embed" allow="autoplay; fullscreen; picture-in-picture" frameborder="0" style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe></div>`,
+                `<iframe src="https://player.vimeo.com/video/817949858?h=319cb0189d&badge=0&autopause=0&player_id=0&app_id=58479/embed" allow="autoplay; fullscreen; picture-in-picture" frameborder="0" ></iframe>`,
             ],
         },
     },
@@ -140,7 +140,7 @@ export const projects = [
         content: {
             images: ["projects/Self_Tracking/Self_Tracking_Cover.webp"],
             videos: [
-                `<div style="padding:62.5% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/396568264?h=a80c8cab1a&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Self Tracking Click Through"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>`,
+                `<iframe src="https://player.vimeo.com/video/396568264?h=a80c8cab1a&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"title="Self Tracking Click Through"></iframe><script src="https://player.vimeo.com/api/player.js"></script>`,
             ],
         },
     },
@@ -186,7 +186,7 @@ export const projects = [
                 "/projects/Stretching_Time/Stretch_7.webp",
             ],
             videos: [
-                `<div style="padding:75% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/817990658?h=1ad877a25b&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Stretch_WIP_Short"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>`,
+                `<iframe src="https://player.vimeo.com/video/817990658?h=1ad877a25b&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"title="Stretch_WIP_Short"></iframe><script src="https://player.vimeo.com/api/player.js"></script>`,
             ],
         },
     },
@@ -200,7 +200,7 @@ export const projects = [
         content: {
             images: ["/projects/Technologic/Technologic_Cover.webp"],
             videos: [
-                `<div style="padding:176.67% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/817966215?h=c7585f138d&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Technologic Workshop Interactive Poster"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>`,
+                `<iframe src="https://player.vimeo.com/video/817966215?h=c7585f138d&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"title="Technologic Workshop Interactive Poster"></iframe><script src="https://player.vimeo.com/api/player.js"></script>`,
             ],
         },
     },
@@ -213,7 +213,7 @@ export const projects = [
         categories: ["Interaction", "Software"],
         content: {
             images: ["/projects/XYScope/XYScope_Cover.webp"],
-            gifs: "/projects/XYScope/XYScope.gif",
+            gifs: ["/projects/XYScope/XYScope.gif"],
         },
     },
     {
@@ -226,7 +226,7 @@ export const projects = [
         content: {
             images: ["/projects/Zach_Workshop/Zach_Cover.webp"],
             videos: [
-                `<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/817961154?h=f82903df49&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Agora_Installation"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>`,
+                `<iframe src="https://player.vimeo.com/video/817987018?h=e42bfa3ddf&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="zach_lieberman_of_workshop_compilation"></iframe><script src="https://player.vimeo.com/api/player.js"></script>`,
             ],
         },
     },
