@@ -97,7 +97,9 @@ export const projects = [
                 "/projects/Physical_Sequencer/Sequencer_4.webp",
                 "/projects/Physical_Sequencer/Sequencer_5.webp",
             ],
-            videos: [``],
+            videos: [
+                `<iframe src="https://player.vimeo.com/video/816276332?h=3301081abb&badge=0&autopause=0&player_id=0&app_id=58479/embed" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen frameborder="0" style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>`,
+            ],
         },
     },
     {
@@ -127,7 +129,9 @@ export const projects = [
         categories: ["Interaction", "Hardware + Software", "Graphic Design"],
         content: {
             images: ["projects/Scroll/Scroll_Cover.webp"],
-            videos: [``],
+            videos: [
+                `<iframe src="https://player.vimeo.com/video/817874024?h=a8e58f4072&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Physical Scrollbar"></iframe>`,
+            ],
         },
     },
     {
