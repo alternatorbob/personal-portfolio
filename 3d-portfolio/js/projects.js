@@ -103,20 +103,25 @@ export const projects = [
         },
     },
     {
-        title: "Public Face",
-        id: "Public_Face",
-        description:
-            "Public Face is my ongoing diploma project. It is a photo editing service designed to protect people’s privacy online by replacing faces with generated ones. In an age where large scale machine learning models and face detection algorithms have become so accessible, controversial companies like ClearviewAI have scraped public social media profiles to create a tool that can now find anyone with a public online presence.",
-        year: "2020",
-        categories: ["Interaction", "Web Development"],
+        title: "FULCRUM",
+        id: "FULCRUM",
+        description: `Targeted at the world of photojournalism, FULCRUM addresses privacy concerns surrounding the publication of photographs. 
+
+        Whilst many photo-journalists would agree that blurring or censoring faces tampers with important historical documents, protecting sources is ultimately a core journalistic principle.
+        
+        Given today’s ubiquitous data scraping and face detection algorithms, legislation aimed at mitigating potential abuse, remains outpaced by the swift progress of technology. FULCRUM offers a contemporary solution to the ethical debate between photojournalists and the public.
+        
+        By masking subjects’ faces with AI generated ones, FULCRUM ensures non-destructive anonymisation, that simultaneously safeguards the identity of the individuals depicted, as well as the photographic quality of the image.
+        `,
+
+        year: "2023",
+        categories: ["Interaction", "Web Development", "Machine Learning"],
         content: {
             images: [
-                "/projects/Public_Face/Public-Face_1.webp",
-                "/projects/Public_Face/Public-Face_2.webp",
-                "/projects/Public_Face/Public-Face_3.webp",
-                "/projects/Public_Face/Public-Face_4.webp",
-                "/projects/Public_Face/Public-Face_5.webp",
-                "/projects/Public_Face/Public-Face_6.webp",
+                "/projects/FULCRUM/FULCRUM_1.webp",
+                "/projects/FULCRUM/FULCRUM_2.webp",
+                "/projects/FULCRUM/FULCRUM_3.webp",
+                "/projects/FULCRUM/FULCRUM_4.webp",
             ],
         },
     },
