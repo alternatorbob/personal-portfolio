@@ -99,7 +99,7 @@ pointer-events: none; */
 }
 
 .project-gallery {
-    height: 100%;
+    height: 90%;
     width: 100%;
     overflow: hidden;
     gap: 10vw;
@@ -121,12 +121,15 @@ pointer-events: none; */
 }
 
 .slide img {
+    margin-top: 24px;
     width: 100%;
     height: 100%;
     object-fit: contain; /* This property ensures the image fits inside the card without overflowing */
 }
 
 .slide iframe {
-    width: 65vw;
+    margin-top: 24px;
+    margin-left: 24px;
+    width: 100%;
     height: 100%;
 }
