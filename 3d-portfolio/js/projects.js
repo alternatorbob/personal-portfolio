@@ -181,7 +181,8 @@ export const projects = [
     {
         title: "Stretching Time",
         id: "Stretching_Time",
-        description: "Website tracking strava data in 3D",
+        description: `Made in collaboration with Industrial Designers Denise Merlette, Giulia Burrus and Léa Omez, during a one week workshop on “Soft Electronics” with Claire Eliot. We created three timers that invoke the human perception of time. Each has an approximate interval, between 3-5 minutes, 10-15 or 30-45. 
+        The objects leverage the elastic properties of the chosen materials. By sewing a pattern of conductive wire into the fabric, stretching the material varies the resistance the circuit can pick up, which in turn sets the timer.`,
         year: "2022",
         categories: ["Interaction", "Hardware + Software"],
         content: {

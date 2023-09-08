@@ -60,6 +60,10 @@ body {
     margin-left: 10vw;
 }
 
+.button-next {
+    align-self: center;
+}
+
 #button-mail {
     max-height: 20px;
     margin-top: 4px;

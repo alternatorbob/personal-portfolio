@@ -163,8 +163,9 @@ function animate(msTime) {
     }
 
     camera.position.y += (mouse.y * 0.5 - camera.position.y + 3.5) * 0.03;
-    camera.position.x += (-mouse.x * 1.5 - camera.position.x) * 0.05;
-    camera.position.z = (mouse.y * 2.5 - camera.position.x) * 0.05 + 14;
+    camera.position.x += (-mouse.x * 0.5 - camera.position.x) * 0.05;
+    camera.position.z = 14;
+    // camera.position.z = (mouse.y * 2.5 - camera.position.x) * 0.05 + 14;
 
     // Loop through the array of cubes and update their positions
     for (let i = 0; i < cubes.length; i++) {

@@ -41,7 +41,6 @@ pointer-events: none; */
     width: 100%;
     padding: 0 48px;
     pointer-events: auto;
-    /* position: relative; */
 }
 
 .navbar-name {
@@ -65,11 +64,7 @@ pointer-events: none; */
 }
 
 .project-card {
-    position: fixed;
-    top: 10%;
-    bottom: 5%;
-    left: 24px;
-    /* left: 0; */
+    margin: 24px;
     width: 84%;
     height: 88%;
     border-radius: 10px;
@@ -104,32 +99,31 @@ pointer-events: none; */
     overflow: hidden;
     gap: 10vw;
     display: flex;
-    align-items: center;
-    justify-content: center; /* Add this to center the image vertically */
-    max-height: 100%;
 }
 
 .slideshow-container {
-    width: 100%;
-    height: 100%;
+    max-width: 100%;
+    height: auto;
     display: flex;
     overflow: hidden;
     /* transition: transform 0.25s; */
 }
-.slide {
-    width: 100%;
-}
+/* .slide {
+    max-width: 100%;
+    height: auto;
+} */
 
 .slide img {
     margin-top: 24px;
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* This property ensures the image fits inside the card without overflowing */
+    max-width: 100%;
+    /* height: 100%; */
+    height: auto;
+    /* object-fit: contain; This property ensures the image fits inside the card without overflowing */
 }
 
 .slide iframe {
     margin-top: 24px;
     margin-left: 24px;
     width: 100%;
-    height: 100%;
+    height: auto;
 }
