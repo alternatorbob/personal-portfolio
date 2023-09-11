@@ -14,3 +14,29 @@
 .fade-out {
     opacity: 0;
 }
+
+#mobile-message {
+    position: fixed;
+    z-index: 999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+
+    justify-content: center;
+    align-items: center;
+}
+
+#mobile-message-text {
+    width: 94%;
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#mobile-message-text:first-child {
+    font-weight: bold;
+}

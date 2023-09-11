@@ -16,6 +16,7 @@ import { createEnvironment } from "./js/utils";
 import { LaserBeam, add2Scene } from "./js/LaserBeam";
 import { addProjectCardToPage, uiSwitchState } from "./js/ui";
 
+const mobileMessage = document.querySelector("#mobile-message");
 const mainContainer = document.querySelector(".main-container");
 export const navbarHint = document.querySelector(".navbar-hint");
 
@@ -68,7 +69,19 @@ const normalMap = textureLoader.load(
     "assets/textures/mat/worn-shiny-metal-bl/worn-shiny-metal-Normal-ogl.png"
 );
 
-threeInit();
+// check for common mobile user agents
+if (
+    navigator.userAgent.match(/Android/i) ||
+    navigator.userAgent.match(/iPhone/i) ||
+    navigator.userAgent.match(/iPad/i) ||
+    navigator.userAgent.match(/iPod/i) ||
+    navigator.userAgent.match(/BlackBerry/i) ||
+    navigator.userAgent.match(/Windows Phone/i)
+) {
+    mobileMessage.classList.remove("hidden");
+} else {
+    threeInit();
+}
 
 function threeInit() {
     renderer = new THREE.WebGLRenderer({
