@@ -41,11 +41,34 @@ var mouse = {
 
 let cubeCamera, cubeRenderTarget;
 
-init();
+const textureManager = new THREE.LoadingManager();
+textureManager.onStart = function (url, itemsLoaded, itemsTotal) {
+    console.log(
+        "Started loading file: " +
+            url +
+            ".\nLoaded " +
+            itemsLoaded +
+            " of " +
+            itemsTotal +
+            " files."
+    );
+};
 
-function init() {
-    threeInit();
-}
+textureManager.onLoad = function () {
+    // all textures are loaded
+    // ...
+};
+
+const textureLoader = new THREE.TextureLoader();
+
+const roughnessMap = textureLoader.load(
+    "assets/textures/mat/worn-shiny-metal-bl/worn-shiny-metal-Roughness.png"
+);
+const normalMap = textureLoader.load(
+    "assets/textures/mat/worn-shiny-metal-bl/worn-shiny-metal-Normal-ogl.png"
+);
+
+threeInit();
 
 function threeInit() {
     renderer = new THREE.WebGLRenderer({
@@ -96,14 +119,6 @@ function threeInit() {
     cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256);
     cubeRenderTarget.texture.type = THREE.HalfFloatType;
     cubeCamera = new THREE.CubeCamera(1, camFar, cubeRenderTarget);
-
-    const textureLoader = new THREE.TextureLoader();
-    const roughnessMap = textureLoader.load(
-        "assets/textures/mat/worn-shiny-metal-bl/worn-shiny-metal-Roughness.png"
-    );
-    const normalMap = textureLoader.load(
-        "assets/textures/mat/worn-shiny-metal-bl/worn-shiny-metal-Normal-ogl.png"
-    );
 
     const sphereMaterial = new THREE.MeshStandardMaterial({
         envMap: cubeRenderTarget.texture,
