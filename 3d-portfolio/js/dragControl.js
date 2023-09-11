@@ -74,7 +74,7 @@ function onMouseMove(e) {
     if (!isDragging) return;
 
     mousePosition.set(e.clientX, e.clientY);
-    const ballWeight = 0.002;
+    const ballWeight = 0.0033;
 
     // Project the mouse position onto the cube's local coordinate system
     raycaster.setFromCamera(

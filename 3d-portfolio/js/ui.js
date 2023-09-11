@@ -112,6 +112,8 @@ function createProjectCard(selectedProject) {
         card.remove();
     });
 
+    console.log(document.querySelector('.slide>iframe'));
+
     return card;
 }
 

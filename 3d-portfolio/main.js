@@ -195,9 +195,15 @@ function animate(msTime) {
     // camera.position.y += (mouse.y * 1.5 - camera.position.y + 3.5) * 0.03;
     camera.position.x += (-mouse.x * 3.5 - camera.position.x) * 0.05;
 
-    if (camera.rotation.y > -0.16) {
+    const width = window.innerWidth;
+    const mouseThreshold = width * 0.4;
+
+    if (camera.rotation.y > -0.16 && mouse.x > width / 2 - mouseThreshold) {
         camera.rotation.y += mouse.x * 0.0005;
-    } else if (camera.rotation.y < 0.16) {
+    } else if (
+        camera.rotation.y < 0.16 &&
+        mouse.x > width / 2 + mouseThreshold
+    ) {
         camera.rotation.y -= mouse.x * 0.0005;
     }
 

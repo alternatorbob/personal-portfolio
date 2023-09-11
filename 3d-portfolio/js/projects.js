@@ -189,7 +189,6 @@ export const projects = [
             images: [
                 "/projects/Stretching_Time/Stretch_1.webp",
                 "/projects/Stretching_Time/Stretch_2.webp",
-                "/projects/Stretching_Time/Stretch_3.webp",
                 "/projects/Stretching_Time/Stretch_4.webp",
                 "/projects/Stretching_Time/Stretch_5.webp",
                 "/projects/Stretching_Time/Stretch_6.webp",
