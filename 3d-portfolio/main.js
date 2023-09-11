@@ -17,6 +17,8 @@ import { LaserBeam, add2Scene } from "./js/LaserBeam";
 import { addProjectCardToPage, uiSwitchState } from "./js/ui";
 
 const mainContainer = document.querySelector(".main-container");
+export const navbarHint = document.querySelector(".navbar-hint");
+
 export let wasSelected = false;
 
 let camera, scene, renderer;
@@ -70,7 +72,7 @@ function threeInit() {
         camFar
     );
     camera.position.z = 14;
-    camera.position.y = 3;
+    camera.position.y = 3.5;
 
     scene = new THREE.Scene();
 
@@ -162,10 +164,16 @@ function animate(msTime) {
         cube.lookAt(sphere.position);
     }
 
-    camera.position.y += (mouse.y * 0.5 - camera.position.y + 3.5) * 0.03;
-    camera.position.x += (-mouse.x * 0.5 - camera.position.x) * 0.05;
-    camera.position.z = 14;
-    // camera.position.z = (mouse.y * 2.5 - camera.position.x) * 0.05 + 14;
+    // camera.position.y += (mouse.y * 1.5 - camera.position.y + 3.5) * 0.03;
+    camera.position.x += (-mouse.x * 3.5 - camera.position.x) * 0.05;
+
+    if (camera.rotation.y > -0.16) {
+        camera.rotation.y += mouse.x * 0.0005;
+    } else if (camera.rotation.y < 0.16) {
+        camera.rotation.y -= mouse.x * 0.0005;
+    }
+
+    camera.position.z = (mouse.y * 1.5 - camera.position.x) * 0.05 + 14;
 
     // Loop through the array of cubes and update their positions
     for (let i = 0; i < cubes.length; i++) {
@@ -173,13 +181,13 @@ function animate(msTime) {
 
         // Define variables for the movement
         const amplitude = 0.0001 + i * 0.005; // Increase amplitude with each cube
-        const frequency = 0.005 + i * 0.0001; // Increase frequency with each cube
+        const frequency = 0.05 + i * 0.01; // Increase frequency with each cube
 
         // Update the cube's position with a sine wave
         cube.position.x +=
             Math.sin(Date.now() * frequency * 0.000001) * amplitude;
-        cube.position.y +=
-            Math.sin(Date.now() * frequency * 0.0001) * amplitude;
+        // cube.position.y +=
+        //     Math.sin(Date.now() * frequency * 0.0001) * amplitude;
     }
 
     renderer.render(scene, camera);

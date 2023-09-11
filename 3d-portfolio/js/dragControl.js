@@ -1,8 +1,9 @@
 import * as THREE from "three";
-import { camera, renderer, sphere } from "../main";
+import { camera, renderer, sphere, navbarHint } from "../main";
 import { cubes } from "./addProjects";
 
 let isDragging = false;
+let wasDragged = false;
 let lastMousePosition = new THREE.Vector2();
 export let mousePosition = new THREE.Vector2();
 let intersectionPoint;
@@ -53,6 +54,12 @@ function onMouseDown(e) {
         intersectionPoint = intersections[0].point;
         isDragging = true;
         renderer.domElement.style.cursor = "grab";
+
+        wasDragged = true;
+    }
+
+    if (wasDragged == true) {
+        navbarHint.classList.add("fade-out");
     }
 
     // Store the current mouse position

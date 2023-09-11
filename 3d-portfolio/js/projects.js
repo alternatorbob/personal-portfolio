@@ -126,7 +126,7 @@ export const projects = [
         },
     },
     {
-        title: "Scroll",
+        title: "Physical Scrollbar",
         id: "Scroll",
         description:
             "Made in collaboration with Interaction Designer Tickie Bindner during a one week workshop with Yehwan Song. Tasked to create a project that explores the website and the mobile experiences’ relationship with the space, we made the connection between the scrollbar of a webpage and the handrail of a set of stairs. We made a phone case that attached to the handrail and transmitted data from a rotary encoder, via wifi, to the web page which would scroll in increments as the user went up the steps. Each step had its own section of the website thus creating a relationship between the physical and the digital.",

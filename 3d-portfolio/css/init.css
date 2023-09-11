@@ -1,4 +1,4 @@
-#fade {
+.fade {
     position: fixed;
     top: 0;
     left: 0;
@@ -7,9 +7,10 @@
     background-color: black;
     z-index: 9999;
     opacity: 1;
+
     transition: opacity 1.55s ease-in;
 }
 
-#fade.fade-out {
+.fade-out {
     opacity: 0;
 }
