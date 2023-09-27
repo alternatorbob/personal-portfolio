@@ -15,13 +15,13 @@ export function uiSwitchState(mode) {
         case "3d":
             reverseSelected();
             console.log("3d");
-            console.log(wasSelected);
+            // console.log(wasSelected);
             mainContainer.style.pointerEvents = "none";
             blur.classList.toggle("hide"); // toggle the .hide class
             break;
         case "2d":
             console.log("2d");
-            console.log(wasSelected);
+            // console.log(wasSelected);
             mainContainer.style.pointerEvents = "auto";
             blur.classList.toggle("hide"); // toggle the .hide class
             break;
