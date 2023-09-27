@@ -98,6 +98,7 @@ function createProjectCard(selectedProject) {
     nextBtn.addEventListener("click", showNextSlide);
 
     let currentIndex = 0;
+
     function showNextSlide() {
         slides[currentIndex].classList.add("hidden");
         // Calculate the index of the next slide
@@ -106,13 +107,18 @@ function createProjectCard(selectedProject) {
         slides[currentIndex].classList.remove("hidden");
     }
 
-    closeBtn.addEventListener("click", () => {
-        // wasSelected = false;
+    closeBtn.addEventListener("click", closeCard);
+    // document.addEventListener("keydown", (event) => {
+    //     if (event.key === "Escape") {
+    //         console.log("Escape ");
+    //         closeCard();
+    //     }
+    // });
+
+    function closeCard() {
         uiSwitchState("3d");
         card.remove();
-    });
-
-    console.log(document.querySelector('.slide>iframe'));
+    }
 
     return card;
 }

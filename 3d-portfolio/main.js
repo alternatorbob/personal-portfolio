@@ -234,37 +234,26 @@ window.addEventListener("mousedown", onMouseDown, false);
 
 // Function to handle mouse click events
 function onMouseDown(event) {
-    // Calculate mouse position in normalized device coordinates (-1 to 1)
     click.x = (event.clientX / window.innerWidth) * 2 - 1;
     click.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    // Set up the raycaster
     raycaster.setFromCamera(click, camera);
+    // const intersects = raycaster.intersectObjects(cubes);
 
-    // Check for intersections with the cubes
-    const intersects = raycaster.intersectObjects(cubes);
+    const intersects = raycaster.intersectObjects([sphere, ...cubes]);
 
-    if (intersects.length > 0) {
-        // An intersection occurred
-        const selectedCube = intersects[0].object;
-        console.log(selectedCube);
-        // Do something with the selected cube, for example:
-        selectedCube.material.color.set(0xff0000); // Change color
+    if (!wasSelected) {
+        if (intersects.length > 0 && intersects[0].object !== sphere) {
+            // An intersection occurred
+            const selectedProject = intersects[0].object;
+            selectedProject.material.color.set(0xff0000);
 
-        // if (!wasSelected) {
-        //     //project creation based on raycast
-        //     const { selectedProject } = laserBeam.intersect(
-        //         new THREE.Vector3(0, 2, -10),
-        //         cubes,
-        //         intersectionTime
-        //     );
-
-        //     if (selectedProject) {
-        //         wasSelected = true;
-        //         addProjectCardToPage(selectedProject, mainContainer);
-        //         uiSwitchState("2d");
-        //     }
-        // }
+            if (selectedProject) {
+                wasSelected = true;
+                addProjectCardToPage(selectedProject.name, mainContainer);
+                uiSwitchState("2d");
+            }
+        }
     }
 }
 
