@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import { projects } from "./projects";
 import { findObjectById } from "./utils";
 import { wasSelected, reverseSelected } from "../main";
@@ -15,13 +16,13 @@ export function uiSwitchState(mode) {
         case "3d":
             reverseSelected();
             console.log("3d");
-            console.log(wasSelected);
+            // console.log(wasSelected);
             mainContainer.style.pointerEvents = "none";
             blur.classList.toggle("hide"); // toggle the .hide class
             break;
         case "2d":
             console.log("2d");
-            console.log(wasSelected);
+            // console.log(wasSelected);
             mainContainer.style.pointerEvents = "auto";
             blur.classList.toggle("hide"); // toggle the .hide class
             break;
@@ -98,6 +99,7 @@ function createProjectCard(selectedProject) {
     nextBtn.addEventListener("click", showNextSlide);
 
     let currentIndex = 0;
+
     function showNextSlide() {
         slides[currentIndex].classList.add("hidden");
         // Calculate the index of the next slide
@@ -106,13 +108,18 @@ function createProjectCard(selectedProject) {
         slides[currentIndex].classList.remove("hidden");
     }
 
-    closeBtn.addEventListener("click", () => {
-        // wasSelected = false;
+    closeBtn.addEventListener("click", closeCard);
+    // document.addEventListener("keydown", (event) => {
+    //     if (event.key === "Escape") {
+    //         console.log("Escape ");
+    //         closeCard();
+    //     }
+    // });
+
+    function closeCard() {
         uiSwitchState("3d");
         card.remove();
-    });
-
-    console.log(document.querySelector('.slide>iframe'));
+    }
 
     return card;
 }
@@ -184,3 +191,30 @@ buttonInvert.addEventListener("click", function () {
         invert.classList.add("hide");
     }
 });
+
+export function addCursorStyles(camera, cubes) {
+    console.log(camera, cubes);
+
+    const raycaster = new THREE.Raycaster();
+    window.addEventListener("mousemove", (e) => {
+        raycaster.setFromCamera(
+            new THREE.Vector2(
+                (e.clientX / window.innerWidth) * 2 - 1,
+                (-e.clientY / window.innerHeight) * 2 + 1
+            ),
+            camera
+        );
+
+        for (const cube of cubes) {
+            const intersections = raycaster.intersectObject(cube);
+
+            if (intersections.length > 0) {
+                console.log(cube);
+
+                document.body.style.cursor = "pointer";
+            } else {
+                document.body.style.cursor = "auto";
+            }
+        }
+    });
+}
