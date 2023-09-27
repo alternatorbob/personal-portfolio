@@ -214,8 +214,8 @@ export const projects = [
         },
     },
     {
-        title: "XYScpope",
-        id: "XYScpope",
+        title: "XYScope",
+        id: "XYScope",
         description:
             "Made in collaboration with Interaction Designer Antoine Contreras during a one week workshop with Ted Davis. Using a p5.js library that enables vintage oscilloscope to reproduce digital canvases, we wanted to create a game, as a sort of hommage to the early days of computing powered by CRT displays. The inherent limited size at which images can be displayed, was leveraged by structuring the game around a small patch of the map. Furthermore we reward the user for trying to break the rules, this is a maze game which allows you to pass through the walls of the maze, however decreasing the frequency of the display at each pass, thus making it harder to see the map.",
         year: "2019",
