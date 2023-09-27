@@ -1,11 +1,6 @@
 import "./css/style.css";
 import "./css/global_styles.css";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import {
-    CSS3DRenderer,
-    CSS3DObject,
-} from "three/examples/jsm/renderers/CSS3DRenderer";
 
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 
@@ -151,28 +146,7 @@ function threeInit() {
 }
 
 function animate(msTime) {
-    const time = clock.getElapsedTime();
-
-    // if (!wasSelected) {
-    //     //project creation based on raycast
-    //     const { selectedProject } = laserBeam.intersect(
-    //         new THREE.Vector3(0, 2, -10),
-    //         cubes,
-    //         intersectionTime
-    //     );
-
-    //     if (selectedProject) {
-    //         wasSelected = true;
-    //         addProjectCardToPage(selectedProject, mainContainer);
-    //         uiSwitchState("2d");
-    //     }
-    // }
-
-    //scene objects animation
     cubeCamera.update(renderer, scene);
-    for (let cube of cubes) {
-        cube.lookAt(sphere.position);
-    }
 
     // camera.position.y += (mouse.y * 1.5 - camera.position.y + 3.5) * 0.03;
     camera.position.x += (-mouse.x * 3.5 - camera.position.x) * 0.05;
@@ -194,6 +168,7 @@ function animate(msTime) {
     // Loop through the array of cubes and update their positions
     for (let i = 0; i < cubes.length; i++) {
         const cube = cubes[i];
+        cube.lookAt(sphere.position);
 
         // Define variables for the movement
         const amplitude = 0.0001 + i * 0.005; // Increase amplitude with each cube
@@ -248,11 +223,15 @@ function onMouseDown(event) {
             const selectedProject = intersects[0].object;
             selectedProject.material.color.set(0xff0000);
 
+            renderer.domElement.style.cursor = "pointer";
+
             if (selectedProject) {
                 wasSelected = true;
                 addProjectCardToPage(selectedProject.name, mainContainer);
                 uiSwitchState("2d");
             }
+        } else {
+            renderer.domElement.style.cursor = "auto";
         }
     }
 }

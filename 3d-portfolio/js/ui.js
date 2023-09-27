@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import { projects } from "./projects";
 import { findObjectById } from "./utils";
 import { wasSelected, reverseSelected } from "../main";
@@ -190,3 +191,30 @@ buttonInvert.addEventListener("click", function () {
         invert.classList.add("hide");
     }
 });
+
+export function addCursorStyles(camera, cubes) {
+    console.log(camera, cubes);
+
+    const raycaster = new THREE.Raycaster();
+    window.addEventListener("mousemove", (e) => {
+        raycaster.setFromCamera(
+            new THREE.Vector2(
+                (e.clientX / window.innerWidth) * 2 - 1,
+                (-e.clientY / window.innerHeight) * 2 + 1
+            ),
+            camera
+        );
+
+        for (const cube of cubes) {
+            const intersections = raycaster.intersectObject(cube);
+
+            if (intersections.length > 0) {
+                console.log(cube);
+
+                document.body.style.cursor = "pointer";
+            } else {
+                document.body.style.cursor = "auto";
+            }
+        }
+    });
+}

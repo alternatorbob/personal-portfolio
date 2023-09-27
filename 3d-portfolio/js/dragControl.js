@@ -31,10 +31,12 @@ function onMouseHover(e) {
         ),
         camera
     );
+
     const intersections = raycaster.intersectObject(sphere);
+   
     if (!isDragging) {
         if (intersections.length > 0) {
-            renderer.domElement.style.cursor = "pointer";
+            renderer.domElement.style.cursor = "grab";
         } else {
             renderer.domElement.style.cursor = "auto";
         }
@@ -53,7 +55,6 @@ function onMouseDown(e) {
     if (intersections.length > 0) {
         intersectionPoint = intersections[0].point;
         isDragging = true;
-        renderer.domElement.style.cursor = "grab";
 
         wasDragged = true;
     }
@@ -72,6 +73,8 @@ const dampingFactor = 0.95;
 
 function onMouseMove(e) {
     if (!isDragging) return;
+
+    renderer.domElement.style.cursor = "grabbing";
 
     mousePosition.set(e.clientX, e.clientY);
     const ballWeight = 0.0033;
