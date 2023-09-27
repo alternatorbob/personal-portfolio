@@ -221,7 +221,7 @@ function onMouseDown(event) {
         if (intersects.length > 0 && intersects[0].object !== sphere) {
             // An intersection occurred
             const selectedProject = intersects[0].object;
-            selectedProject.material.color.set(0xff0000);
+            selectedProject.material.color.set(0x202020);
 
             renderer.domElement.style.cursor = "pointer";
 
