@@ -10,24 +10,34 @@ export function uiInit() {
 
 export function uiSwitchState(mode) {
     const mainContainer = document.querySelector(".main-container");
-    const blur = document.querySelector("#blur");
+    const navBar = document.querySelector(".navbar");
+    const canvas = document.querySelector(".three-canvas");
     //switch between 3d and 2d
     switch (mode) {
         case "3d":
             reverseSelected();
+            invertHide(navBar);
             console.log("3d");
-            // console.log(wasSelected);
             mainContainer.style.pointerEvents = "none";
-            blur.classList.toggle("hide"); // toggle the .hide class
+            canvas.classList.toggle("blur"); // toggle the .blur class
             break;
         case "2d":
             console.log("2d");
-            // console.log(wasSelected);
+            invertHide(navBar);
             mainContainer.style.pointerEvents = "auto";
-            blur.classList.toggle("hide"); // toggle the .hide class
+            canvas.classList.toggle("blur"); // toggle the .blur class
             break;
     }
 }
+
+const invertHide = (div) => {
+    if (div.classList.contains('hide')) {
+        div.classList.remove('hide');
+    } else {
+        div.classList.add('hide');
+    }
+};
+
 
 //dispatch mouseup event to stop sphere drag when project is open
 const event = new MouseEvent("mouseup", {});
@@ -183,13 +193,17 @@ nameDiv.addEventListener("mouseout", function () {
     }
 });
 
-buttonInvert.addEventListener("click", function () {
-    const invert = document.querySelector(".invert");
-    if (invert.classList.contains("hide")) {
-        invert.classList.remove("hide");
-    } else {
-        invert.classList.add("hide");
-    }
+document.addEventListener("DOMContentLoaded", function () {
+
+    buttonInvert.addEventListener("click", function () {
+        const invert = document.querySelector(".invert");
+        if (invert.classList.contains("hide")) {
+            invert.classList.remove("hide");
+        } else {
+            invert.classList.add("hide");
+            console.log(invert);
+        }
+    });
 });
 
 export function addCursorStyles(camera, cubes) {

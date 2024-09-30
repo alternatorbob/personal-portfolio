@@ -161,25 +161,20 @@ function animate(msTime) {
     ) {
         camera.rotation.y -= mouse.x * 0.0005;
     }
-
-    // camera.position.z = (mouse.y * 1.5 - camera.position.x) * 0.05 + 14;
-
     // Loop through the array of cubes and update their positions
     for (let i = 0; i < cubes.length; i++) {
         const cube = cubes[i];
         cube.lookAt(sphere.position);
 
-        // Define variables for the movement
-        const amplitude = 0.0001 + i * 0.005; // Increase amplitude with each cube
-        const frequency = 0.05 + i * 0.01; // Increase frequency with each cube
+        // Create a new Quaternion for rotation based on the cube's own rotation speed
+        const quaternion = new THREE.Quaternion();
 
-        // Update the cube's position with a sine wave
+        // Rotate around the Y-axis using the cube's rotation speed
+        quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), cube.rotationSpeed);
+        quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 1), cube.rotationSpeed / 4);
 
-        // cube.position.x +=
-        // Math.sin(Date.now() * frequency * 0.000001) * amplitude;
-        // Math.sin(Date.now() * frequency * 0.001) * amplitude;
-        // cube.position.y +=
-        //     Math.sin(Date.now() * frequency * 0.0001) * amplitude;
+        // Apply the rotation to the cube's position
+        cube.position.applyQuaternion(quaternion);
     }
 
     renderer.render(scene, camera);

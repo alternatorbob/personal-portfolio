@@ -36,20 +36,7 @@ export const projects = [
             ],
         },
     },
-    {
-        title: "Portfolio for Juri Roemmel",
-        id: "Juri",
-        description:
-            "Personal portfolio website designed and programmed for Industrial Designer and ECAL Alumni Juri Roemmel.",
-        year: "2021",
-        categories: ["Web Design", "Web Development"],
-        content: {
-            images: [
-                "/projects/Juri_Site/Juri_Cover.webp",
-                "/projects/Juri_Site/Juri_Mockup.webp",
-            ],
-        },
-    },
+
     {
         title: "MIDI Clock",
         id: "MIDI",

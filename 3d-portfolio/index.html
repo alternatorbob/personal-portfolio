@@ -1,71 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
 
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>PORTFOLIO</title>
+<head>
+    <meta charset="UTF-8" />
 
-        <link rel="stylesheet" href="css/init.css" />
-    </head>
-    <body>
-        <div class="fade"></div>
-        <script>
-            const fadeElement = document.querySelector(".fade");
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PORTFOLIO</title>
 
-            setTimeout(function () {
-                fadeElement.classList.add("fade-out");
-            }, 770);
+    <link rel="stylesheet" href="css/init.css" />
+</head>
 
-            // Listen for the 'transitionend' event and remove the element once the fade-out animation is complete
-            fadeElement.addEventListener("transitionend", function () {
-                fadeElement.remove();
-            });
-        </script>
+<body>
+    <div class="fade"></div>
+    <script>
+        const fadeElement = document.querySelector(".fade");
 
-        <div id="mobile-message" class="hidden">
-            <div id="mobile-message-text">
-                On your mobile, the view is quite tight, <br />
+        setTimeout(function () {
+            fadeElement.classList.add("fade-out");
+        }, 770);
 
-                Desktop's where the site shines bright!
-                <br />
-                <br />
-                <span id="construction-text" class="text-sm" style="font-weight: 100;"
-                    >( Mobile version under construction )</span
-                >
-            </div>
+        // Listen for the 'transitionend' event and remove the element once the fade-out animation is complete
+        fadeElement.addEventListener("transitionend", function () {
+            fadeElement.remove();
+        });
+    </script>
+
+    <div id="mobile-message" class="hidden">
+        <div id="mobile-message-text">
+            On your mobile, the view is quite tight, <br />
+
+            Desktop's where the site shines bright!
+            <br />
+            <br />
+            <span id="construction-text" class="text-sm" style="font-weight: 100;">( Mobile version under construction
+                )</span>
         </div>
+    </div>
 
-        <div class="main-container">
-            <div class="navbar">
-                <div class="navbar-name text-lg">
-                    <div id="name">Bogdan Năstase</div>
-                    <div class="slide-div">→</div>
-                    <div class="slide-div">
-                        <a href="mailto:cbogdan.nastase@gmail.com">
-                            <img
-                                id="button-mail"
-                                src="/assets/UI/mail-button.png"
-                                alt=""
-                        /></a>
-                    </div>
-                </div>
-
-                <div class="navbar-hint text-sm">
-                    Drag the sphere to browse.
-                    <br>
-                    Click image to open project.
-                </div>
-
-                <div class="button-invert button">
-                    <img src="/assets/UI/ball-button.png" alt="" />
+    <div class="main-container">
+        <div class="navbar">
+            <div class="navbar-name text-lg">
+                <div id="name">Bogdan Năstase</div>
+                <div class="slide-div">→</div>
+                <div class="slide-div">
+                    <a href="mailto:cbogdan.nastase@gmail.com">
+                        <img id="button-mail" src="/assets/UI/mail-button.png" alt="" /></a>
                 </div>
             </div>
-        </div>
-        <div class="invert"></div>
-        <div id="blur"></div>
 
-        <script type="module" src="/main.js"></script>
-        <script type="module" src="js/ui.js"></script>
-    </body>
+            <div class="navbar-hint text-sm">
+                Drag the sphere to browse.
+                <br>
+                Click image to open project.
+            </div>
+
+            <div class="button-invert button">
+                <img src="/assets/UI/ball-button.png" alt="" />
+            </div>
+        </div>
+    </div>
+    <div class="invert hide"></div>
+
+    <script type="module" src="/main.js"></script>
+    <script type="module" src="js/ui.js"></script>
+</body>
+
 </html>

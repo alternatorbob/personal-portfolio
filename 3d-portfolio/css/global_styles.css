@@ -8,17 +8,18 @@
 
 html,
 body {
+    background-color: black;
     width: 100%;
     height: 100%;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 body {
     display: flex;
     font-family: Helvetica, sans-serif;
     color: #f2f2f2;
-    background-image: linear-gradient(black, black, white);
 }
 
 .text-sm {
@@ -70,24 +71,18 @@ body {
     mix-blend-mode: difference;
     pointer-events: none;
 
-    opacity: 0;
+    opacity: 1;
     transition: opacity 0.5s ease-in-out;
 }
 
 .blur {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px);
-    opacity: 0; /* initially hidden */
-    z-index: 999;
-    transition: opacity 0.5s; /* add opacity transition */
+    filter: blur(15px);
+    opacity: 0.65;
+    transition: filter 0.12s ease-in-out, opacity 0.12s ease-in-out;
 }
 
 .hide {
-    opacity: 1;
+    opacity: 0;
     transition: opacity 0.5s ease-in-out;
+    display: none;
 }
