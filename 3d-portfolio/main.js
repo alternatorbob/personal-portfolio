@@ -37,12 +37,12 @@ const textureManager = new THREE.LoadingManager();
 textureManager.onStart = function (url, itemsLoaded, itemsTotal) {
     console.log(
         "Started loading file: " +
-            url +
-            ".\nLoaded " +
-            itemsLoaded +
-            " of " +
-            itemsTotal +
-            " files."
+        url +
+        ".\nLoaded " +
+        itemsLoaded +
+        " of " +
+        itemsTotal +
+        " files."
     );
 };
 
@@ -141,14 +141,13 @@ function threeInit() {
     scene.add(sphere);
 
     addProjects(projects);
-
     dragInit();
 }
 
 function animate(msTime) {
     cubeCamera.update(renderer, scene);
 
-    // camera.position.y += (mouse.y * 1.5 - camera.position.y + 3.5) * 0.03;
+    camera.position.y += (mouse.y * 0.7 - camera.position.y + 3.5) * 0.03;
     camera.position.x += (-mouse.x * 3.5 - camera.position.x) * 0.05;
 
     const width = window.innerWidth;
@@ -163,7 +162,7 @@ function animate(msTime) {
         camera.rotation.y -= mouse.x * 0.0005;
     }
 
-    camera.position.z = (mouse.y * 1.5 - camera.position.x) * 0.05 + 14;
+    // camera.position.z = (mouse.y * 1.5 - camera.position.x) * 0.05 + 14;
 
     // Loop through the array of cubes and update their positions
     for (let i = 0; i < cubes.length; i++) {
@@ -175,8 +174,10 @@ function animate(msTime) {
         const frequency = 0.05 + i * 0.01; // Increase frequency with each cube
 
         // Update the cube's position with a sine wave
-        cube.position.x +=
-            Math.sin(Date.now() * frequency * 0.000001) * amplitude;
+
+        // cube.position.x +=
+        // Math.sin(Date.now() * frequency * 0.000001) * amplitude;
+        // Math.sin(Date.now() * frequency * 0.001) * amplitude;
         // cube.position.y +=
         //     Math.sin(Date.now() * frequency * 0.0001) * amplitude;
     }
