@@ -1,5 +1,6 @@
 import "./css/style.css";
 import "./css/global_styles.css";
+import "./css/mobile.css";
 import * as THREE from "three";
 
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
@@ -8,7 +9,7 @@ import { dragInit } from "./js/dragControl";
 import { addProjects, cubes } from "./js/addProjects";
 import { projects } from "./js/projects";
 import { createEnvironment } from "./js/utils";
-import { addProjectCardToPage, uiSwitchState } from "./js/ui";
+import { addProjectCardToPage, uiSwitchState, uiInit } from "./js/ui";
 
 const mobileMessage = document.querySelector("#mobile-message");
 const mainContainer = document.querySelector(".main-container");
@@ -21,8 +22,11 @@ let camera, scene, renderer;
 let sphere;
 
 const camFar = 1500;
-export const sphereRadius = 3.75;
+export const sphereRadius = window.innerWidth < 768 ? 6 : 3.75;
 export const numCubes = 10;
+
+// Add original scale reference for spring effect
+export let originalSphereScale = 1.0;
 
 const clock = new THREE.Clock();
 export let intersectionTime = 0;
@@ -60,19 +64,14 @@ const normalMap = textureLoader.load(
     "assets/textures/mat/worn-shiny-metal-bl/worn-shiny-metal-Normal-ogl.png"
 );
 
-// check for common mobile user agents
-if (
-    navigator.userAgent.match(/Android/i) ||
-    navigator.userAgent.match(/iPhone/i) ||
-    navigator.userAgent.match(/iPad/i) ||
-    navigator.userAgent.match(/iPod/i) ||
-    navigator.userAgent.match(/BlackBerry/i) ||
-    navigator.userAgent.match(/Windows Phone/i)
-) {
-    mobileMessage.classList.remove("hidden");
-} else {
-    threeInit();
+// Ensure the #blur element is inserted before the main-container
+const blurElement = document.getElementById('blur');
+if (mainContainer && blurElement) {
+    mainContainer.parentNode.insertBefore(blurElement, mainContainer);
 }
+
+// Remove mobile detection and directly initialize Three.js
+threeInit();
 
 function threeInit() {
     renderer = new THREE.WebGLRenderer({
@@ -98,8 +97,9 @@ function threeInit() {
         1,
         camFar
     );
-    camera.position.z = 14;
-    camera.position.y = 3.5;
+    // Adjust initial camera position for better mobile view
+    camera.position.z = window.innerWidth < 768 ? 22 : 14;
+    camera.position.y = window.innerWidth < 768 ? 6 : 3.5;
 
     scene = new THREE.Scene();
 
@@ -138,52 +138,37 @@ function threeInit() {
         sphereMaterial
     );
     sphere.castShadow = true;
+    // Store original scale for spring effect
+    originalSphereScale = sphere.scale.x;
     scene.add(sphere);
 
     addProjects(projects);
     dragInit();
+    
+    // Initialize UI elements
+    uiInit();
 }
 
 function animate(msTime) {
     cubeCamera.update(renderer, scene);
 
+    // Store current rotation
+    const currentRotation = new THREE.Euler().copy(camera.rotation);
+
+    // Update camera position
     camera.position.y += (mouse.y * 0.7 - camera.position.y + 3.5) * 0.03;
     camera.position.x += (-mouse.x * 3.5 - camera.position.x) * 0.05;
 
-    const width = window.innerWidth;
-    const mouseThreshold = width * 0.4;
+    // Restore rotation after position update
+    camera.rotation.copy(currentRotation);
 
-    if (camera.rotation.y > -0.16 && mouse.x > width / 2 - mouseThreshold) {
-        camera.rotation.y += mouse.x * 0.0005;
-    } else if (
-        camera.rotation.y < 0.16 &&
-        mouse.x > width / 2 + mouseThreshold
-    ) {
-        camera.rotation.y -= mouse.x * 0.0005;
-    }
-
-    // camera.position.z = (mouse.y * 1.5 - camera.position.x) * 0.05 + 14;
-
-    // Loop through the array of cubes and update their positions
+    // Update cube positions
     for (let i = 0; i < cubes.length; i++) {
         const cube = cubes[i];
         cube.lookAt(sphere.position);
-
-        // Define variables for the movement
-        const amplitude = 0.0001 + i * 0.005; // Increase amplitude with each cube
-        const frequency = 0.05 + i * 0.01; // Increase frequency with each cube
-
-        // Update the cube's position with a sine wave
-
-        // cube.position.x +=
-        // Math.sin(Date.now() * frequency * 0.000001) * amplitude;
-        // Math.sin(Date.now() * frequency * 0.001) * amplitude;
-        // cube.position.y +=
-        //     Math.sin(Date.now() * frequency * 0.0001) * amplitude;
     }
 
     renderer.render(scene, camera);
-    // CSSRenderer.render(CSSScene, camera);
 }
 
 export function reverseSelected() {
@@ -197,33 +182,46 @@ function onWindowResized() {
     camera.updateProjectionMatrix();
 }
 
+// Add touch event listeners
 document.addEventListener(
-    "mousemove",
+    "touchmove",
     function (event) {
-        mouse.x = event.clientX / window.innerWidth - 0.5;
-        mouse.y = event.clientY / window.innerHeight - 0.5;
+        event.preventDefault();
+        const touch = event.touches[0];
+        mouse.x = touch.clientX / window.innerWidth - 0.5;
+        mouse.y = touch.clientY / window.innerHeight - 0.5;
     },
-    false
+    { passive: false }
 );
 
-window.addEventListener("mousedown", onMouseDown, false);
+window.addEventListener("touchstart", onTouchStart, false);
 
-// Function to handle mouse click events
-function onMouseDown(event) {
-    click.x = (event.clientX / window.innerWidth) * 2 - 1;
-    click.y = -(event.clientY / window.innerHeight) * 2 + 1;
+function onTouchStart(event) {
+    event.preventDefault();
+    const touch = event.touches[0];
+    click.x = (touch.clientX / window.innerWidth) * 2 - 1;
+    click.y = -(touch.clientY / window.innerHeight) * 2 + 1;
 
     raycaster.setFromCamera(click, camera);
-    // const intersects = raycaster.intersectObjects(cubes);
-
     const intersects = raycaster.intersectObjects([sphere, ...cubes]);
 
     if (!wasSelected) {
         if (intersects.length > 0 && intersects[0].object !== sphere) {
-            // An intersection occurred
             const selectedProject = intersects[0].object;
-            selectedProject.material.color.set(0x202020);
-
+            
+            // Handle material color change for array of materials
+            if (Array.isArray(selectedProject.material)) {
+                // Set color for all materials in the array
+                selectedProject.material.forEach(mat => {
+                    if (mat && mat.color) {
+                        mat.color.set(0x202020);
+                    }
+                });
+            } else if (selectedProject.material && selectedProject.material.color) {
+                // Fallback for single material
+                selectedProject.material.color.set(0x202020);
+            }
+            
             renderer.domElement.style.cursor = "pointer";
 
             if (selectedProject) {

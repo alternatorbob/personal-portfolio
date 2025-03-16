@@ -6,6 +6,58 @@ import { wasSelected, reverseSelected } from "../main";
 export function uiInit() {
     //populate projects with images from projects array
     //initiate navbar
+    initNavbar();
+    initInvertButton();
+}
+
+function initNavbar() {
+    let nameDiv = document.querySelector(".navbar-name");
+    let slideDivs = document.querySelectorAll(".slide-div");
+
+    if (nameDiv && slideDivs.length > 0) {
+        nameDiv.addEventListener("mouseover", function () {
+            for (let i = 0; i < slideDivs.length; i++) {
+                slideDivs[i].style.visibility = "visible";
+                slideDivs[i].style.transitionDelay = i * 0.1 + "s";
+                slideDivs[i].style.opacity = 1;
+                slideDivs[i].style.transform = "translateX(0)";
+            }
+        });
+
+        nameDiv.addEventListener("mouseout", function () {
+            for (let i = 0; i < slideDivs.length; i++) {
+                slideDivs[i].style.transitionDelay =
+                    (slideDivs.length - i - 1) * 0.1 + "s";
+                slideDivs[i].style.opacity = 0;
+                slideDivs[i].style.transform = "translateX(-100%)";
+            }
+        });
+    }
+}
+
+function initInvertButton() {
+    const buttonInvert = document.querySelector(".button-invert");
+    const invert = document.querySelector(".invert");
+    
+    // Ensure invert is hidden on page load
+    if (invert) {
+        invert.classList.add("hide");
+    }
+    
+    if (buttonInvert) {
+        buttonInvert.addEventListener("click", function () {
+            if (invert) {
+                if (invert.classList.contains("hide")) {
+                    invert.classList.remove("hide");
+                } else {
+                    invert.classList.add("hide");
+                }
+            }
+        });
+        console.log("Invert button initialized");
+    } else {
+        console.error("Invert button not found");
+    }
 }
 
 export function uiSwitchState(mode) {
@@ -18,13 +70,13 @@ export function uiSwitchState(mode) {
             console.log("3d");
             // console.log(wasSelected);
             mainContainer.style.pointerEvents = "none";
-            blur.classList.toggle("hide"); // toggle the .hide class
+            blur.classList.add("hide"); // Always hide blur in 3D mode
             break;
         case "2d":
             console.log("2d");
             // console.log(wasSelected);
             mainContainer.style.pointerEvents = "auto";
-            blur.classList.toggle("hide"); // toggle the .hide class
+            blur.classList.remove("hide"); // Always show blur in 2D mode
             break;
     }
 }
@@ -96,16 +148,69 @@ function createProjectCard(selectedProject) {
 
     const slides = generateGallery(project, slideshowContainer);
 
+    // Preload images when the gallery is opened
+    preloadImages(project);
+
+    // Initial setup: position all slides except the first one off-screen to the right
+    slides.forEach((slide, index) => {
+        slide.style.transition = 'transform 0.3s ease-in-out';
+        slide.style.position = 'absolute';
+        slide.style.top = '0';
+        slide.style.left = '0';
+        slide.style.transform = index === 0 ? 'translateX(0)' : 'translateX(100%)';
+    });
+
     nextBtn.addEventListener("click", showNextSlide);
 
     let currentIndex = 0;
 
+    function preloadImages(project) {
+        const images = project.content.images;
+        images.forEach((src) => {
+            const img = new Image();
+            img.src = src;
+        });
+    }
+
     function showNextSlide() {
-        slides[currentIndex].classList.add("hidden");
         // Calculate the index of the next slide
-        currentIndex = (currentIndex + 1) % slides.length;
-        // Show the next slide
-        slides[currentIndex].classList.remove("hidden");
+        const nextIndex = (currentIndex + 1) % slides.length;
+
+        // If we're at the last slide, prepare the first slide to come from the right
+        if (nextIndex === 0) {
+            // Move all slides except current and first to the right
+            slides.forEach((slide, index) => {
+                if (index !== currentIndex) {
+                    slide.style.transition = 'none';
+                    slide.style.transform = 'translateX(100%)';
+                }
+            });
+
+            // Force reflow to ensure the position is set before starting animation
+            slides[0].offsetHeight;
+
+            // Move the current slide out to the left
+            slides[currentIndex].style.transition = 'transform 0.3s ease-in-out';
+            slides[currentIndex].style.transform = 'translateX(-100%)';
+
+            // After a short delay, animate the first slide in
+            setTimeout(() => {
+                slides[0].style.transition = 'transform 0.3s ease-in-out';
+                slides[0].style.transform = 'translateX(0)';
+            }, 50);
+        } else {
+            // Normal slide transition
+            // Move the current slide out to the left
+            slides[currentIndex].style.transition = 'transform 0.3s ease-in-out';
+            slides[currentIndex].style.transform = 'translateX(-100%)';
+
+            // Move the next slide in from the right
+            slides[nextIndex].style.transition = 'transform 0.3s ease-in-out';
+            slides[nextIndex].style.transform = 'translateX(0)';
+        }
+
+        // Update the current index
+        currentIndex = nextIndex;
     }
 
     closeBtn.addEventListener("click", closeCard);
@@ -131,66 +236,31 @@ function generateGallery(project, slideshowContainer) {
 
     let slides = [];
 
-    let currentIndex = 0;
-    let loopedOnce = false;
-
     let numSlides = images.length;
     if (videos !== undefined && videos.length > 0) numSlides += videos.length;
     if (gifs !== undefined && gifs.length > 0) numSlides += gifs.length;
 
-    console.log("slideshowContainer", slideshowContainer);
-
     for (let i = 0; i < numSlides; i++) {
         const slide = document.createElement("div");
         slide.className = "slide";
-        if (i > 0) slide.classList.add("hidden");
+        
         if (i < images.length) {
             slide.innerHTML = `<img src="${images[i]}" alt="" />`;
         } else if ("videos" in project.content && videos.length > 0) {
             slide.innerHTML = `${videos[i - images.length]}`;
         } else if ("gifs" in project.content && gifs.length > 0) {
-            console.log("gifs", gifs);
             slide.innerHTML = `<img src="${gifs[0]}" alt="" />`;
         }
 
+        // Set initial position
+        slide.style.transform = i === 0 ? 'translateX(0)' : 'translateX(100%)';
+        
         slideshowContainer.appendChild(slide);
         slides.push(slide);
     }
 
     return slides;
 }
-
-const buttonInvert = document.querySelector(".button-invert");
-
-let nameDiv = document.querySelector(".navbar-name");
-let slideDivs = document.querySelectorAll(".slide-div");
-
-nameDiv.addEventListener("mouseover", function () {
-    for (let i = 0; i < slideDivs.length; i++) {
-        slideDivs[i].style.visibility = "visible";
-        slideDivs[i].style.transitionDelay = i * 0.1 + "s";
-        slideDivs[i].style.opacity = 1;
-        slideDivs[i].style.transform = "translateX(0)";
-    }
-});
-
-nameDiv.addEventListener("mouseout", function () {
-    for (let i = 0; i < slideDivs.length; i++) {
-        slideDivs[i].style.transitionDelay =
-            (slideDivs.length - i - 1) * 0.1 + "s";
-        slideDivs[i].style.opacity = 0;
-        slideDivs[i].style.transform = "translateX(-100%)";
-    }
-});
-
-buttonInvert.addEventListener("click", function () {
-    const invert = document.querySelector(".invert");
-    if (invert.classList.contains("hide")) {
-        invert.classList.remove("hide");
-    } else {
-        invert.classList.add("hide");
-    }
-});
 
 export function addCursorStyles(camera, cubes) {
     console.log(camera, cubes);

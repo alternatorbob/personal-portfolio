@@ -1,0 +1,23 @@
+@media screen and (max-width: 768px) {
+    .navbar-name {
+        font-size: 1.2rem !important;
+    }
+
+    .navbar-name img {
+        width: 24px !important;
+        height: 24px !important;
+    }
+
+    .button-invert img {
+        width: 32px !important;
+        height: 32px !important;
+    }
+
+    .navbar-hint {
+        font-size: 0.8rem !important;
+    }
+
+    .slide-div {
+        margin-left: 8px !important;
+    }
+} 
