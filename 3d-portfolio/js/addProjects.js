@@ -16,21 +16,11 @@ const targetVisualSize = 18; // Increased from 12 to make images bigger
 
 //used for 3D Cubes Projects
 export function addProjects(projects) {
-    const size = 6; // Size of the grid
-    const scale = 2; // Scale of the cubes
-    const gridSize = 10; // Grid size
-
-    // Define the grid of positions
-    const grid = [];
-    for (let x = -gridSize; x <= gridSize; x++) {
-        for (let y = -gridSize; y <= gridSize; y++) {
-            for (let z = -gridSize; z <= gridSize; z++) {
-                grid.push(new THREE.Vector3(x, y, z).multiplyScalar(size));
-            }
-        }
-    }
-
-    const occupiedPositions = new Set();
+    const scale = 30; // Scale of the cubes
+    const radius = 40; // Distance from center
+    
+    // Calculate positions on a sphere for equal distribution
+    const positions = calculateEvenlySpacedPointsOnSphere(projects.length, radius);
 
     for (let i = 0; i < projects.length; i++) {
         const loader = new THREE.TextureLoader();
@@ -120,20 +110,32 @@ export function addProjects(projects) {
             cube.lookAt(sphere.position);
         });
 
-        // Select a random position from the grid
-        let randomPosition = null;
-        while (randomPosition === null) {
-            const index = Math.floor(Math.random() * grid.length);
-            const position = grid[index];
-            if (!occupiedPositions.has(position)) {
-                randomPosition = position;
-                occupiedPositions.add(position);
-            }
-        }
+        // Position the cube at the calculated position
+        cube.position.copy(positions[i]);
         cube.name = projects[i].id;
-        cube.position.copy(randomPosition);
         cube.lookAt(sphere.position);
         cubes.push(cube);
         scene.add(cube);
     }
+}
+
+// Function to calculate evenly spaced points on a sphere using the Fibonacci sphere algorithm
+function calculateEvenlySpacedPointsOnSphere(count, radius) {
+    const points = [];
+    const phi = Math.PI * (3 - Math.sqrt(5)); // Golden angle in radians
+    
+    for (let i = 0; i < count; i++) {
+        const y = 1 - (i / (count - 1)) * 2; // y goes from 1 to -1
+        const radiusAtY = Math.sqrt(1 - y * y); // radius at y
+        
+        const theta = phi * i; // Golden angle increment
+        
+        const x = Math.cos(theta) * radiusAtY;
+        const z = Math.sin(theta) * radiusAtY;
+        
+        // Scale to desired radius
+        points.push(new THREE.Vector3(x * radius, y * radius, z * radius));
+    }
+    
+    return points;
 }

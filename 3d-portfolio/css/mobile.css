@@ -1,4 +1,9 @@
 @media screen and (max-width: 768px) {
+    .navbar {
+        padding: 10px;
+        margin-top: -40px;
+    }
+    
     .navbar-name {
         font-size: 1.2rem !important;
     }

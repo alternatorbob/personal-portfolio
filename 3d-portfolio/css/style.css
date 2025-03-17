@@ -1,3 +1,7 @@
+body{
+    overflow: hidden;
+}
+
 .main-container {
     /* position: absolute;
     top: 0;

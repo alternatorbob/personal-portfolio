@@ -23,7 +23,6 @@ function createEnvironment(scene) {
         "/assets/textures/hdr/28.03.2023_fade_background_S.jpg",
         (texture) => {
             scene.background = texture;
-            scene.environment = texture;
         }
     );
 

@@ -2,9 +2,8 @@ import "./css/style.css";
 import "./css/global_styles.css";
 import "./css/mobile.css";
 import * as THREE from "three";
-
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
-
+import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 import { dragInit } from "./js/dragControl";
 import { addProjects, cubes } from "./js/addProjects";
 import { projects } from "./js/projects";
@@ -64,13 +63,7 @@ const normalMap = textureLoader.load(
     "assets/textures/mat/worn-shiny-metal-bl/worn-shiny-metal-Normal-ogl.png"
 );
 
-// Ensure the #blur element is inserted before the main-container
-const blurElement = document.getElementById('blur');
-if (mainContainer && blurElement) {
-    mainContainer.parentNode.insertBefore(blurElement, mainContainer);
-}
-
-// Remove mobile detection and directly initialize Three.js
+// Initialize Three.js
 threeInit();
 
 function threeInit() {
@@ -97,9 +90,9 @@ function threeInit() {
         1,
         camFar
     );
-    // Adjust initial camera position for better mobile view
+    // Adjust camera position for mobile view - higher Y position to make sphere appear lower
     camera.position.z = window.innerWidth < 768 ? 22 : 14;
-    camera.position.y = window.innerWidth < 768 ? 6 : 3.5;
+    camera.position.y = window.innerWidth < 768 ? 10 : 3.5; // Increased from 6 to 10 for mobile
 
     scene = new THREE.Scene();
 
@@ -113,11 +106,8 @@ function threeInit() {
 
     createEnvironment(scene);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
-    const redLight_1 = new THREE.DirectionalLight(0xff0000, 0.25);
-    redLight_1.castShadow = true;
-
-    redLight_1.position.set(0, 6, -15); // set position to above
+    // Increased ambient light intensity for stronger environment lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // Increased from 0.25 to 0.5
     scene.add(ambientLight);
 
     cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256);
@@ -133,8 +123,42 @@ function threeInit() {
         normalScale: new THREE.Vector2(1.5, 1.5), // adjust the normal map strength with this Vector2
     });
 
+    // Create a higher resolution sphere geometry for better subdivision
+    const sphereGeometry = new THREE.IcosahedronGeometry(sphereRadius, 100);
+    
+    // Apply subtle noise displacement to the vertices
+    const noise = new SimplexNoise();
+    const noiseScale = 0.15; // Scale of the noise (smaller = more subtle)
+    const noiseAmount = -0.15; // Amount of displacement (smaller = more subtle)
+    
+    const positionAttribute = sphereGeometry.attributes.position;
+    const vertex = new THREE.Vector3();
+    
+    for (let i = 0; i < positionAttribute.count; i++) {
+        vertex.fromBufferAttribute(positionAttribute, i);
+        
+        // Normalize to get direction
+        const direction = vertex.clone().normalize();
+        
+        // Apply noise based on position
+        const noiseValue = noise.noise(
+            direction.x * noiseScale, 
+            direction.y * noiseScale, 
+            direction.z * noiseScale
+        );
+        
+        // Displace vertex along its direction
+        vertex.add(direction.multiplyScalar(noiseValue * noiseAmount));
+        
+        // Write back to geometry
+        positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
+    }
+    
+    // Update normals after displacement
+    sphereGeometry.computeVertexNormals();
+    
     sphere = new THREE.Mesh(
-        new THREE.IcosahedronGeometry(sphereRadius, 20),
+        sphereGeometry,
         sphereMaterial
     );
     sphere.castShadow = true;
