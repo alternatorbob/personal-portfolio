@@ -84,16 +84,64 @@ export function uiSwitchState(mode) {
 //dispatch mouseup event to stop sphere drag when project is open
 const event = new MouseEvent("mouseup", {});
 
-export function addProjectCardToPage(project, parent) {
-    const card = createProjectCard(project);
-    parent.appendChild(card);
-    const threeCanvas = document.querySelector(".three-canvas");
-    threeCanvas.dispatchEvent(event);
+export function addProjectCardToPage(projectId, container) {
+    const project = findObjectById(projects, projectId);
+    if (!project) return;
+
+    const card = createProjectCard(project, container);
+    container.appendChild(card);
+    
+    // Add keyboard navigation for the project card
+    setupKeyboardNavigation(card);
+    
+    return card;
 }
 
-function createProjectCard(selectedProject) {
-    const project = findObjectById(projects, selectedProject);
+// Function to set up keyboard navigation for project cards
+function setupKeyboardNavigation(card) {
+    // Remove any existing keyboard event listeners to prevent duplicates
+    document.removeEventListener('keydown', handleKeyDown);
+    
+    // Add the keyboard event listener
+    document.addEventListener('keydown', handleKeyDown);
+    
+    // Handler function for keyboard events
+    function handleKeyDown(event) {
+        if (event.key === 'Escape') {
+            // Find and click the close button
+            const closeBtn = card.querySelector('.button-close');
+            if (closeBtn) {
+                closeBtn.click();
+            }
+        } else if (event.key === 'ArrowRight') {
+            // Find and click the next button
+            const nextBtn = card.querySelector('.button-next');
+            if (nextBtn) {
+                nextBtn.click();
+            }
+        }
+    }
+    
+    // Store the handler function on the card for cleanup
+    card.handleKeyDown = handleKeyDown;
+    
+    // Clean up the event listener when the card is removed
+    const closeBtn = card.querySelector('.button-close');
+    if (closeBtn) {
+        const originalClickHandler = closeBtn.onclick;
+        closeBtn.onclick = function(event) {
+            // Call the original handler if it exists
+            if (originalClickHandler) {
+                originalClickHandler.call(this, event);
+            }
+            
+            // Remove the keyboard event listener
+            document.removeEventListener('keydown', card.handleKeyDown);
+        };
+    }
+}
 
+function createProjectCard(project, container) {
     const card = document.createElement("div");
     card.className = "project-card";
 
@@ -101,22 +149,15 @@ function createProjectCard(selectedProject) {
     info.className = "project-info";
     card.appendChild(info);
 
-    const titleGroup = document.createElement("div");
-    titleGroup.className = "project-title-group column";
-    info.appendChild(titleGroup);
-
-    const category = document.createElement("div");
-    category.className = "project-category text-sm text-up";
-    category.textContent = project.categories
-        .map((category) => `${category} `)
-        .join(", ");
-
-    titleGroup.appendChild(category);
-
     const title = document.createElement("div");
-    title.className = "project-title text-lg";
+    title.className = "project-title text-lg column";
     title.textContent = project.title;
-    titleGroup.appendChild(title);
+    info.appendChild(title);
+
+    const categories = document.createElement("div");
+    categories.className = "project-categories text-sm column";
+    categories.textContent = project.categories.join(", ");
+    info.appendChild(categories);
 
     const year = document.createElement("div");
     year.className = "project-year text-sm column";
@@ -214,12 +255,6 @@ function createProjectCard(selectedProject) {
     }
 
     closeBtn.addEventListener("click", closeCard);
-    // document.addEventListener("keydown", (event) => {
-    //     if (event.key === "Escape") {
-    //         console.log("Escape ");
-    //         closeCard();
-    //     }
-    // });
 
     function closeCard() {
         uiSwitchState("3d");

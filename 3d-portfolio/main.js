@@ -82,6 +82,18 @@ function threeInit() {
     renderer.domElement.classList.add("three-canvas");
     document.body.insertBefore(renderer.domElement, document.body.firstChild);
 
+    // Ensure the blur div is positioned correctly (after canvas, before main-container)
+    const blurElement = document.getElementById('blur');
+    const mainContainer = document.querySelector('.main-container');
+    
+    if (blurElement && mainContainer) {
+        // Remove the blur element from its current position
+        blurElement.parentNode.removeChild(blurElement);
+        
+        // Insert it before the main-container
+        mainContainer.parentNode.insertBefore(blurElement, mainContainer);
+    }
+
     window.addEventListener("resize", onWindowResized);
 
     camera = new THREE.PerspectiveCamera(
