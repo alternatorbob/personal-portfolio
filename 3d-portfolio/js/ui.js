@@ -270,11 +270,17 @@ function createProjectCard(project, container) {
 
     // Initial setup: position all slides except the first one off-screen to the right
     slides.forEach((slide, index) => {
-        slide.style.transition = 'transform 0.3s ease-in-out';
         slide.style.position = 'absolute';
         slide.style.top = '0';
         slide.style.left = '0';
-        slide.style.transform = index === 0 ? 'translateX(0)' : 'translateX(100%)';
+        
+        if (index === 0) {
+            // First slide is visible
+            slide.style.transform = 'translateX(0)';
+        } else {
+            // All other slides are off-screen to the right
+            slide.style.transform = 'translateX(100%)';
+        }
     });
 
     nextBtn.addEventListener("click", showNextSlide);
@@ -292,40 +298,23 @@ function createProjectCard(project, container) {
     function showNextSlide() {
         // Calculate the index of the next slide
         const nextIndex = (currentIndex + 1) % slides.length;
-
-        // If we're at the last slide, prepare the first slide to come from the right
-        if (nextIndex === 0) {
-            // Move all slides except current and first to the right
-            slides.forEach((slide, index) => {
-                if (index !== currentIndex) {
-                    slide.style.transition = 'none';
-                    slide.style.transform = 'translateX(100%)';
-                }
-            });
-
-            // Force reflow to ensure the position is set before starting animation
-            slides[0].offsetHeight;
-
-            // Move the current slide out to the left
-            slides[currentIndex].style.transition = 'transform 0.3s ease-in-out';
-            slides[currentIndex].style.transform = 'translateX(-100%)';
-
-            // After a short delay, animate the first slide in
-            setTimeout(() => {
-                slides[0].style.transition = 'transform 0.3s ease-in-out';
-                slides[0].style.transform = 'translateX(0)';
-            }, 50);
-        } else {
-            // Normal slide transition
-            // Move the current slide out to the left
-            slides[currentIndex].style.transition = 'transform 0.3s ease-in-out';
-            slides[currentIndex].style.transform = 'translateX(-100%)';
-
-            // Move the next slide in from the right
-            slides[nextIndex].style.transition = 'transform 0.3s ease-in-out';
-            slides[nextIndex].style.transform = 'translateX(0)';
-        }
-
+        
+        // Always create the infinite scrolling effect
+        // 1. Position the next slide off-screen to the right
+        slides[nextIndex].style.transition = 'none';
+        slides[nextIndex].style.transform = 'translateX(100%)';
+        
+        // Force reflow to ensure the position is set before starting animation
+        slides[nextIndex].offsetHeight;
+        
+        // 2. Move the current slide out to the left
+        slides[currentIndex].style.transition = 'transform 0.3s ease-in-out';
+        slides[currentIndex].style.transform = 'translateX(-100%)';
+        
+        // 3. Animate the next slide in from the right
+        slides[nextIndex].style.transition = 'transform 0.3s ease-in-out';
+        slides[nextIndex].style.transform = 'translateX(0)';
+        
         // Update the current index
         currentIndex = nextIndex;
     }

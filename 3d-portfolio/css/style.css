@@ -25,11 +25,6 @@ body {
 }
 
 .main-container {
-    /* position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%; */
     width: 100%;
     height: 100%;
     display: flex;
@@ -38,17 +33,9 @@ body {
     background-color: rgba(0, 0, 0, 0);
     user-select: none;
     pointer-events: none;
-    z-index: 1;
+    z-index: 10;
+    position: relative;
 }
-
-/* display: flex;
-width: 100vw;
-height: 100vh;
-flex-direction: column;
-justify-content: flex-start;
-margin: 0 auto;
-user-select: none;
-pointer-events: none; */
 
 .three-canvas {
     position: fixed;
@@ -65,7 +52,6 @@ pointer-events: none; */
 
 .three-canvas.hide {
     opacity: 0;
-    /* transform: translateX(-50%); */
 }
 
 .navbar {
@@ -127,7 +113,7 @@ pointer-events: none; */
     padding: 24px;
     border-radius: 24px;
     background-color: #202020;
-    overflow: hidden; /* Add overflow: hidden to hide overflowing content */
+    overflow: hidden;
 }
 
 .project-info {
@@ -215,14 +201,13 @@ pointer-events: none; */
 
 .invert.hide {
     opacity: 0;
-    /* Delay visibility change until after opacity transition completes */
     transition: opacity 0.5s ease-in-out, visibility 0s linear 0.5s;
     visibility: hidden;
 }
 
 .hide {
-    opacity: 0 !important; /* Use !important to ensure it overrides other styles */
-    visibility: hidden; /* Add visibility hidden for better hiding */
+    opacity: 0 !important;
+    visibility: hidden;
 }
 
 .button {
@@ -233,20 +218,20 @@ pointer-events: none; */
 .button-invert img {
     width: 48px;
     height: 48px;
-    object-fit: contain; /* Ensure the image maintains its aspect ratio */
-    display: block; /* Prevent inline display issues */
+    object-fit: contain;
+    display: block;
 }
 
 /* Blur effect for Three.js canvas */
 #blur {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(10px);
-    z-index: 5; /* Lower z-index to ensure it doesn't interfere with invert */
+    z-index: 5;
     pointer-events: none;
     transition: opacity 0.3s ease;
 }
