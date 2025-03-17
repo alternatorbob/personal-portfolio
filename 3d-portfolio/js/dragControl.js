@@ -12,9 +12,9 @@ let intersectionPoint;
 let cursorStyle = "none";
 
 // Spring effect parameters
-const springCompression = 0.99; // How much the sphere shrinks when pressed
-const mobileSpringCompression = 0.97; // Less compression for mobile devices
-const springDamping = 0.7; // Damping factor for the spring
+const springCompression = 0.9; // How much the sphere shrinks when pressed
+const mobileSpringCompression = 0.92; // Less compression for mobile devices
+const springDamping = 0.65; // Damping factor for the spring
 const springStiffness = 0.1; // Stiffness of the spring
 let targetScale = 1.0; // Target scale for the spring effect
 let currentScale = 1.0; // Current scale of the sphere
@@ -34,11 +34,11 @@ const sphereRotation = new THREE.Quaternion();
 
 // Add velocity tracking
 let rotationVelocity = new THREE.Vector3();
-const dampingFactor = 0.98; // Even stronger damping
-const velocityFactor = 0.009; // Drastically reduced
-const mobileVelocityFactor = 0.009; // Drastically reduced for mobile
-const maxVelocity = 0.5; // Drastically reduced maximum velocity
-const mobileMaxVelocity = 0.05; // Drastically reduced for mobile
+const dampingFactor = 0.9; // Even stronger damping
+const velocityFactor = 0.0089; // Drastically reduced
+const mobileVelocityFactor = 0.012; // Drastically reduced for mobile
+const maxVelocity = 0.7; // Drastically reduced maximum velocity
+const mobileMaxVelocity = 0.65; // Drastically reduced for mobile
 
 // Add animation frame tracking
 let lastTime = 0;

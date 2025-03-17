@@ -21,7 +21,7 @@ let camera, scene, renderer;
 let sphere;
 
 const camFar = 1500;
-export const sphereRadius = window.innerWidth < 768 ? 6 : 3.75;
+export const sphereRadius = window.innerWidth < 768 ? 4.5 : 3.75;
 export const numCubes = 10;
 
 // Add original scale reference for spring effect
@@ -103,8 +103,8 @@ function threeInit() {
         camFar
     );
     // Adjust camera position for mobile view - higher Y position to make sphere appear lower
-    camera.position.z = window.innerWidth < 768 ? 22 : 14;
-    camera.position.y = window.innerWidth < 768 ? 10 : 3.5; // Increased from 6 to 10 for mobile
+    camera.position.z = window.innerWidth < 768 ? 20 : 14;
+    camera.position.y = window.innerWidth < 768 ? 12 : 3.5; // Set initial Y position to match target
 
     scene = new THREE.Scene();
 
@@ -191,8 +191,11 @@ function animate(msTime) {
     // Store current rotation
     const currentRotation = new THREE.Euler().copy(camera.rotation);
 
+    // Define target Y position based on device width
+    const targetY = window.innerWidth < 768 ? 5.5 : 3.5;
+
     // Update camera position
-    camera.position.y += (mouse.y * 0.7 - camera.position.y + 3.5) * 0.03;
+    camera.position.y += (mouse.y * 0.7 - camera.position.y + targetY) * 0.03;
     camera.position.x += (-mouse.x * 3.5 - camera.position.x) * 0.05;
 
     // Restore rotation after position update
