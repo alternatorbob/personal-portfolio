@@ -182,17 +182,19 @@ pointer-events: none; */
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.9);
-    z-index: 10;
+    background-color: white;
+    z-index: 1000;
     pointer-events: none;
     mix-blend-mode: difference;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.5s ease-in-out;
     opacity: 1;
     visibility: visible;
 }
 
 .invert.hide {
     opacity: 0;
+    /* Delay visibility change until after opacity transition completes */
+    transition: opacity 0.5s ease-in-out, visibility 0s linear 0.5s;
     visibility: hidden;
 }
 
@@ -222,7 +224,7 @@ pointer-events: none; */
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(10px);
-    z-index: 1;
+    z-index: 5; /* Lower z-index to ensure it doesn't interfere with invert */
     pointer-events: none;
     transition: opacity 0.3s ease;
 }

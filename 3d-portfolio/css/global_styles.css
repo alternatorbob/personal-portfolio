@@ -59,21 +59,6 @@ body {
     display: none;
 }
 
-.invert {
-    height: 100vh;
-    width: 100vw;
-    position: absolute;
-    top: 0;
-    z-index: 1000;
-    background: #fff;
-    left: 0;
-    mix-blend-mode: difference;
-    pointer-events: none;
-
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-}
-
 .blur {
     position: fixed;
     top: 0;
