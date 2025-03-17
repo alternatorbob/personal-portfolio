@@ -51,8 +51,24 @@
         </div>
         <div class="invert hide"></div>
         <div id="blur" class="hide"></div>
+        
+        <!-- Mobile-specific invert button that uses a different approach -->
+        <button id="mobile-invert-btn" class="mobile-only">Invert Colors</button>
 
         <script type="module" src="/main.js"></script>
         <script type="module" src="js/ui.js"></script>
+        
+        <!-- Simple script for mobile invert button -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const mobileInvertBtn = document.getElementById('mobile-invert-btn');
+                if (mobileInvertBtn) {
+                    mobileInvertBtn.addEventListener('click', function() {
+                        document.body.classList.toggle('mobile-inverted');
+                        console.log('Mobile invert button clicked');
+                    });
+                }
+            });
+        </script>
     </body>
 </html>

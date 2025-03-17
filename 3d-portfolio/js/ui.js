@@ -38,6 +38,7 @@ function initNavbar() {
 function initInvertButton() {
     const buttonInvert = document.querySelector(".button-invert");
     const invert = document.querySelector(".invert");
+    let isInverted = false; // Track inversion state
     
     // Ensure invert is hidden on page load
     if (invert) {
@@ -46,11 +47,86 @@ function initInvertButton() {
     
     if (buttonInvert) {
         buttonInvert.addEventListener("click", function () {
+            // Check if mobile at the time of click, not just at initialization
+            const isMobile = window.innerWidth < 768;
+            console.log("Invert button clicked, isMobile:", isMobile, "Window width:", window.innerWidth);
+            
+            // Toggle inversion state
+            isInverted = !isInverted;
+            
             if (invert) {
-                if (invert.classList.contains("hide")) {
+                if (isInverted) {
+                    // Show invert div
                     invert.classList.remove("hide");
+                    
+                    // For mobile, use multiple approaches for better compatibility
+                    if (isMobile) {
+                        // 1. Add class-based approaches
+                        document.body.classList.add("inverted-colors");
+                        document.body.classList.add("color-inverted"); // CSS variable approach
+                        console.log("Added inversion classes to body");
+                        
+                        // 2. Direct style manipulation approach
+                        try {
+                            // Apply inversion to body
+                            document.body.style.filter = "invert(1) hue-rotate(180deg)";
+                            document.body.style.webkitFilter = "invert(1) hue-rotate(180deg)";
+                            
+                            // Counter-invert images and canvas to prevent double inversion
+                            const images = document.querySelectorAll('img');
+                            const canvases = document.querySelectorAll('canvas');
+                            
+                            images.forEach(img => {
+                                img.style.filter = "invert(1) hue-rotate(180deg)";
+                                img.style.webkitFilter = "invert(1) hue-rotate(180deg)";
+                            });
+                            
+                            canvases.forEach(canvas => {
+                                canvas.style.filter = "invert(1) hue-rotate(180deg)";
+                                canvas.style.webkitFilter = "invert(1) hue-rotate(180deg)";
+                            });
+                            
+                            console.log("Applied direct style inversion");
+                        } catch (e) {
+                            console.error("Error applying direct style inversion:", e);
+                        }
+                    }
                 } else {
+                    // Hide invert div
                     invert.classList.add("hide");
+                    
+                    // For mobile, remove all inversion approaches
+                    if (isMobile) {
+                        // 1. Remove class-based approaches
+                        document.body.classList.remove("inverted-colors");
+                        document.body.classList.remove("color-inverted"); // CSS variable approach
+                        console.log("Removed inversion classes from body");
+                        
+                        // 2. Remove direct style manipulation
+                        try {
+                            // Remove inversion from body
+                            document.body.style.filter = "";
+                            document.body.style.webkitFilter = "";
+                            
+                            // Remove counter-inversion from images and canvas
+                            const images = document.querySelectorAll('img');
+                            const canvases = document.querySelectorAll('canvas');
+                            
+                            images.forEach(img => {
+                                img.style.filter = "";
+                                img.style.webkitFilter = "";
+                            });
+                            
+                            canvases.forEach(canvas => {
+                                canvas.style.filter = "";
+                                canvas.style.webkitFilter = "";
+                            });
+                            
+                            console.log("Removed direct style inversion");
+                        } catch (e) {
+                            console.error("Error removing direct style inversion:", e);
+                        }
+                    }
                 }
             }
         });

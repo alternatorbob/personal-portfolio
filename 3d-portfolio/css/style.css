@@ -1,5 +1,27 @@
-body{
+/* Add CSS variables for colors at the root level */
+:root {
+    --bg-color: #000000;
+    --text-color: #f2f2f2;
+    --invert-filter: none;
+}
+
+/* Add inverted colors class that changes the CSS variables */
+.color-inverted {
+    --bg-color: #f2f2f2;
+    --text-color: #000000;
+    --invert-filter: invert(1);
+}
+
+/* Apply the CSS variables to elements */
+body {
+    color: var(--text-color);
+    background-color: var(--bg-color);
     overflow: hidden;
+}
+
+/* Apply invert filter to specific elements */
+.color-inverted .three-canvas {
+    filter: var(--invert-filter);
 }
 
 .main-container {
