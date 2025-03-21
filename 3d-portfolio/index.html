@@ -55,6 +55,31 @@
         <!-- Mobile-specific invert button that uses a different approach -->
         <button id="mobile-invert-btn" class="mobile-only">Invert Colors</button>
 
+        <!-- List View Toggle Button -->
+        <div class="view-toggle">
+            <div class="toggle-slider"></div>
+            <div class="toggle-text">
+                <span>3D</span>
+                <span>LIST</span>
+            </div>
+        </div>
+
+        <!-- List View -->
+        <div class="list-view">
+            <table class="list-view-table">
+                <thead>
+                    <tr>
+                        <th data-sort="title">Project Title<span class="sort-indicator">↑</span></th>
+                        <th data-sort="category">Category</th>
+                        <th data-sort="year">Year<span class="sort-indicator">↑</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Will be populated with JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
         <script type="module" src="/main.js"></script>
         <script type="module" src="js/ui.js"></script>
         

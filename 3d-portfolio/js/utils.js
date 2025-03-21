@@ -34,14 +34,16 @@ function createEnvironment(scene) {
         positionOffset: new THREE.Vector3(0, 0, 0),
         velocity: new THREE.Vector3(0, 0, 0),
         positionVelocity: new THREE.Vector3(0, 0, 0),
-        maxOffset: Math.PI / 8,
-        maxPositionOffset: 4.0,
-        followStrength: 0.015,
-        positionFollowStrength: 0.012,
+        maxOffset: Math.PI / 4,
+        maxPositionOffset: 50.0,
+        followStrength: 0.025,
+        positionFollowStrength: 0.02,
         inertia: 0.95,
-        returnStrength: 0.02,
-        dampingFactor: 0.94,
-        isMouseDown: false
+        returnStrength: 0.045,
+        dampingFactor: 0.92,
+        isMouseDown: false,
+        lastRotationVelocity: new THREE.Vector3(0, 0, 0),
+        returnToCenter: false
     };
 
     // Update camera position to orbit around sphere
@@ -57,27 +59,55 @@ function createEnvironment(scene) {
         }
 
         // Update mouse down state
+        const wasMouseDown = cameraOrbit.isMouseDown;
         cameraOrbit.isMouseDown = isMouseDown;
 
-        // Scale the velocities for movement and rotation
-        const scaledRotationX = -sphereRotationVelocity.y * 1.2;
-        const scaledPositionX = sphereRotationVelocity.x * 2.5;
-        const scaledPositionY = sphereRotationVelocity.y * 2.5;
+        // If mouse was just released, start return to center
+        if (wasMouseDown && !isMouseDown) {
+            cameraOrbit.returnToCenter = true;
+            cameraOrbit.lastRotationVelocity.copy(sphereRotationVelocity);
+        }
 
-        // Update velocities with smooth follow
-        cameraOrbit.velocity.x += (scaledRotationX - cameraOrbit.velocity.x) * cameraOrbit.followStrength;
-        cameraOrbit.positionVelocity.x += (scaledPositionX - cameraOrbit.positionVelocity.x) * cameraOrbit.positionFollowStrength;
-        cameraOrbit.positionVelocity.y += (scaledPositionY - cameraOrbit.positionVelocity.y) * cameraOrbit.positionFollowStrength;
+        // Use either current rotation velocity or last stored velocity
+        const effectiveRotationVelocity = isMouseDown ? 
+            sphereRotationVelocity : 
+            cameraOrbit.lastRotationVelocity;
+
+        // Scale the velocities for movement and rotation
+        const scaledRotationX = -effectiveRotationVelocity.y * 1.5;
+        const scaledPositionX = effectiveRotationVelocity.x * 3.0;
+        const scaledPositionY = effectiveRotationVelocity.y * 3.0;
+
+        // Update velocities with smooth follow only when dragging
+        if (isMouseDown) {
+            cameraOrbit.velocity.x += (scaledRotationX - cameraOrbit.velocity.x) * cameraOrbit.followStrength;
+            cameraOrbit.positionVelocity.x += (scaledPositionX - cameraOrbit.positionVelocity.x) * cameraOrbit.positionFollowStrength;
+            cameraOrbit.positionVelocity.y += (scaledPositionY - cameraOrbit.positionVelocity.y) * cameraOrbit.positionFollowStrength;
+            cameraOrbit.returnToCenter = false;
+        }
 
         // Apply damping
         cameraOrbit.velocity.multiplyScalar(cameraOrbit.dampingFactor);
         cameraOrbit.positionVelocity.multiplyScalar(cameraOrbit.dampingFactor);
 
-        // Apply return force when mouse is not down
-        if (!cameraOrbit.isMouseDown) {
+        // Apply return force when returning to center
+        if (cameraOrbit.returnToCenter) {
             const returnForce = cameraOrbit.returnStrength;
             cameraOrbit.currentOffset.x *= (1 - returnForce);
             cameraOrbit.positionOffset.multiplyScalar(1 - returnForce);
+            
+            // Apply stronger return force to velocities
+            cameraOrbit.velocity.multiplyScalar(1 - returnForce);
+            cameraOrbit.positionVelocity.multiplyScalar(1 - returnForce);
+            cameraOrbit.lastRotationVelocity.multiplyScalar(1 - returnForce);
+
+            // Check if we're close enough to center to stop returning
+            if (Math.abs(cameraOrbit.currentOffset.x) < 0.001 && 
+                cameraOrbit.positionOffset.lengthSq() < 0.001) {
+                cameraOrbit.returnToCenter = false;
+                cameraOrbit.currentOffset.set(0, 0, 0);
+                cameraOrbit.positionOffset.set(0, 0, 0);
+            }
         }
 
         // Update offsets

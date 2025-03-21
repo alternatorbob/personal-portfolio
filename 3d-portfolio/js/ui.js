@@ -8,6 +8,8 @@ export function uiInit() {
     //initiate navbar
     initNavbar();
     initInvertButton();
+    initListViewToggle();
+    populateListView();
 }
 
 function initNavbar() {
@@ -59,6 +61,12 @@ function initInvertButton() {
                     // Show invert div
                     invert.classList.remove("hide");
                     
+                    // Also add color-inverted class to the list view
+                    const listView = document.querySelector('.list-view');
+                    if (listView) {
+                        listView.classList.add('color-inverted');
+                    }
+                    
                     // For mobile, use multiple approaches for better compatibility
                     if (isMobile) {
                         // 1. Add class-based approaches
@@ -94,6 +102,12 @@ function initInvertButton() {
                 } else {
                     // Hide invert div
                     invert.classList.add("hide");
+                    
+                    // Remove color-inverted class from the list view
+                    const listView = document.querySelector('.list-view');
+                    if (listView) {
+                        listView.classList.remove('color-inverted');
+                    }
                     
                     // For mobile, remove all inversion approaches
                     if (isMobile) {
@@ -388,3 +402,191 @@ export function addCursorStyles(camera, cubes) {
         }
     });
 }
+
+function initListViewToggle() {
+    const viewToggle = document.querySelector('.view-toggle');
+    const listView = document.querySelector('.list-view');
+    const threeCanvas = document.querySelector('.three-canvas');
+    let isListViewActive = false;
+
+    if (viewToggle && listView) {
+        viewToggle.addEventListener('click', function() {
+            isListViewActive = !isListViewActive;
+            
+            if (isListViewActive) {
+                viewToggle.classList.add('active');
+                listView.classList.add('active');
+                if (threeCanvas) {
+                    threeCanvas.classList.add('hide');
+                }
+            } else {
+                viewToggle.classList.remove('active');
+                listView.classList.remove('active');
+                if (threeCanvas) {
+                    threeCanvas.classList.remove('hide');
+                }
+            }
+        });
+    }
+    
+    // Initialize sorting functionality
+    initTableSorting();
+}
+
+// Global variables to keep track of sorting state
+let sortField = 'year';
+let sortDirection = 'desc';
+let sortedProjects = []; // Initialize empty, will be filled on first sort
+
+function initTableSorting() {
+    const tableHeaders = document.querySelectorAll('.list-view-table th[data-sort]');
+    
+    if (tableHeaders) {
+        // Set initial sorting state - year is active by default, title should have 40% opacity
+        updateSortIndicators();
+        
+        // Add click event to headers
+        tableHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                const field = this.getAttribute('data-sort');
+                
+                // Toggle sort direction if clicking the same header again
+                if (field === sortField) {
+                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortField = field;
+                    sortDirection = 'asc';
+                }
+                
+                // Sort and repopulate the list
+                sortProjects();
+                populateListView();
+            });
+        });
+    }
+}
+
+function sortProjects() {
+    sortedProjects = [...projects]; // Create a fresh copy
+    
+    sortedProjects.sort((a, b) => {
+        let valueA, valueB;
+        
+        if (sortField === 'title') {
+            valueA = a.title.toLowerCase();
+            valueB = b.title.toLowerCase();
+        } else if (sortField === 'year') {
+            valueA = parseInt(a.year);
+            valueB = parseInt(b.year);
+        } else if (sortField === 'category') {
+            valueA = a.categories[0].toLowerCase();
+            valueB = b.categories[0].toLowerCase();
+        }
+        
+        // Compare the values
+        if (valueA < valueB) {
+            return sortDirection === 'asc' ? -1 : 1;
+        }
+        if (valueA > valueB) {
+            return sortDirection === 'asc' ? 1 : -1;
+        }
+        return 0;
+    });
+}
+
+function populateListView() {
+    const tableBody = document.querySelector('.list-view-table tbody');
+    
+    if (tableBody) {
+        // Sort projects first
+        if (sortedProjects.length === 0) {
+            sortProjects(); // Initial sort
+        }
+        
+        // Clear existing rows
+        tableBody.innerHTML = '';
+        
+        // Update header indicators
+        updateSortIndicators();
+        
+        // Add a row for each project
+        sortedProjects.forEach(project => {
+            const row = document.createElement('tr');
+            
+            // Create and add title cell
+            const titleCell = document.createElement('td');
+            titleCell.textContent = project.title;
+            row.appendChild(titleCell);
+            
+            // Create and add category cell
+            const categoryCell = document.createElement('td');
+            categoryCell.textContent = project.categories.join(', ');
+            row.appendChild(categoryCell);
+            
+            // Create and add year cell
+            const yearCell = document.createElement('td');
+            yearCell.textContent = project.year;
+            row.appendChild(yearCell);
+            
+            // Add click event to row to open project
+            row.addEventListener('click', function() {
+                // Close list view first
+                const viewToggle = document.querySelector('.view-toggle');
+                const listView = document.querySelector('.list-view');
+                const threeCanvas = document.querySelector('.three-canvas');
+                
+                if (viewToggle) viewToggle.classList.remove('active');
+                if (listView) listView.classList.remove('active');
+                if (threeCanvas) threeCanvas.classList.remove('hide');
+                
+                // Simulate click on the cube to open project card
+                document.dispatchEvent(new CustomEvent('open-project', { 
+                    detail: { projectId: project.id }
+                }));
+            });
+            
+            tableBody.appendChild(row);
+        });
+    }
+}
+
+function updateSortIndicators() {
+    // Reset all headers
+    const allHeaders = document.querySelectorAll('.list-view-table th[data-sort]');
+    allHeaders.forEach(header => {
+        header.classList.remove('sort-active');
+        
+        // Find the sort indicator span
+        const indicator = header.querySelector('.sort-indicator');
+        if (indicator) {
+            indicator.style.transform = 'rotate(0deg)';
+            indicator.style.transition = 'transform 0.55s ease-in-out';
+        }
+    });
+    
+    // Update the active header
+    const activeHeader = document.querySelector(`.list-view-table th[data-sort="${sortField}"]`);
+    if (activeHeader) {
+        activeHeader.classList.add('sort-active');
+        
+        // Update sort indicator rotation
+        const indicator = activeHeader.querySelector('.sort-indicator');
+        if (indicator) {
+            indicator.style.transform = sortDirection === 'asc' ? 'rotate(0deg)' : 'rotate(180deg)';
+            indicator.style.transition = 'transform 0.55s ease-in-out';
+        }
+    }
+}
+
+// Add event listener for the custom 'open-project' event
+document.addEventListener('open-project', function(e) {
+    if (e.detail && e.detail.projectId) {
+        const mainContainer = document.querySelector('.main-container');
+        const projectId = e.detail.projectId;
+        
+        // Similar to what happens when a cube is clicked
+        uiSwitchState('2d');
+        document.dispatchEvent(event);
+        const card = addProjectCardToPage(projectId, mainContainer);
+    }
+});

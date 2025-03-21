@@ -3,12 +3,16 @@ import "./css/global_styles.css";
 import "./css/mobile.css";
 import * as THREE from "three";
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
-import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 import { dragInit } from "./js/dragControl";
 import { addProjects, cubes } from "./js/addProjects";
 import { projects } from "./js/projects";
 import { createEnvironment } from "./js/utils";
 import { addProjectCardToPage, uiSwitchState, uiInit } from "./js/ui";
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 
 const mobileMessage = document.querySelector("#mobile-message");
 const mainContainer = document.querySelector(".main-container");
@@ -17,7 +21,7 @@ export const navbarHint = document.querySelector(".navbar-hint");
 export let wasSelected = false;
 
 let camera, scene, renderer;
-
+let composer, renderPass, bloomPass, afterimagePass;
 let sphere;
 
 const camFar = 1500;
@@ -71,13 +75,18 @@ function threeInit() {
         antialias: true,
         precision: "highp",
         powerPreference: "high-performance",
+        alpha: true,
+        stencil: false,
+        depth: true
     });
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio for performance
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setAnimationLoop(animate);
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2; // Slightly increased exposure
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Better shadow quality
 
     renderer.domElement.classList.add("three-canvas");
     document.body.insertBefore(renderer.domElement, document.body.firstChild);
@@ -119,55 +128,33 @@ function threeInit() {
     createEnvironment(scene);
 
     // Increased ambient light intensity for stronger environment lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // Increased from 0.25 to 0.5
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3); // Increased from 0.25 to 0.5
     scene.add(ambientLight);
 
     cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256);
     cubeRenderTarget.texture.type = THREE.HalfFloatType;
     cubeCamera = new THREE.CubeCamera(1, camFar, cubeRenderTarget);
 
+    // Update sphere material for better quality
     const sphereMaterial = new THREE.MeshStandardMaterial({
         envMap: cubeRenderTarget.texture,
         metalness: 1.0,
         roughness: 0.4,
-        roughnessMap: roughnessMap, // roughnessMap is your loaded roughness texture
-        normalMap: normalMap, // normalMap is your loaded normal map texture
-        normalScale: new THREE.Vector2(1.5, 1.5), // adjust the normal map strength with this Vector2
+        roughnessMap: roughnessMap,
+        normalMap: normalMap,
+        normalScale: new THREE.Vector2(1.5, 1.5),
+        envMapIntensity: 0.85, // Increased environment map intensity
+        flatShading: false, // Ensure smooth shading
     });
 
-    // Create a higher resolution sphere geometry for better subdivision
-    const sphereGeometry = new THREE.IcosahedronGeometry(sphereRadius, 100);
+    // Improve texture quality
+    roughnessMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    normalMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    roughnessMap.minFilter = THREE.LinearFilter;
+    normalMap.minFilter = THREE.LinearFilter;
     
-    // Apply subtle noise displacement to the vertices
-    const noise = new SimplexNoise();
-    const noiseScale = 0.15; // Scale of the noise (smaller = more subtle)
-    const noiseAmount = -0.15; // Amount of displacement (smaller = more subtle)
-    
-    const positionAttribute = sphereGeometry.attributes.position;
-    const vertex = new THREE.Vector3();
-    
-    for (let i = 0; i < positionAttribute.count; i++) {
-        vertex.fromBufferAttribute(positionAttribute, i);
-        
-        // Normalize to get direction
-        const direction = vertex.clone().normalize();
-        
-        // Apply noise based on position
-        const noiseValue = noise.noise(
-            direction.x * noiseScale, 
-            direction.y * noiseScale, 
-            direction.z * noiseScale
-        );
-        
-        // Displace vertex along its direction
-        vertex.add(direction.multiplyScalar(noiseValue * noiseAmount));
-        
-        // Write back to geometry
-        positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
-    }
-    
-    // Update normals after displacement
-    sphereGeometry.computeVertexNormals();
+    // Create a higher quality sphere geometry
+    const sphereGeometry = new THREE.IcosahedronGeometry(sphereRadius, 32);
     
     sphere = new THREE.Mesh(
         sphereGeometry,
@@ -183,6 +170,39 @@ function threeInit() {
     
     // Initialize UI elements
     uiInit();
+
+    // Setup post-processing with better quality
+    composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(
+        window.innerWidth, 
+        window.innerHeight, 
+        {
+            minFilter: THREE.LinearFilter,
+            magFilter: THREE.LinearFilter,
+            format: THREE.RGBAFormat,
+            encoding: THREE.sRGBEncoding,
+            samples: 4 // MSAA for composer
+        }
+    ));
+    
+    // Regular scene render pass
+    renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
+    
+    // Add bloom effect with refined settings
+    bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        0.35,    // Slightly reduced bloom strength for clarity
+        0.5,    // Increased radius for smoother bloom
+        0.85    // threshold
+    );
+    bloomPass.threshold = 0.85;
+    bloomPass.radius = 0.5;
+    bloomPass.strength = 0.35;
+    composer.addPass(bloomPass);
+    
+    // Add afterimage effect for motion trails
+    afterimagePass = new AfterimagePass(0.75);
+    composer.addPass(afterimagePass);
 }
 
 function animate(msTime) {
@@ -207,7 +227,8 @@ function animate(msTime) {
         cube.lookAt(sphere.position);
     }
 
-    renderer.render(scene, camera);
+    // Render with post-processing
+    composer.render();
 }
 
 export function reverseSelected() {
@@ -215,10 +236,17 @@ export function reverseSelected() {
 }
 
 function onWindowResized() {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
+    
+    const pixelRatio = Math.min(window.devicePixelRatio, 2);
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(pixelRatio);
+    composer.setSize(width, height);
+    composer.setPixelRatio(pixelRatio);
 }
 
 // Add touch event listeners

@@ -239,3 +239,147 @@ body {
 #blur.hide {
     opacity: 0;
 }
+
+/* List View Toggle Button */
+.view-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 80px;
+    height: 34px;
+    border-radius: 50px;
+    background-color: transparent;
+    border: 1px solid #000000;
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    padding: 3px;
+    pointer-events: auto;
+    transition: border-color 0.75s ease-in-out;
+}
+
+.view-toggle.active {
+    border-color: var(--text-color);
+}
+
+.toggle-slider {
+    position: relative;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #000000;
+    transition: transform 0.3s ease, background-color 0.75s ease-in-out;
+}
+
+.view-toggle.active .toggle-slider {
+    transform: translateX(46px);
+    background-color: var(--text-color);
+}
+
+.toggle-text {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    box-sizing: border-box;
+    color: #000000;
+    font-size: 9px;
+    pointer-events: none;
+    transition: color 0.75s ease-in-out;
+}
+
+.view-toggle.active .toggle-text {
+    color: var(--text-color);
+}
+
+/* List View */
+.list-view {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-color);
+    z-index: 90;
+    overflow-y: auto;
+    display: none;
+    padding: 132px 48px 48px;
+    box-sizing: border-box;
+}
+
+.list-view.active {
+    display: block;
+}
+
+.list-view-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--text-color);
+    table-layout: fixed;
+}
+
+.list-view-table thead {
+    border-bottom: 0.5px solid var(--text-color);
+}
+
+.list-view-table th,
+.list-view-table td {
+    padding: 16px 12px;
+    text-align: left;
+    border-bottom: 0.5px solid var(--text-color);
+    border-left: none;
+    border-right: none;
+    vertical-align: top;
+}
+
+.list-view-table th:first-child,
+.list-view-table td:first-child {
+    padding-left: 0;
+    width: 25%; /* Project title width */
+}
+
+.list-view-table th:nth-child(2),
+.list-view-table td:nth-child(2) {
+    width: 60%; /* Category width */
+}
+
+.list-view-table th:last-child,
+.list-view-table td:last-child {
+    padding-right: 0;
+    width: 10%; /* Year width */
+}
+
+.list-view-table tr {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.list-view-table tbody tr:hover {
+    background-color: rgba(128, 128, 128, 0.1);
+}
+
+.list-view-table th {
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+}
+
+.list-view-table th .sort-indicator {
+    display: inline-block;
+    margin-left: 5px;
+    transform: rotate(0deg);
+    transition: transform 0.25s ease-in-out, opacity 0.1s ease;
+    opacity: 0.4;
+}
+
+.list-view-table th.sort-desc .sort-indicator {
+    transform: rotate(180deg);
+}
+
+.list-view-table th.sort-active .sort-indicator {
+    opacity: 1;
+}

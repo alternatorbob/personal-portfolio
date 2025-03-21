@@ -50,6 +50,20 @@ const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/
 // Camera rotation control
 let cameraControl;
 
+// Add parameters for cube movement
+const cubeMovementConfig = {
+    maxDistance: 100.0,  // Maximum additional distance cubes can move
+    returnSpeed: 0.00005, // Speed at which cubes return to original position
+    velocityScale: 3.0 // How much velocity affects the movement
+};
+
+// Store cube positions
+const cubePositions = new Map(); // Store current orbital positions
+const cubeOutwardOffsets = new Map(); // Store outward offset for each cube
+
+// Store original cube positions
+const cubeOriginalPositions = new Map();
+
 // Define touch event handlers before they're used
 // Touch event handlers
 const onTouchStart = function(e) {
@@ -113,21 +127,15 @@ const onTouchMove = function(e) {
     sphereRotation.multiplyQuaternions(rotationQuaternion, sphereRotation);
     sphere.setRotationFromQuaternion(sphereRotation);
     
-    // Update velocity for inertia (with very low values)
-    rotationVelocity.x = Math.min(mobileMaxVelocity, Math.max(-mobileMaxVelocity, mouseDelta.x * factor * 0.1));
-    rotationVelocity.y = Math.min(mobileMaxVelocity, Math.max(-mobileMaxVelocity, mouseDelta.y * factor * 0.1));
+    // Calculate velocity magnitude and update cube positions
+    const velocityMagnitude = rotationVelocity.length();
+    updateCubePositions(rotationQuaternion, velocityMagnitude);
     
     // Update camera rotation
-    cameraControl.updateCameraRotation(camera, rotationVelocity);
+    cameraControl.updateCameraRotation(camera, rotationVelocity, true);
     
     lastMousePosition.copy(mousePosition);
     lastTime = performance.now();
-
-    // Update cube positions
-    for (let cube of cubes) {
-        cube.position.applyQuaternion(rotationQuaternion);
-        cube.lookAt(sphere.position);
-    }
 };
 
 const onTouchEnd = function() {
@@ -159,13 +167,19 @@ export function dragInit() {
     renderer.domElement.addEventListener("touchmove", onTouchMove, { passive: false });
     renderer.domElement.addEventListener("touchend", onTouchEnd);
     
+    // Initialize cube positions
+    for (let cube of cubes) {
+        cubePositions.set(cube.uuid, cube.position.clone());
+        cubeOutwardOffsets.set(cube.uuid, new THREE.Vector3());
+    }
+    
     // Store original cube scales
     setTimeout(() => {
         for (let cube of cubes) {
             cubeOriginalScales.set(cube.uuid, cube.scale.x);
         }
         cubeScalingEnabled = true;
-    }, 1000); // Delay to ensure cubes are fully loaded
+    }, 1000);
     
     // Start the spring animation
     animateSpring();
@@ -291,6 +305,10 @@ function onMouseUp() {
     if (isDragging) {
         isDragging = false;
         renderer.domElement.style.cursor = "auto";
+        
+        // Update camera rotation with isDragging false immediately
+        cameraControl.updateCameraRotation(camera, rotationVelocity, false);
+        
         // Start inertia animation if there's velocity
         if (rotationVelocity.length() > 0.0001) {
             animateInertia();
@@ -311,13 +329,17 @@ function animateInertia() {
             // Apply damping to velocity
             rotationVelocity.multiplyScalar(dampingFactor);
             
+            // Calculate velocity magnitude
+            const velocityMagnitude = rotationVelocity.length();
+            
             // Stop animation if velocity is very small
-            if (rotationVelocity.length() < 0.0001) {
+            if (velocityMagnitude < 0.0001) {
                 rotationVelocity.set(0, 0, 0);
+                returnCubesToOriginalPositions();
                 return;
             }
             
-            // Apply rotation directly based on velocity components
+            // Apply rotation based on velocity components
             const xRotation = new THREE.Quaternion().setFromAxisAngle(
                 new THREE.Vector3(1, 0, 0),
                 rotationVelocity.y
@@ -330,30 +352,81 @@ function animateInertia() {
             
             const rotationQuaternion = new THREE.Quaternion().multiplyQuaternions(yRotation, xRotation);
             
-            // Apply rotation
+            // Apply rotation to sphere
             sphereRotation.multiplyQuaternions(rotationQuaternion, sphereRotation);
             sphere.setRotationFromQuaternion(sphereRotation);
-            
-            // Update camera rotation
-            cameraControl.updateCameraRotation(camera, rotationVelocity);
 
             // Update cube positions
-            for (let cube of cubes) {
-                cube.position.applyQuaternion(rotationQuaternion);
-                cube.lookAt(sphere.position);
-            }
+            updateCubePositions(rotationQuaternion, velocityMagnitude);
             
-            requestAnimationFrame(animate);
+            // Update camera rotation
+            cameraControl.updateCameraRotation(camera, rotationVelocity, false);
+            
+            animationFrameId = requestAnimationFrame(animate);
+        } else {
+            returnCubesToOriginalPositions();
         }
     };
     animate();
+}
+
+function updateCubePositions(rotationQuaternion, velocityMagnitude) {
+    for (let cube of cubes) {
+        // Get the current orbital position
+        let orbitalPosition = cubePositions.get(cube.uuid);
+        
+        // Apply rotation to orbital position
+        orbitalPosition.applyQuaternion(rotationQuaternion);
+        cubePositions.set(cube.uuid, orbitalPosition);
+        
+        // Calculate outward offset based on velocity
+        const directionFromCenter = orbitalPosition.clone().sub(sphere.position).normalize();
+        const offset = velocityMagnitude * cubeMovementConfig.velocityScale;
+        const currentOutwardOffset = cubeOutwardOffsets.get(cube.uuid);
+        
+        // Calculate target outward offset
+        const targetOffset = directionFromCenter.multiplyScalar(offset * cubeMovementConfig.maxDistance);
+        
+        // Smoothly interpolate the outward offset
+        currentOutwardOffset.lerp(targetOffset, 0.1);
+        cubeOutwardOffsets.set(cube.uuid, currentOutwardOffset);
+        
+        // Apply combined position
+        cube.position.copy(orbitalPosition).add(currentOutwardOffset);
+        cube.lookAt(sphere.position);
+    }
+}
+
+function returnCubesToOriginalPositions() {
+    const returnAnimation = () => {
+        let allCubesInPosition = true;
+        
+        for (let cube of cubes) {
+            const currentOutwardOffset = cubeOutwardOffsets.get(cube.uuid);
+            
+            if (currentOutwardOffset.length() > 0.01) {
+                currentOutwardOffset.multiplyScalar(1 - cubeMovementConfig.returnSpeed);
+                cubeOutwardOffsets.set(cube.uuid, currentOutwardOffset);
+                
+                // Apply position
+                cube.position.copy(cubePositions.get(cube.uuid)).add(currentOutwardOffset);
+                cube.lookAt(sphere.position);
+                allCubesInPosition = false;
+            }
+        }
+        
+        if (!allCubesInPosition) {
+            requestAnimationFrame(returnAnimation);
+        }
+    };
+    
+    returnAnimation();
 }
 
 function onMouseMove(e) {
     if (!isDragging) return;
 
     renderer.domElement.style.cursor = "grabbing";
-
     mousePosition.set(e.clientX, e.clientY);
     
     // Calculate mouse movement delta
@@ -375,33 +448,23 @@ function onMouseMove(e) {
     
     const rotationQuaternion = new THREE.Quaternion().multiplyQuaternions(yRotation, xRotation);
     
-    // Apply rotation
+    // Apply rotation to sphere
     sphereRotation.multiplyQuaternions(rotationQuaternion, sphereRotation);
     sphere.setRotationFromQuaternion(sphereRotation);
     
     // Update velocity for inertia
     rotationVelocity.x = Math.min(maxVelocity, Math.max(-maxVelocity, mouseDelta.x * factor * 0.1));
     rotationVelocity.y = Math.min(maxVelocity, Math.max(-maxVelocity, mouseDelta.y * factor * 0.1));
+
+    // Calculate velocity magnitude and update cube positions
+    const velocityMagnitude = rotationVelocity.length();
+    updateCubePositions(rotationQuaternion, velocityMagnitude);
     
     // Update camera rotation
-    cameraControl.updateCameraRotation(camera, rotationVelocity);
+    cameraControl.updateCameraRotation(camera, rotationVelocity, true);
     
     lastMousePosition.copy(mousePosition);
     lastTime = performance.now();
-
-    // Update cube positions
-    for (let cube of cubes) {
-        cube.position.applyQuaternion(rotationQuaternion);
-        cube.lookAt(sphere.position);
-    }
-
-    if (hasCursorLeftScreen(e)) {
-        isDragging = false;
-        renderer.domElement.style.cursor = "auto";
-        if (rotationVelocity.length() > 0.0001) {
-            animateInertia();
-        }
-    }
 }
 
 function hasCursorLeftScreen(event) {
