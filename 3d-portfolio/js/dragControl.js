@@ -426,6 +426,25 @@ function returnCubesToOriginalPositions() {
 function onMouseMove(e) {
     if (!isDragging) return;
 
+    // Check if cursor has left the screen
+    if (hasCursorLeftScreen(e)) {
+        // Trigger the same behavior as mouseUp
+        isDragging = false;
+        renderer.domElement.style.cursor = "auto";
+        
+        // Update camera rotation with isDragging false immediately
+        cameraControl.updateCameraRotation(camera, rotationVelocity, false);
+        
+        // Start inertia animation if there's velocity
+        if (rotationVelocity.length() > 0.0001) {
+            animateInertia();
+        }
+        
+        // Release spring compression
+        targetScale = originalSphereScale;
+        return;
+    }
+
     renderer.domElement.style.cursor = "grabbing";
     mousePosition.set(e.clientX, e.clientY);
     
