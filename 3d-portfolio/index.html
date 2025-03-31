@@ -1,47 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
 
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>PORTFOLIO</title>
+<head>
+    <meta charset="UTF-8" />
 
-        <link rel="stylesheet" href="css/init.css" />
-    </head>
-    <body>
-        <div class="fade"></div>
-        <script>
-            const fadeElement = document.querySelector(".fade");
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PORTFOLIO</title>
 
-            setTimeout(function () {
-                fadeElement.classList.add("fade-out");
-            }, 770);
+    <link rel="stylesheet" href="css/init.css" />
+</head>
 
-            // Listen for the 'transitionend' event and remove the element once the fade-out animation is complete
-            fadeElement.addEventListener("transitionend", function () {
-                fadeElement.remove();
-            });
-        </script>
+<body>
+    <div class="fade"></div>
+    <script>
+        const fadeElement = document.querySelector(".fade");
 
-        <div class="main-container">
-            <div class="navbar">
-                <div class="navbar-name text-lg">
-                    <div id="name">Bogdan Năstase</div>
-                    <div class="slide-div">→</div>
-                    <div class="slide-div">
-                        <a href="mailto:cbogdan.nastase@gmail.com">
-                            <img
-                                id="button-mail"
-                                src="/assets/UI/mail-button.png"
-                                alt=""
-                        /></a>
-                    </div>
-                </div>
+        setTimeout(function () {
+            fadeElement.classList.add("fade-out");
+        }, 770);
 
+        // Listen for the 'transitionend' event and remove the element once the fade-out animation is complete
+        fadeElement.addEventListener("transitionend", function () {
+            fadeElement.remove();
+        });
+    </script>
+
+    <div class="main-container">
+        <div class="navbar">
+            <div class="navbar-name text-sm">
+                <div id="name">Bogdan Năstase</div>
                 <div class="navbar-hint text-sm">
-                    Drag the sphere to browse.
-                    <br>
-                    Click image to open project.
+                    To browse, drag the sphere. To open a project, click an image.
                 </div>
 
                 <div class="button-invert button">
@@ -51,7 +40,7 @@
         </div>
         <div class="invert hide"></div>
         <div id="blur" class="hide"></div>
-        
+
         <!-- Mobile-specific invert button that uses a different approach -->
         <button id="mobile-invert-btn" class="mobile-only">Invert Colors</button>
 
@@ -82,18 +71,19 @@
 
         <script type="module" src="/main.js"></script>
         <script type="module" src="js/ui.js"></script>
-        
+
         <!-- Simple script for mobile invert button -->
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 const mobileInvertBtn = document.getElementById('mobile-invert-btn');
                 if (mobileInvertBtn) {
-                    mobileInvertBtn.addEventListener('click', function() {
+                    mobileInvertBtn.addEventListener('click', function () {
                         document.body.classList.toggle('mobile-inverted');
                         console.log('Mobile invert button clicked');
                     });
                 }
             });
         </script>
-    </body>
+</body>
+
 </html>
