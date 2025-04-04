@@ -44,6 +44,25 @@ export function uiInit() {
             }
         }
     });
+
+    // Add about button click handler
+    const aboutButton = document.querySelector('.about-button');
+    const aboutCard = document.querySelector('.about-card');
+    
+    if (aboutButton && aboutCard) {
+        aboutButton.addEventListener('click', () => {
+            aboutCard.classList.add('show');
+            document.querySelector('.navbar').classList.add('project-card-open');
+            document.querySelector('.three-canvas').style.pointerEvents = 'none';
+        });
+
+        // Add close button click handler for about card
+        aboutCard.addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                closeAboutCard();
+            }
+        });
+    }
 }
 
 function initNavbar() {
@@ -577,3 +596,13 @@ document.addEventListener('open-project', function(e) {
         const card = addProjectCardToPage(projectId, mainContainer);
     }
 });
+
+function closeAboutCard() {
+    const aboutCard = document.querySelector('.about-card');
+    document.querySelector('.navbar').classList.remove('project-card-open');
+    document.querySelector('.three-canvas').style.pointerEvents = 'auto';
+    aboutCard.classList.remove('show');
+    setTimeout(() => {
+        aboutCard.style.transform = 'translateY(100%)';
+    }, 350);
+}

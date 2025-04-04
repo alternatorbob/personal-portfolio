@@ -93,6 +93,7 @@ body {
 }
 
 .navbar-button {
+    font-size: 0.8rem;
     font-weight: bold;
     cursor: pointer;
     text-decoration: none;
@@ -133,8 +134,10 @@ body {
     display: flex;
     flex-direction: column;
     z-index: 1000;
-    /* Higher than navbar and other elements */
     transition: transform 0.35s ease-in-out, opacity 0.35s ease-in-out;
+    transform: translateY(100%);
+    opacity: 0;
+    visibility: hidden;
 }
 
 .project-card.show {
@@ -294,8 +297,8 @@ body {
     position: absolute;
     top: 50%;
     left: 2px;
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     background-color: #fff;
     border-radius: 50%;
     transform: translateY(-50%);
@@ -475,4 +478,76 @@ body {
 .list-view-preview.show {
     opacity: 1;
     visibility: visible;
+}
+
+.about-button {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 40px;
+    height: 12px;
+    border-radius: 50px;
+    background-color: transparent;
+    border: 0.55px solid #fff;
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px;
+    pointer-events: auto;
+    transition: border-color 0.75s ease-in-out;
+    overflow: hidden;
+    font-size: 0.8rem;
+}
+
+.about-card {
+    position: absolute;
+    inset: 24px;
+    padding: 24px;
+    border-radius: 24px;
+    background-color: #202020;
+    overflow: hidden;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    transition: transform 0.35s ease-in-out, opacity 0.35s ease-in-out;
+    transform: translateY(110%);
+
+}
+
+.about-card.show {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+.about-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-shrink: 0;
+}
+
+.about-title-group {
+    flex-basis: 30vw;
+}
+
+.about-title {
+    font-weight: bold;
+}
+
+.about-description {
+    flex-basis: 60vw;
+}
+
+.about-gallery {
+    display: flex;
+    justify-content: space-between;
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+    gap: 10vw;
+    position: relative;
 }
