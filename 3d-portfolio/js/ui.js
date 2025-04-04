@@ -3,13 +3,47 @@ import { projects } from "./projects";
 import { findObjectById } from "./utils";
 import { wasSelected, reverseSelected } from "../main";
 
+// Global variables
+let sortedProjects = [];
+
 export function uiInit() {
-    //populate projects with images from projects array
-    //initiate navbar
+    // Initialize sortedProjects with projects array
+    sortedProjects = [...projects];
+    
+    // Initialize UI components
     initNavbar();
     initInvertButton();
     initListViewToggle();
     populateListView();
+    
+    // Add name click handler
+    const nameElement = document.getElementById('name');
+    if (nameElement) {
+        nameElement.addEventListener('click', () => {
+            const viewToggle = document.querySelector('.view-toggle');
+            const listView = document.querySelector('.list-view');
+            const threeCanvas = document.querySelector('.three-canvas');
+            
+            if (viewToggle) viewToggle.classList.remove('active');
+            if (listView) listView.classList.remove('active');
+            if (threeCanvas) threeCanvas.style.pointerEvents = 'auto';
+        });
+    }
+    
+    // Add escape key handler
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const viewToggle = document.querySelector('.view-toggle');
+            const listView = document.querySelector('.list-view');
+            const threeCanvas = document.querySelector('.three-canvas');
+            
+            if (viewToggle && viewToggle.classList.contains('active')) {
+                viewToggle.classList.remove('active');
+                if (listView) listView.classList.remove('active');
+                if (threeCanvas) threeCanvas.style.pointerEvents = 'auto';
+            }
+        }
+    });
 }
 
 function initNavbar() {
@@ -40,113 +74,11 @@ function initNavbar() {
 function initInvertButton() {
     const buttonInvert = document.querySelector(".button-invert");
     const invert = document.querySelector(".invert");
-    let isInverted = false; // Track inversion state
     
-    // Ensure invert is hidden on page load
-    if (invert) {
-        invert.classList.add("hide");
-    }
-    
-    if (buttonInvert) {
-        buttonInvert.addEventListener("click", function () {
-            // Check if mobile at the time of click, not just at initialization
-            const isMobile = window.innerWidth < 768;
-            console.log("Invert button clicked, isMobile:", isMobile, "Window width:", window.innerWidth);
-            
-            // Toggle inversion state
-            isInverted = !isInverted;
-            
-            if (invert) {
-                if (isInverted) {
-                    // Show invert div
-                    invert.classList.remove("hide");
-                    
-                    // Also add color-inverted class to the list view
-                    const listView = document.querySelector('.list-view');
-                    if (listView) {
-                        listView.classList.add('color-inverted');
-                    }
-                    
-                    // For mobile, use multiple approaches for better compatibility
-                    if (isMobile) {
-                        // 1. Add class-based approaches
-                        document.body.classList.add("inverted-colors");
-                        document.body.classList.add("color-inverted"); // CSS variable approach
-                        console.log("Added inversion classes to body");
-                        
-                        // 2. Direct style manipulation approach
-                        try {
-                            // Apply inversion to body
-                            document.body.style.filter = "invert(1) hue-rotate(180deg)";
-                            document.body.style.webkitFilter = "invert(1) hue-rotate(180deg)";
-                            
-                            // Counter-invert images and canvas to prevent double inversion
-                            const images = document.querySelectorAll('img');
-                            const canvases = document.querySelectorAll('canvas');
-                            
-                            images.forEach(img => {
-                                img.style.filter = "invert(1) hue-rotate(180deg)";
-                                img.style.webkitFilter = "invert(1) hue-rotate(180deg)";
-                            });
-                            
-                            canvases.forEach(canvas => {
-                                canvas.style.filter = "invert(1) hue-rotate(180deg)";
-                                canvas.style.webkitFilter = "invert(1) hue-rotate(180deg)";
-                            });
-                            
-                            console.log("Applied direct style inversion");
-                        } catch (e) {
-                            console.error("Error applying direct style inversion:", e);
-                        }
-                    }
-                } else {
-                    // Hide invert div
-                    invert.classList.add("hide");
-                    
-                    // Remove color-inverted class from the list view
-                    const listView = document.querySelector('.list-view');
-                    if (listView) {
-                        listView.classList.remove('color-inverted');
-                    }
-                    
-                    // For mobile, remove all inversion approaches
-                    if (isMobile) {
-                        // 1. Remove class-based approaches
-                        document.body.classList.remove("inverted-colors");
-                        document.body.classList.remove("color-inverted"); // CSS variable approach
-                        console.log("Removed inversion classes from body");
-                        
-                        // 2. Remove direct style manipulation
-                        try {
-                            // Remove inversion from body
-                            document.body.style.filter = "";
-                            document.body.style.webkitFilter = "";
-                            
-                            // Remove counter-inversion from images and canvas
-                            const images = document.querySelectorAll('img');
-                            const canvases = document.querySelectorAll('canvas');
-                            
-                            images.forEach(img => {
-                                img.style.filter = "";
-                                img.style.webkitFilter = "";
-                            });
-                            
-                            canvases.forEach(canvas => {
-                                canvas.style.filter = "";
-                                canvas.style.webkitFilter = "";
-                            });
-                            
-                            console.log("Removed direct style inversion");
-                        } catch (e) {
-                            console.error("Error removing direct style inversion:", e);
-                        }
-                    }
-                }
-            }
+    if (buttonInvert && invert) {
+        buttonInvert.addEventListener("click", () => {
+            invert.classList.toggle("show");
         });
-        console.log("Invert button initialized");
-    } else {
-        console.error("Invert button not found");
     }
 }
 
@@ -183,6 +115,18 @@ export function addProjectCardToPage(projectId, container) {
     
     // Add keyboard navigation for the project card
     setupKeyboardNavigation(card);
+
+    // Add close button functionality
+    const closeButton = card.querySelector('.close-button');
+    if (closeButton) {
+        closeButton.addEventListener('click', () => {
+            document.querySelector('.navbar').classList.remove('project-card-open');
+            card.remove();
+        });
+    }
+
+    // Add project-card-open class to navbar
+    document.querySelector('.navbar').classList.add('project-card-open');
 
     // Initial state - positioned below
     card.style.transform = 'translateY(100%)';
@@ -351,6 +295,9 @@ function createProjectCard(project, container) {
     closeBtn.addEventListener("click", closeCard);
 
     function closeCard() {
+        // Remove project-card-open class from navbar
+        document.querySelector('.navbar').classList.remove('project-card-open');
+        
         // Animate out
         card.style.transform = 'translateY(100%)';
         card.style.opacity = '0';
@@ -431,6 +378,13 @@ function initListViewToggle() {
     const threeCanvas = document.querySelector('.three-canvas');
     let isListViewActive = false;
 
+    // Create preview container and image
+    const previewContainer = document.createElement('div');
+    previewContainer.className = 'list-view-preview';
+    const previewImage = document.createElement('img');
+    previewContainer.appendChild(previewImage);
+    document.body.appendChild(previewContainer);
+
     if (viewToggle && listView) {
         viewToggle.addEventListener('click', function() {
             isListViewActive = !isListViewActive;
@@ -438,130 +392,141 @@ function initListViewToggle() {
             if (isListViewActive) {
                 viewToggle.classList.add('active');
                 listView.classList.add('active');
+                
+                // Disable pointer events on canvas
                 if (threeCanvas) {
-                    threeCanvas.classList.add('hide');
+                    threeCanvas.style.pointerEvents = 'none';
                 }
+                
+                // Populate the list view
+                populateListView(previewContainer, previewImage);
             } else {
                 viewToggle.classList.remove('active');
                 listView.classList.remove('active');
+                
+                // Re-enable pointer events on canvas
                 if (threeCanvas) {
-                    threeCanvas.classList.remove('hide');
+                    threeCanvas.style.pointerEvents = 'auto';
                 }
             }
         });
     }
     
     // Initialize sorting functionality
-    initTableSorting();
+    initTableSorting(previewContainer, previewImage);
 }
 
-// Global variables to keep track of sorting state
-let sortField = 'year';
-let sortDirection = 'desc';
-let sortedProjects = []; // Initialize empty, will be filled on first sort
-
-function initTableSorting() {
+function initTableSorting(previewContainer, previewImage) {
     const tableHeaders = document.querySelectorAll('.list-view-table th[data-sort]');
     
-    if (tableHeaders) {
-        // Set initial sorting state - year is active by default, title should have 40% opacity
-        updateSortIndicators();
-        
-        // Add click event to headers
-        tableHeaders.forEach(header => {
-            header.addEventListener('click', function() {
-                const field = this.getAttribute('data-sort');
-                
-                // Toggle sort direction if clicking the same header again
-                if (field === sortField) {
-                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-                } else {
-                    sortField = field;
-                    sortDirection = 'asc';
-                }
-                
-                // Sort and repopulate the list
-                sortProjects();
-                populateListView();
-            });
-        });
-    }
-}
-
-function sortProjects() {
-    sortedProjects = [...projects]; // Create a fresh copy
+    // Set default sort by year descending
+    sortProjects('year', 'desc');
+    populateListView(previewContainer, previewImage);
     
-    sortedProjects.sort((a, b) => {
-        let valueA, valueB;
-        
-        if (sortField === 'title') {
-            valueA = a.title.toLowerCase();
-            valueB = b.title.toLowerCase();
-        } else if (sortField === 'year') {
-            valueA = parseInt(a.year);
-            valueB = parseInt(b.year);
-        } else if (sortField === 'category') {
-            valueA = a.categories[0].toLowerCase();
-            valueB = b.categories[0].toLowerCase();
-        }
-        
-        // Compare the values
-        if (valueA < valueB) {
-            return sortDirection === 'asc' ? -1 : 1;
-        }
-        if (valueA > valueB) {
-            return sortDirection === 'asc' ? 1 : -1;
-        }
-        return 0;
+    // Update sort indicators for all headers
+    const updateSortIndicators = (activeHeader) => {
+        tableHeaders.forEach(header => {
+            const indicator = header.querySelector('.sort-indicator');
+            if (indicator) {
+                if (header === activeHeader) {
+                    // Show arrow based on current sort direction
+                    if (header.classList.contains('sort-desc')) {
+                        indicator.textContent = '↓';
+                    } else {
+                        indicator.textContent = '↑';
+                    }
+                } else {
+                    // Keep the indicator but with lower opacity
+                    indicator.textContent = '↑';
+                }
+            }
+        });
+    };
+    
+    // Set initial sort indicators
+    const yearHeader = document.querySelector('.list-view-table th[data-sort="year"]');
+    yearHeader.classList.add('sort-active', 'sort-desc');
+    updateSortIndicators(yearHeader);
+    
+    tableHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const column = this.getAttribute('data-sort');
+            const isCurrentlyDesc = this.classList.contains('sort-desc');
+            const newOrder = isCurrentlyDesc ? 'asc' : 'desc';
+            
+            // Update sort classes
+            tableHeaders.forEach(h => {
+                h.classList.remove('sort-active', 'sort-asc', 'sort-desc');
+            });
+            
+            this.classList.add('sort-active', `sort-${newOrder}`);
+            
+            // Update sort indicators
+            updateSortIndicators(this);
+            
+            // Sort projects
+            sortProjects(column, newOrder);
+            
+            // Repopulate the list view with the sorted projects
+            populateListView(previewContainer, previewImage);
+        });
     });
 }
 
-function populateListView() {
+function populateListView(previewContainer, previewImage) {
     const tableBody = document.querySelector('.list-view-table tbody');
     
     if (tableBody) {
-        // Sort projects first
-        if (sortedProjects.length === 0) {
-            sortProjects(); // Initial sort
-        }
-        
         // Clear existing rows
         tableBody.innerHTML = '';
-        
-        // Update header indicators
-        updateSortIndicators();
         
         // Add a row for each project
         sortedProjects.forEach(project => {
             const row = document.createElement('tr');
+            row.id = project.id;
             
-            // Create and add title cell
+            // Create and add cells
             const titleCell = document.createElement('td');
             titleCell.textContent = project.title;
             row.appendChild(titleCell);
             
-            // Create and add category cell
             const categoryCell = document.createElement('td');
             categoryCell.textContent = project.categories.join(', ');
             row.appendChild(categoryCell);
             
-            // Create and add year cell
             const yearCell = document.createElement('td');
             yearCell.textContent = project.year;
             row.appendChild(yearCell);
             
+            // Add hover events for preview
+            if (project.content && project.content.images && project.content.images.length > 0) {
+                row.addEventListener('mouseenter', (e) => {
+                    previewImage.src = project.content.images[0];
+                    previewContainer.style.left = `${e.clientX}px`;
+                    previewContainer.style.top = `${e.clientY}px`;
+                    previewContainer.classList.add('show');
+                });
+                
+                row.addEventListener('mousemove', (e) => {
+                    previewContainer.style.left = `${e.clientX}px`;
+                    previewContainer.style.top = `${e.clientY}px`;
+                });
+                
+                row.addEventListener('mouseleave', () => {
+                    previewContainer.classList.remove('show');
+                });
+            }
+            
             // Add click event to row to open project
             row.addEventListener('click', function() {
-                // Close list view first
                 const viewToggle = document.querySelector('.view-toggle');
                 const listView = document.querySelector('.list-view');
                 const threeCanvas = document.querySelector('.three-canvas');
                 
                 if (viewToggle) viewToggle.classList.remove('active');
                 if (listView) listView.classList.remove('active');
-                if (threeCanvas) threeCanvas.classList.remove('hide');
+                if (threeCanvas) threeCanvas.style.pointerEvents = 'auto';
                 
-                // Simulate click on the cube to open project card
                 document.dispatchEvent(new CustomEvent('open-project', { 
                     detail: { projectId: project.id }
                 }));
@@ -572,32 +537,32 @@ function populateListView() {
     }
 }
 
-function updateSortIndicators() {
-    // Reset all headers
-    const allHeaders = document.querySelectorAll('.list-view-table th[data-sort]');
-    allHeaders.forEach(header => {
-        header.classList.remove('sort-active');
-        
-        // Find the sort indicator span
-        const indicator = header.querySelector('.sort-indicator');
-        if (indicator) {
-            indicator.style.transform = 'rotate(0deg)';
-            indicator.style.transition = 'transform 0.55s ease-in-out';
-        }
-    });
+function sortProjects(column, order) {
+    sortedProjects = [...projects]; // Create a fresh copy
     
-    // Update the active header
-    const activeHeader = document.querySelector(`.list-view-table th[data-sort="${sortField}"]`);
-    if (activeHeader) {
-        activeHeader.classList.add('sort-active');
+    sortedProjects.sort((a, b) => {
+        let valueA, valueB;
         
-        // Update sort indicator rotation
-        const indicator = activeHeader.querySelector('.sort-indicator');
-        if (indicator) {
-            indicator.style.transform = sortDirection === 'asc' ? 'rotate(0deg)' : 'rotate(180deg)';
-            indicator.style.transition = 'transform 0.55s ease-in-out';
+        if (column === 'title') {
+            valueA = a.title.toLowerCase();
+            valueB = b.title.toLowerCase();
+        } else if (column === 'year') {
+            valueA = parseInt(a.year);
+            valueB = parseInt(b.year);
+        } else if (column === 'category') {
+            valueA = a.categories[0].toLowerCase();
+            valueB = b.categories[0].toLowerCase();
         }
-    }
+        
+        // Compare the values
+        if (valueA < valueB) {
+            return order === 'asc' ? -1 : 1;
+        }
+        if (valueA > valueB) {
+            return order === 'asc' ? 1 : -1;
+        }
+        return 0;
+    });
 }
 
 // Add event listener for the custom 'open-project' event

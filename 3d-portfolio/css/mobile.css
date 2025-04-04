@@ -2,11 +2,13 @@
     .navbar {
         padding: 10px;
         margin-top: -40px;
+        font-size: texts-sm;
     }
 
     .navbar-name {
         font-size: 1.2rem !important;
     }
+
 
     .navbar-name img {
         width: 24px !important;

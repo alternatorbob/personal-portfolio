@@ -31,7 +31,6 @@ const raycaster = new THREE.Raycaster();
 
 // Create a quaternion to store the sphere rotation
 const sphereRotation = new THREE.Quaternion();
-
 // Add velocity tracking
 let rotationVelocity = new THREE.Vector3();
 const dampingFactor = 0.96; // Even stronger damping
@@ -159,7 +158,9 @@ const onTouchMove = function (e) {
     updateCubePositions(rotationQuaternion, velocityMagnitude);
 
     // Update camera rotation
-    cameraControl.updateCameraRotation(camera, rotationVelocity, true);
+    if (cameraControl) {
+        cameraControl.updateCameraRotation(camera, rotationVelocity, true);
+    }
 
     lastMousePosition.copy(mousePosition);
     lastTime = performance.now();
@@ -183,6 +184,23 @@ export function dragInit() {
     // Initialize camera control
     cameraControl = createEnvironment(sphere.parent);
 
+    // Initialize cube positions and randomized properties
+    for (let cube of cubes) {
+        cubePositions.set(cube.uuid, cube.position.clone());
+        cubeOriginalPositions.set(cube.uuid, cube.position.clone());
+        cubeOutwardOffsets.set(cube.uuid, new THREE.Vector3(0, 0, 0));
+        
+        // Randomize return speeds and max distances
+        const returnSpeed = cubeMovementConfig.returnSpeed * 
+            (1 + (Math.random() - 0.5) * cubeMovementConfig.returnSpeedVariation);
+        cubeReturnSpeeds.set(cube.uuid, returnSpeed);
+        
+        const maxDistance = cubeMovementConfig.baseMaxDistance * 
+            (cubeMovementConfig.distanceMultiplierMin + 
+             Math.random() * (cubeMovementConfig.distanceMultiplierMax - cubeMovementConfig.distanceMultiplierMin));
+        cubeMaxDistances.set(cube.uuid, maxDistance);
+    }
+
     // Add mouse event listeners
     renderer.domElement.addEventListener("mousemove", onMouseMove);
     renderer.domElement.addEventListener("mousemove", onMouseHover);
@@ -193,26 +211,6 @@ export function dragInit() {
     renderer.domElement.addEventListener("touchstart", onTouchStart, { passive: false });
     renderer.domElement.addEventListener("touchmove", onTouchMove, { passive: false });
     renderer.domElement.addEventListener("touchend", onTouchEnd);
-<<<<<<< HEAD
-    
-    // Initialize cube positions and randomized properties
-=======
-
-    // Initialize cube positions
->>>>>>> added-info_header
-    for (let cube of cubes) {
-        cubePositions.set(cube.uuid, cube.position.clone());
-        cubeOutwardOffsets.set(cube.uuid, new THREE.Vector3());
-        
-        // Generate random return speed between 0.8 and 1.2 of base speed
-        const randomSpeedMultiplier = 0.8 + Math.random() * 0.4;
-        cubeReturnSpeeds.set(cube.uuid, cubeMovementConfig.returnSpeed * randomSpeedMultiplier);
-        
-        // Generate random max distance multiplier between min and max
-        const randomDistanceMultiplier = cubeMovementConfig.distanceMultiplierMin + 
-            Math.random() * (cubeMovementConfig.distanceMultiplierMax - cubeMovementConfig.distanceMultiplierMin);
-        cubeMaxDistances.set(cube.uuid, cubeMovementConfig.baseMaxDistance * randomDistanceMultiplier);
-    }
 
     // Store original cube scales
     setTimeout(() => {
@@ -357,7 +355,9 @@ function onMouseUp() {
         renderer.domElement.style.cursor = "auto";
 
         // Update camera rotation with isDragging false immediately
-        cameraControl.updateCameraRotation(camera, rotationVelocity, false);
+        if (cameraControl) {
+            cameraControl.updateCameraRotation(camera, rotationVelocity, false);
+        }
 
         // Start inertia animation if there's velocity
         if (rotationVelocity.length() > 0.0001) {
@@ -410,7 +410,9 @@ function animateInertia() {
             updateCubePositions(rotationQuaternion, velocityMagnitude);
 
             // Update camera rotation
-            cameraControl.updateCameraRotation(camera, rotationVelocity, false);
+            if (cameraControl) {
+                cameraControl.updateCameraRotation(camera, rotationVelocity, false);
+            }
 
             animationFrameId = requestAnimationFrame(animate);
         } else {
@@ -433,18 +435,11 @@ function updateCubePositions(rotationQuaternion, velocityMagnitude) {
         const directionFromCenter = orbitalPosition.clone().sub(sphere.position).normalize();
         const offset = velocityMagnitude * cubeMovementConfig.velocityScale;
         const currentOutwardOffset = cubeOutwardOffsets.get(cube.uuid);
-<<<<<<< HEAD
-        
+
         // Use cube's individual max distance
         const maxDistance = cubeMaxDistances.get(cube.uuid);
         const targetOffset = directionFromCenter.multiplyScalar(offset * maxDistance);
         
-=======
-
-        // Calculate target outward offset
-        const targetOffset = directionFromCenter.multiplyScalar(offset * cubeMovementConfig.maxDistance);
-
->>>>>>> added-info_header
         // Smoothly interpolate the outward offset
         currentOutwardOffset.lerp(targetOffset, 0.1);
         cubeOutwardOffsets.set(cube.uuid, currentOutwardOffset);
@@ -461,12 +456,9 @@ function returnCubesToOriginalPositions() {
 
         for (let cube of cubes) {
             const currentOutwardOffset = cubeOutwardOffsets.get(cube.uuid);
-<<<<<<< HEAD
+
             const returnSpeed = cubeReturnSpeeds.get(cube.uuid);
             
-=======
-
->>>>>>> added-info_header
             if (currentOutwardOffset.length() > 0.01) {
                 // Use cube's individual return speed
                 currentOutwardOffset.multiplyScalar(1 - returnSpeed);
@@ -496,7 +488,9 @@ function onMouseMove(e) {
         renderer.domElement.style.cursor = "auto";
 
         // Update camera rotation with isDragging false immediately
-        cameraControl.updateCameraRotation(camera, rotationVelocity, false);
+        if (cameraControl) {
+            cameraControl.updateCameraRotation(camera, rotationVelocity, false);
+        }
 
         // Start inertia animation if there's velocity
         if (rotationVelocity.length() > 0.0001) {
@@ -543,7 +537,9 @@ function onMouseMove(e) {
     updateCubePositions(rotationQuaternion, velocityMagnitude);
 
     // Update camera rotation
-    cameraControl.updateCameraRotation(camera, rotationVelocity, true);
+    if (cameraControl) {
+        cameraControl.updateCameraRotation(camera, rotationVelocity, true);
+    }
 
     lastMousePosition.copy(mousePosition);
     lastTime = performance.now();

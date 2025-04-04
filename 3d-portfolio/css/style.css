@@ -12,6 +12,11 @@
     --invert-filter: invert(1);
 }
 
+.text-sm {
+    font-size: 0.8rem;
+}
+
+
 /* Apply the CSS variables to elements */
 body {
     color: var(--text-color);
@@ -47,11 +52,12 @@ body {
     backdrop-filter: blur(10px);
     z-index: 1;
     pointer-events: auto;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, pointer-events 0s linear 0.3s;
 }
 
 .three-canvas.hide {
     opacity: 0;
+    pointer-events: none;
 }
 
 .navbar {
@@ -62,12 +68,35 @@ body {
     flex-shrink: 0;
     padding: 0 12px;
     pointer-events: auto;
-    z-index: 10;
+    z-index: 3;
+    transition: opacity 0.35s ease-in-out, backdrop-filter 0.35s ease-in-out;
+}
+
+.navbar.project-card-open {
+    opacity: 0;
+    backdrop-filter: blur(50px);
 }
 
 .navbar-name {
     display: flex;
     font-weight: bold;
+}
+
+#name {
+    align-self: center;
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.navbar-button {
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--text-color);
 }
 
 .navbar-hint {
@@ -103,7 +132,8 @@ body {
     pointer-events: auto;
     display: flex;
     flex-direction: column;
-    z-index: 20; /* Higher than navbar */
+    z-index: 1000;
+    /* Higher than navbar and other elements */
     transition: transform 0.35s ease-in-out, opacity 0.35s ease-in-out;
 }
 
@@ -111,7 +141,6 @@ body {
     transform: translateY(0);
     opacity: 1;
     visibility: visible;
-    transition: transform 0.15s ease-in-out, opacity 0.15s ease-in-out, visibility 0s;
 }
 
 .project-info {
@@ -182,26 +211,25 @@ body {
     align-self: flex-start;
 }
 
-/* Invert functionality */
+/* Remove all existing invert-related CSS and replace with: */
 .invert {
     position: fixed;
     top: 0;
     left: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
     height: 100%;
-    background-color: white;
-    z-index: 1000;
-    pointer-events: none;
+    background: #fff;
     mix-blend-mode: difference;
-    transition: opacity 0.5s ease-in-out;
-    opacity: 1;
-    visibility: visible;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 999999;
+    pointer-events: none;
 }
 
-.invert.hide {
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out, visibility 0s linear 0.5s;
-    visibility: hidden;
+.invert.show {
+    opacity: 1;
 }
 
 .hide {
@@ -215,8 +243,7 @@ body {
 }
 
 .button-invert img {
-    width: 24px;
-    height: 24px;
+    width: 20px;
     object-fit: contain;
     display: block;
 }
@@ -243,18 +270,17 @@ body {
 
 /* List View Toggle Button */
 .view-toggle {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 80px;
-    height: 34px;
-    border-radius: 50px;
-    background-color: transparent;
-    border: 1px solid #000000;
-    cursor: pointer;
-    z-index: 1000;
+    position: relative;
     display: flex;
     align-items: center;
+    width: 40px;
+    height: 12px;
+    background-color: transparent;
+    border: 0.55px solid #fff;
+    border-radius: 50px;
+    cursor: pointer;
+    overflow: hidden;
+    z-index: 1000;
     padding: 3px;
     pointer-events: auto;
     transition: border-color 0.75s ease-in-out;
@@ -265,36 +291,68 @@ body {
 }
 
 .toggle-slider {
-    position: relative;
-    width: 28px;
-    height: 28px;
+    position: absolute;
+    top: 50%;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    background-color: #fff;
     border-radius: 50%;
-    background-color: #000000;
+    transform: translateY(-50%);
     transition: transform 0.3s ease, background-color 0.75s ease-in-out;
+    z-index: 2;
 }
 
 .view-toggle.active .toggle-slider {
-    transform: translateX(46px);
+    transform: translate(28px, -50%);
     background-color: var(--text-color);
 }
 
 .toggle-text {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
     width: 100%;
+    height: 100%;
     display: flex;
     justify-content: space-between;
-    padding: 0 10px;
+    align-items: center;
+    padding: 0 8px;
     box-sizing: border-box;
-    color: #000000;
+    color: #fff;
     font-size: 9px;
     pointer-events: none;
     transition: color 0.75s ease-in-out;
+    z-index: 0;
 }
 
 .view-toggle.active .toggle-text {
     color: var(--text-color);
+}
+
+.toggle-cover {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    background-color: var(--bg-color);
+    transition: transform 0.3s ease;
+    z-index: 1;
+    border-radius: 50px;
+}
+
+.toggle-cover-3d {
+    left: -3px;
+}
+
+.toggle-cover-list {
+    left: -3px;
+}
+
+.view-toggle.active .toggle-cover-3d {
+    transform: translateX(100%);
+}
+
+.view-toggle.active .toggle-cover-list {
+    transform: translateX(100%);
 }
 
 /* List View */
@@ -305,15 +363,17 @@ body {
     width: 100%;
     height: 100%;
     background-color: var(--bg-color);
-    z-index: 90;
+    z-index: 2;
     overflow-y: auto;
-    display: none;
-    padding: 132px 48px 48px;
+    padding: 132px 12px 12px;
     box-sizing: border-box;
+    transform: translateX(-100%);
+    transition: transform 0.27s ease-in-out;
+    pointer-events: auto;
 }
 
 .list-view.active {
-    display: block;
+    transform: translateX(0);
 }
 
 .list-view-table {
@@ -321,20 +381,26 @@ body {
     border-collapse: collapse;
     color: var(--text-color);
     table-layout: fixed;
+    font-size: 0.8rem;
 }
 
 .list-view-table thead {
-    border-bottom: 0.5px solid var(--text-color);
+    border-bottom: 0.15px solid rgba(242, 242, 242, 1.0);
+    font-weight: bold;
 }
 
 .list-view-table th,
 .list-view-table td {
-    padding: 16px 12px;
+    padding: 12px 12px;
     text-align: left;
-    border-bottom: 0.5px solid var(--text-color);
+    border-bottom: 0.15px solid rgba(242, 242, 242, 0.35);
     border-left: none;
     border-right: none;
     vertical-align: top;
+}
+
+.list-view-table tbody tr:first-child td {
+    border-top: 0.15px solid rgba(242, 242, 242, 1.0);
 }
 
 .list-view-table th:first-child,
@@ -359,11 +425,12 @@ body {
 
 .list-view-table tr {
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, opacity 0.15s ease-in-out;
 }
 
 .list-view-table tbody tr:hover {
     background-color: rgba(128, 128, 128, 0.1);
+    opacity: 0.4;
 }
 
 .list-view-table th {
@@ -375,15 +442,37 @@ body {
 .list-view-table th .sort-indicator {
     display: inline-block;
     margin-left: 5px;
-    transform: rotate(0deg);
-    transition: transform 0.25s ease-in-out, opacity 0.1s ease;
     opacity: 0.4;
-}
-
-.list-view-table th.sort-desc .sort-indicator {
-    transform: rotate(180deg);
+    transition: opacity 0.25s ease-in-out;
 }
 
 .list-view-table th.sort-active .sort-indicator {
     opacity: 1;
+}
+
+.list-view-preview {
+    position: fixed;
+    width: 16vw;
+    max-width: 16vw;
+    background-color: var(--bg-color);
+    border-radius: 6px;
+    overflow: hidden;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease-in-out, visibility 0.15s ease-in-out;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+}
+
+.list-view-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+}
+
+.list-view-preview.show {
+    opacity: 1;
+    visibility: visible;
 }

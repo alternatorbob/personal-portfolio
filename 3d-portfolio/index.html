@@ -29,38 +29,36 @@
         <div class="navbar">
             <div class="navbar-name text-sm">
                 <div id="name">Bogdan Năstase</div>
-                <div class="navbar-hint text-sm">
-                    To browse, drag the sphere. To open a project, click an image.
+            </div>
+            <div class="navbar-right">
+                <a href="#" class="navbar-button" id="about-button">About</a>
+                <div class="view-toggle">
+                    <div class="toggle-slider"></div>
+                    <div class="toggle-text">
+                        <span style="margin-left:-4px">3D</span>
+                        <span>LIST</span>
+                    </div>
+                    <div class="toggle-cover toggle-cover-3d"></div>
+                    <div class="toggle-cover toggle-cover-list"></div>
                 </div>
-
-                <div class="button-invert button">
-                    <img src="/assets/UI/ball-button.png" alt="Invert colors" />
+                <div class="button button-invert">
+                    <img src="/assets/UI/ball-button.png" alt="Invert colors">
                 </div>
             </div>
+            <div class="navbar-hint text-sm">
+                To browse, drag the sphere. To open a project, click an image.
+            </div>
         </div>
-        <div class="invert hide"></div>
         <div id="blur" class="hide"></div>
-
-        <!-- Mobile-specific invert button that uses a different approach -->
-        <button id="mobile-invert-btn" class="mobile-only">Invert Colors</button>
-
-        <!-- List View Toggle Button -->
-        <div class="view-toggle">
-            <div class="toggle-slider"></div>
-            <div class="toggle-text">
-                <span>3D</span>
-                <span>LIST</span>
-            </div>
-        </div>
 
         <!-- List View -->
         <div class="list-view">
             <table class="list-view-table">
                 <thead>
                     <tr>
-                        <th data-sort="title">Project Title<span class="sort-indicator">↑</span></th>
+                        <th data-sort="title">Project Title<span class="sort-indicator"></span></th>
                         <th data-sort="category">Category</th>
-                        <th data-sort="year">Year<span class="sort-indicator">↑</span></th>
+                        <th data-sort="year" class="sort-active sort-desc">Year<span class="sort-indicator">↓</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -68,22 +66,11 @@
                 </tbody>
             </table>
         </div>
+    </div>
 
-        <script type="module" src="/main.js"></script>
-        <script type="module" src="js/ui.js"></script>
-
-        <!-- Simple script for mobile invert button -->
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const mobileInvertBtn = document.getElementById('mobile-invert-btn');
-                if (mobileInvertBtn) {
-                    mobileInvertBtn.addEventListener('click', function () {
-                        document.body.classList.toggle('mobile-inverted');
-                        console.log('Mobile invert button clicked');
-                    });
-                }
-            });
-        </script>
+    <script type="module" src="/main.js"></script>
+    <script type="module" src="js/ui.js"></script>
+    <div class="invert"></div>
 </body>
 
 </html>
