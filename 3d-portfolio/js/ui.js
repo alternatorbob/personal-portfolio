@@ -183,6 +183,21 @@ export function addProjectCardToPage(projectId, container) {
     
     // Add keyboard navigation for the project card
     setupKeyboardNavigation(card);
+
+    // Initial state - positioned below
+    card.style.transform = 'translateY(100%)';
+    card.style.opacity = '0';
+    card.style.visibility = 'hidden';
+
+    // Force a reflow to ensure the initial state is applied
+    card.offsetHeight;
+
+    // Animate in
+    requestAnimationFrame(() => {
+        card.style.transform = 'translateY(0)';
+        card.style.opacity = '1';
+        card.style.visibility = 'visible';
+    });
     
     return card;
 }
@@ -336,8 +351,15 @@ function createProjectCard(project, container) {
     closeBtn.addEventListener("click", closeCard);
 
     function closeCard() {
-        uiSwitchState("3d");
-        card.remove();
+        // Animate out
+        card.style.transform = 'translateY(100%)';
+        card.style.opacity = '0';
+        
+        // Wait for animation to complete before removing
+        setTimeout(() => {
+            uiSwitchState("3d");
+            card.remove();
+        }, 175); // Match the CSS transition duration
     }
 
     return card;

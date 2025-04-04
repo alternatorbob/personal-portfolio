@@ -24,7 +24,7 @@ let springVelocity = 0; // Velocity of the spring
 const cubeOriginalScales = new Map(); // Store original scales of cubes
 const cubeMaxScaleFactor = 1.15; // Maximum scale increase for closest cubes
 const cubeMinScaleFactor = 0.9; // Minimum scale for furthest cubes
-const cubeScaleDistance = 15; // Distance over which scaling is applied
+const cubeScaleDistance = 55; // Distance over which scaling is applied
 let cubeScalingEnabled = false; // Will be enabled after initialization
 
 const raycaster = new THREE.Raycaster();
@@ -40,6 +40,20 @@ const mobileVelocityFactor = 0.012; // Drastically reduced for mobile
 const maxVelocity = 0.7; // Drastically reduced maximum velocity
 const mobileMaxVelocity = 0.65; // Drastically reduced for mobile
 
+// Track viewed projects
+const viewedProjects = new Set();
+const darknessFactor = 0.2; // How dark the viewed projects should become
+
+// Add parameters for project cube movement
+const cubeMovementConfig = {
+    baseMaxDistance: 550.0,  // Base maximum distance cubes can move
+    distanceMultiplierMin: 0.5, // Minimum multiplier for max distance
+    distanceMultiplierMax: 1.2, // Maximum multiplier for max distance
+    returnSpeed: 0.00022, // Base speed at which cubes return to original position
+    returnSpeedVariation: 2, // How much the return speed can vary
+    velocityScale: 1.2 // How much velocity affects the movement
+}
+
 // Add animation frame tracking
 let lastTime = 0;
 let animationFrameId = null;
@@ -50,16 +64,11 @@ const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/
 // Camera rotation control
 let cameraControl;
 
-// Add parameters for cube movement
-const cubeMovementConfig = {
-    maxDistance: 100.0,  // Maximum additional distance cubes can move
-    returnSpeed: 0.00005, // Speed at which cubes return to original position
-    velocityScale: 3.0 // How much velocity affects the movement
-};
-
 // Store cube positions
 const cubePositions = new Map(); // Store current orbital positions
 const cubeOutwardOffsets = new Map(); // Store outward offset for each cube
+const cubeReturnSpeeds = new Map(); // Store randomized return speeds for each cube
+const cubeMaxDistances = new Map(); // Store randomized max distances for each cube
 
 // Store original cube positions
 const cubeOriginalPositions = new Map();
@@ -76,8 +85,26 @@ const onTouchStart = function(e) {
         ),
         camera
     );
-    const intersections = raycaster.intersectObject(sphere);
+    const intersections = raycaster.intersectObjects([sphere, ...cubes]);
     if (intersections.length > 0) {
+        const intersectedObject = intersections[0].object;
+        if (cubes.includes(intersectedObject)) {
+            // If a cube is clicked, switch to 2D mode and open the gallery
+            const projectId = intersectedObject.name;
+            
+            // Mark project as viewed and darken its texture after 1s delay
+            if (!viewedProjects.has(projectId)) {
+                viewedProjects.add(projectId);
+                setTimeout(() => {
+                    darkenProjectCube(intersectedObject);
+                }, 1000);
+            }
+            
+            uiSwitchState("2d");
+            addProjectCardToPage(projectId, document.querySelector(".main-container"));
+            return;
+        }
+        
         intersectionPoint = intersections[0].point;
         isDragging = true;
         wasDragged = true;
@@ -167,10 +194,19 @@ export function dragInit() {
     renderer.domElement.addEventListener("touchmove", onTouchMove, { passive: false });
     renderer.domElement.addEventListener("touchend", onTouchEnd);
     
-    // Initialize cube positions
+    // Initialize cube positions and randomized properties
     for (let cube of cubes) {
         cubePositions.set(cube.uuid, cube.position.clone());
         cubeOutwardOffsets.set(cube.uuid, new THREE.Vector3());
+        
+        // Generate random return speed between 0.8 and 1.2 of base speed
+        const randomSpeedMultiplier = 0.8 + Math.random() * 0.4;
+        cubeReturnSpeeds.set(cube.uuid, cubeMovementConfig.returnSpeed * randomSpeedMultiplier);
+        
+        // Generate random max distance multiplier between min and max
+        const randomDistanceMultiplier = cubeMovementConfig.distanceMultiplierMin + 
+            Math.random() * (cubeMovementConfig.distanceMultiplierMax - cubeMovementConfig.distanceMultiplierMin);
+        cubeMaxDistances.set(cube.uuid, cubeMovementConfig.baseMaxDistance * randomDistanceMultiplier);
     }
     
     // Store original cube scales
@@ -277,7 +313,16 @@ function onMouseDown(e) {
         const intersectedObject = intersections[0].object;
         if (cubes.includes(intersectedObject)) {
             // If a cube is clicked, switch to 2D mode and open the gallery
-            const projectId = intersectedObject.name; // Assuming each cube has a unique name matching the project ID
+            const projectId = intersectedObject.name;
+            
+            // Mark project as viewed and darken its texture after 1s delay
+            if (!viewedProjects.has(projectId)) {
+                viewedProjects.add(projectId);
+                setTimeout(() => {
+                    darkenProjectCube(intersectedObject);
+                }, 1000);
+            }
+            
             uiSwitchState("2d");
             addProjectCardToPage(projectId, document.querySelector(".main-container"));
         } else {
@@ -384,8 +429,9 @@ function updateCubePositions(rotationQuaternion, velocityMagnitude) {
         const offset = velocityMagnitude * cubeMovementConfig.velocityScale;
         const currentOutwardOffset = cubeOutwardOffsets.get(cube.uuid);
         
-        // Calculate target outward offset
-        const targetOffset = directionFromCenter.multiplyScalar(offset * cubeMovementConfig.maxDistance);
+        // Use cube's individual max distance
+        const maxDistance = cubeMaxDistances.get(cube.uuid);
+        const targetOffset = directionFromCenter.multiplyScalar(offset * maxDistance);
         
         // Smoothly interpolate the outward offset
         currentOutwardOffset.lerp(targetOffset, 0.1);
@@ -403,9 +449,11 @@ function returnCubesToOriginalPositions() {
         
         for (let cube of cubes) {
             const currentOutwardOffset = cubeOutwardOffsets.get(cube.uuid);
+            const returnSpeed = cubeReturnSpeeds.get(cube.uuid);
             
             if (currentOutwardOffset.length() > 0.01) {
-                currentOutwardOffset.multiplyScalar(1 - cubeMovementConfig.returnSpeed);
+                // Use cube's individual return speed
+                currentOutwardOffset.multiplyScalar(1 - returnSpeed);
                 cubeOutwardOffsets.set(cube.uuid, currentOutwardOffset);
                 
                 // Apply position
@@ -428,7 +476,6 @@ function onMouseMove(e) {
 
     // Check if cursor has left the screen
     if (hasCursorLeftScreen(e)) {
-        // Trigger the same behavior as mouseUp
         isDragging = false;
         renderer.domElement.style.cursor = "auto";
         
@@ -493,4 +540,19 @@ function hasCursorLeftScreen(event) {
         event.clientY > window.innerHeight
         ? true
         : false;
+}
+
+function darkenProjectCube(cube) {
+    // Handle both single material and material array cases
+    if (Array.isArray(cube.material)) {
+        cube.material.forEach(material => {
+            if (material.map) {
+                // Create a dark overlay color
+                material.color = new THREE.Color(darknessFactor, darknessFactor, darknessFactor);
+            }
+        });
+    } else if (cube.material && cube.material.map) {
+        // Create a dark overlay color
+        cube.material.color = new THREE.Color(darknessFactor, darknessFactor, darknessFactor);
+    }
 }
