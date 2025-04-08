@@ -2,22 +2,25 @@ import * as THREE from "three";
 import { camera, renderer, sphere, navbarHint, originalSphereScale } from "../main";
 import { cubes, cubeOriginalDimensions } from "./addProjects";
 import { uiSwitchState, addProjectCardToPage } from "./ui";
-import { createEnvironment } from "./utils";
+import { createEnvironment, isMobileDevice, pauseRenderer } from "./utils";
 
 let isDragging = false;
 let wasDragged = false;
 let lastMousePosition = new THREE.Vector2();
 export let mousePosition = new THREE.Vector2();
-let intersectionPoint;
-let cursorStyle = "none";
+let intersectionPoint; // Required for touch interactions
+let lastTime = 0; // Track time for velocity calculations
 
 // Spring effect parameters
-const springCompression = 0.9; // How much the sphere shrinks when pressed
-const mobileSpringCompression = 0.92; // Less compression for mobile devices
+const springCompression = 0.87; // How much the sphere shrinks when pressed
+const mobileSpringCompression = 0.85; // Larger spring for mobile devices (15% larger than before)
 const springDamping = 0.55; // Damping factor for the spring
 const springStiffness = 0.15; // Stiffness of the spring
-let targetScale = 1.0; // Target scale for the spring effect
-let currentScale = 1.0; // Current scale of the sphere
+const mobileSpringStiffness = 0.12; // Softer spring stiffness for mobile devices
+// Initialize isMobile right away to avoid reference errors
+let isMobile = isMobileDevice(); // Flag to check if the user is on mobile
+let targetScale = 1.0; // Default value until we have originalSphereScale
+let currentScale = 1.0; // Default value until we have originalSphereScale
 let springVelocity = 0; // Velocity of the spring
 
 // Cube scaling parameters
@@ -45,20 +48,16 @@ const darknessFactor = 0.2; // How dark the viewed projects should become
 
 // Add parameters for project cube movement
 const cubeMovementConfig = {
-    baseMaxDistance: 550.0,  // Base maximum distance cubes can move
+    baseMaxDistance: 550.0, // Base maximum distance cubes can move
     distanceMultiplierMin: 0.5, // Minimum multiplier for max distance
     distanceMultiplierMax: 1.2, // Maximum multiplier for max distance
     returnSpeed: 0.00022, // Base speed at which cubes return to original position
     returnSpeedVariation: 2, // How much the return speed can vary
-    velocityScale: 1.2 // How much velocity affects the movement
-}
+    velocityScale: 1.2, // How much velocity affects the movement
+};
 
 // Add animation frame tracking
-let lastTime = 0;
 let animationFrameId = null;
-
-// Detect if we're on mobile
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 // Camera rotation control
 let cameraControl;
@@ -72,16 +71,28 @@ const cubeMaxDistances = new Map(); // Store randomized max distances for each c
 // Store original cube positions
 const cubeOriginalPositions = new Map();
 
+// Track if we're currently hovering over the sphere
+let isHoveringOverSphere = false;
+// Track if we've already played the hover animation
+let hoverAnimationPlayed = false;
+
 // Define touch event handlers before they're used
 // Touch event handlers
 const onTouchStart = function (e) {
     e.preventDefault();
+
+    // Skip hover animation on touch devices
+    hoverAnimationPlayed = true;
+
+    // Check if a project card is already open
+    const existingProjectCards = document.querySelectorAll(".project-card");
+    if (existingProjectCards.length > 0) {
+        return; // Don't process further if a card is already open
+    }
+
     const touch = e.touches[0];
     raycaster.setFromCamera(
-        new THREE.Vector2(
-            (touch.clientX / window.innerWidth) * 2 - 1,
-            (-touch.clientY / window.innerHeight) * 2 + 1
-        ),
+        new THREE.Vector2((touch.clientX / window.innerWidth) * 2 - 1, (-touch.clientY / window.innerHeight) * 2 + 1),
         camera
     );
     const intersections = raycaster.intersectObjects([sphere, ...cubes]);
@@ -90,28 +101,30 @@ const onTouchStart = function (e) {
         if (cubes.includes(intersectedObject)) {
             // If a cube is clicked, switch to 2D mode and open the gallery
             const projectId = intersectedObject.name;
-            
+
             // Mark project as viewed and darken its texture after 1s delay
             if (!viewedProjects.has(projectId)) {
                 viewedProjects.add(projectId);
                 setTimeout(() => {
                     darkenProjectCube(intersectedObject);
-                }, 1000);
+                }, 170);
             }
-            
+
             uiSwitchState("2d");
             addProjectCardToPage(projectId, document.querySelector(".main-container"));
             return;
         }
-        
+
+        // Store the intersection point and enable dragging
         intersectionPoint = intersections[0].point;
         isDragging = true;
         wasDragged = true;
+
         // Reset velocity when starting to drag
         rotationVelocity.set(0, 0, 0);
 
-        // Apply spring compression effect - use mobile-specific value
-        targetScale = mobileSpringCompression;
+        // Apply compression effect for mobile
+        targetScale = mobileSpringCompression * originalSphereScale;
     }
 
     if (wasDragged == true) {
@@ -133,32 +146,34 @@ const onTouchMove = function (e) {
     // Calculate touch movement delta
     const mouseDelta = new THREE.Vector2().subVectors(mousePosition, lastMousePosition);
 
+    // Ensure we have enough movement to consider it a drag (prevents accidental touches)
+    if (mouseDelta.length() < 0.1 && isDragging) {
+        lastMousePosition.copy(mousePosition);
+        return;
+    }
+
     // Apply a fixed factor for direct rotation control (lower for mobile)
     const factor = mobileVelocityFactor;
 
     // Apply direct rotation based on touch movement
-    const xRotation = new THREE.Quaternion().setFromAxisAngle(
-        new THREE.Vector3(1, 0, 0),
-        mouseDelta.y * factor
-    );
-
-    const yRotation = new THREE.Quaternion().setFromAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        mouseDelta.x * factor
-    );
-
+    const xRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), mouseDelta.y * factor);
+    const yRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), mouseDelta.x * factor);
     const rotationQuaternion = new THREE.Quaternion().multiplyQuaternions(yRotation, xRotation);
 
     // Apply rotation
     sphereRotation.multiplyQuaternions(rotationQuaternion, sphereRotation);
     sphere.setRotationFromQuaternion(sphereRotation);
 
+    // Update velocity for inertia
+    rotationVelocity.x = Math.min(mobileMaxVelocity, Math.max(-mobileMaxVelocity, mouseDelta.x * factor * 0.1));
+    rotationVelocity.y = Math.min(mobileMaxVelocity, Math.max(-mobileMaxVelocity, mouseDelta.y * factor * 0.1));
+
     // Calculate velocity magnitude and update cube positions
     const velocityMagnitude = rotationVelocity.length();
     updateCubePositions(rotationQuaternion, velocityMagnitude);
 
-    // Update camera rotation
-    if (cameraControl) {
+    // When on mobile, don't update camera rotation to prevent getting stuck
+    if (cameraControl && !isMobile) {
         cameraControl.updateCameraRotation(camera, rotationVelocity, true);
     }
 
@@ -170,34 +185,51 @@ const onTouchEnd = function () {
     if (isDragging) {
         isDragging = false;
         renderer.domElement.style.cursor = "auto";
+
+        // Reset camera rotation to prevent sticking on mobile
+        if (isMobile && cameraControl) {
+            rotationVelocity.multiplyScalar(0.5); // Reduce velocity on touch end for mobile
+            cameraControl.updateCameraRotation(camera, new THREE.Vector3(0, 0, 0), false);
+        }
+
         // Start inertia animation if there's velocity
         if (rotationVelocity.length() > 0.0001) {
             animateInertia();
         }
 
-        // Release spring compression
+        // Release spring compression with a slight expansion effect
+        springVelocity = 0.01; // Add a small positive impulse
         targetScale = originalSphereScale;
     }
 };
 
 export function dragInit() {
+    // isMobile is already initialized at the top of the file
+    
     // Initialize camera control
     cameraControl = createEnvironment(sphere.parent);
+
+    // Now that we have originalSphereScale available, set the correct values
+    targetScale = originalSphereScale;
+    currentScale = originalSphereScale;
+
+    // Ensure sphere starts at the correct size
+    sphere.scale.set(originalSphereScale, originalSphereScale, originalSphereScale);
 
     // Initialize cube positions and randomized properties
     for (let cube of cubes) {
         cubePositions.set(cube.uuid, cube.position.clone());
         cubeOriginalPositions.set(cube.uuid, cube.position.clone());
         cubeOutwardOffsets.set(cube.uuid, new THREE.Vector3(0, 0, 0));
-        
+
         // Randomize return speeds and max distances
-        const returnSpeed = cubeMovementConfig.returnSpeed * 
-            (1 + (Math.random() - 0.5) * cubeMovementConfig.returnSpeedVariation);
+        const returnSpeed = cubeMovementConfig.returnSpeed * (1 + (Math.random() - 0.5) * cubeMovementConfig.returnSpeedVariation);
         cubeReturnSpeeds.set(cube.uuid, returnSpeed);
-        
-        const maxDistance = cubeMovementConfig.baseMaxDistance * 
-            (cubeMovementConfig.distanceMultiplierMin + 
-             Math.random() * (cubeMovementConfig.distanceMultiplierMax - cubeMovementConfig.distanceMultiplierMin));
+
+        const maxDistance =
+            cubeMovementConfig.baseMaxDistance *
+            (cubeMovementConfig.distanceMultiplierMin +
+                Math.random() * (cubeMovementConfig.distanceMultiplierMax - cubeMovementConfig.distanceMultiplierMin));
         cubeMaxDistances.set(cube.uuid, maxDistance);
     }
 
@@ -207,10 +239,15 @@ export function dragInit() {
     renderer.domElement.addEventListener("mousedown", onMouseDown);
     renderer.domElement.addEventListener("mouseup", onMouseUp);
 
-    // Add touch event listeners
+    // Add wheel event listener for trackpad scrolling
+    renderer.domElement.addEventListener("wheel", onWheel, { passive: false });
+
+    // Add touch event listeners with correct options
     renderer.domElement.addEventListener("touchstart", onTouchStart, { passive: false });
     renderer.domElement.addEventListener("touchmove", onTouchMove, { passive: false });
     renderer.domElement.addEventListener("touchend", onTouchEnd);
+    // Add touchcancel handler to properly end dragging operation
+    renderer.domElement.addEventListener("touchcancel", onTouchEnd);
 
     // Store original cube scales
     setTimeout(() => {
@@ -218,7 +255,7 @@ export function dragInit() {
             cubeOriginalScales.set(cube.uuid, cube.scale.x);
         }
         cubeScalingEnabled = true;
-    }, 1000);
+    }, 1100);
 
     // Start the spring animation
     animateSpring();
@@ -227,14 +264,18 @@ export function dragInit() {
 function animateSpring() {
     requestAnimationFrame(animateSpring);
 
-    // Calculate spring physics
-    const springForce = (targetScale - currentScale) * springStiffness;
+    // Calculate spring physics with improved smoothness
+    // Use appropriate spring stiffness based on device type
+    const activeSpringStiffness = isMobile ? mobileSpringStiffness : springStiffness;
+
+    const springForce = (targetScale - currentScale) * activeSpringStiffness;
     springVelocity += springForce;
     springVelocity *= springDamping;
     currentScale += springVelocity;
 
     // Apply scale to sphere
     if (sphere) {
+        // Simply apply the current scale without breathing effect
         sphere.scale.set(currentScale, currentScale, currentScale);
 
         // Scale cubes based on distance from sphere
@@ -275,57 +316,81 @@ function updateCubeScales() {
         }
 
         // Apply scale with smooth transition, maintaining aspect ratio
-        cube.scale.lerp(new THREE.Vector3(
-            scaleFactor,
-            scaleFactor,
-            scaleFactor
-        ), 0.1);
+        cube.scale.lerp(new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor), 0.1);
     }
 }
 
 function onMouseHover(e) {
-    raycaster.setFromCamera(
-        new THREE.Vector2(
-            (e.clientX / window.innerWidth) * 2 - 1,
-            (-e.clientY / window.innerHeight) * 2 + 1
-        ),
-        camera
-    );
+    // Skip hover effects on mobile devices
+    if (isMobile) return;
+
+    raycaster.setFromCamera(new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, (-e.clientY / window.innerHeight) * 2 + 1), camera);
 
     const intersections = raycaster.intersectObject(sphere);
+
+    // Previous hover state - store for detecting when we leave the sphere
+    const wasHovering = isHoveringOverSphere;
 
     if (!isDragging) {
         if (intersections.length > 0) {
             renderer.domElement.style.cursor = "grab";
+
+            // If we weren't hovering before and haven't played the animation yet
+            if (!isHoveringOverSphere && !hoverAnimationPlayed) {
+                // Trigger a gentle spring effect
+                springVelocity = -0.004; // Small negative impulse for shrinking
+                targetScale = originalSphereScale * 0.98; // Shrink slightly
+
+                // After a short delay, return to normal size
+                setTimeout(() => {
+                    targetScale = originalSphereScale;
+                    hoverAnimationPlayed = true; // Mark animation as played
+
+                    // Reset the animation played flag after leaving the sphere
+                    setTimeout(() => {
+                        hoverAnimationPlayed = false;
+                    }, 1000);
+                }, 150);
+            }
+
+            isHoveringOverSphere = true;
         } else {
             renderer.domElement.style.cursor = "auto";
+
+            // If we just left the sphere (was hovering, now not)
+            if (wasHovering) {
+                // Add a small spring effect when leaving
+                springVelocity = 0.005; // Small positive impulse when leaving
+            }
+
+            isHoveringOverSphere = false;
         }
     }
 }
 
 function onMouseDown(e) {
-    raycaster.setFromCamera(
-        new THREE.Vector2(
-            (e.clientX / window.innerWidth) * 2 - 1,
-            (-e.clientY / window.innerHeight) * 2 + 1
-        ),
-        camera
-    );
+    // Check if a project card is already open
+    const existingProjectCards = document.querySelectorAll(".project-card");
+    if (existingProjectCards.length > 0) {
+        return; // Don't process further if a card is already open
+    }
+
+    raycaster.setFromCamera(new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, (-e.clientY / window.innerHeight) * 2 + 1), camera);
     const intersections = raycaster.intersectObjects([sphere, ...cubes]);
     if (intersections.length > 0) {
         const intersectedObject = intersections[0].object;
         if (cubes.includes(intersectedObject)) {
             // If a cube is clicked, switch to 2D mode and open the gallery
             const projectId = intersectedObject.name;
-            
+
             // Mark project as viewed and darken its texture after 1s delay
             if (!viewedProjects.has(projectId)) {
                 viewedProjects.add(projectId);
                 setTimeout(() => {
                     darkenProjectCube(intersectedObject);
-                }, 1000);
+                }, 170);
             }
-            
+
             uiSwitchState("2d");
             addProjectCardToPage(projectId, document.querySelector(".main-container"));
         } else {
@@ -336,8 +401,8 @@ function onMouseDown(e) {
             // Reset velocity when starting to drag
             rotationVelocity.set(0, 0, 0);
 
-            // Apply spring compression effect
-            targetScale = springCompression;
+            // Apply appropriate spring compression effect based on device type
+            targetScale = isMobile ? mobileSpringCompression * originalSphereScale : springCompression * originalSphereScale;
         }
     }
 
@@ -364,7 +429,8 @@ function onMouseUp() {
             animateInertia();
         }
 
-        // Release spring compression
+        // Release spring compression with a slight expansion effect
+        springVelocity = 0.01; // Add a small positive impulse
         targetScale = originalSphereScale;
     }
 }
@@ -390,15 +456,9 @@ function animateInertia() {
             }
 
             // Apply rotation based on velocity components
-            const xRotation = new THREE.Quaternion().setFromAxisAngle(
-                new THREE.Vector3(1, 0, 0),
-                rotationVelocity.y
-            );
+            const xRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), rotationVelocity.y);
 
-            const yRotation = new THREE.Quaternion().setFromAxisAngle(
-                new THREE.Vector3(0, 1, 0),
-                rotationVelocity.x
-            );
+            const yRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), rotationVelocity.x);
 
             const rotationQuaternion = new THREE.Quaternion().multiplyQuaternions(yRotation, xRotation);
 
@@ -409,8 +469,8 @@ function animateInertia() {
             // Update cube positions
             updateCubePositions(rotationQuaternion, velocityMagnitude);
 
-            // Update camera rotation
-            if (cameraControl) {
+            // On mobile devices, limit camera rotation during inertia to prevent getting stuck
+            if (cameraControl && (!isMobile || velocityMagnitude < 0.1)) {
                 cameraControl.updateCameraRotation(camera, rotationVelocity, false);
             }
 
@@ -439,7 +499,7 @@ function updateCubePositions(rotationQuaternion, velocityMagnitude) {
         // Use cube's individual max distance
         const maxDistance = cubeMaxDistances.get(cube.uuid);
         const targetOffset = directionFromCenter.multiplyScalar(offset * maxDistance);
-        
+
         // Smoothly interpolate the outward offset
         currentOutwardOffset.lerp(targetOffset, 0.1);
         cubeOutwardOffsets.set(cube.uuid, currentOutwardOffset);
@@ -458,7 +518,7 @@ function returnCubesToOriginalPositions() {
             const currentOutwardOffset = cubeOutwardOffsets.get(cube.uuid);
 
             const returnSpeed = cubeReturnSpeeds.get(cube.uuid);
-            
+
             if (currentOutwardOffset.length() > 0.01) {
                 // Use cube's individual return speed
                 currentOutwardOffset.multiplyScalar(1 - returnSpeed);
@@ -497,7 +557,8 @@ function onMouseMove(e) {
             animateInertia();
         }
 
-        // Release spring compression
+        // Release spring compression with a slight expansion effect
+        springVelocity = 0.01; // Add a small positive impulse
         targetScale = originalSphereScale;
         return;
     }
@@ -512,15 +573,9 @@ function onMouseMove(e) {
     const factor = velocityFactor;
 
     // Apply direct rotation based on mouse movement
-    const xRotation = new THREE.Quaternion().setFromAxisAngle(
-        new THREE.Vector3(1, 0, 0),
-        mouseDelta.y * factor
-    );
+    const xRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), mouseDelta.y * factor);
 
-    const yRotation = new THREE.Quaternion().setFromAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        mouseDelta.x * factor
-    );
+    const yRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), mouseDelta.x * factor);
 
     const rotationQuaternion = new THREE.Quaternion().multiplyQuaternions(yRotation, xRotation);
 
@@ -546,18 +601,68 @@ function onMouseMove(e) {
 }
 
 function hasCursorLeftScreen(event) {
-    return event.clientX < 0 ||
-        event.clientX > window.innerWidth ||
-        event.clientY < 0 ||
-        event.clientY > window.innerHeight
-        ? true
-        : false;
+    // Only check screen boundaries for mouse events, not touch events
+    if (event.type && event.type.startsWith("touch")) {
+        return false;
+    }
+    return event.clientX < 0 || event.clientX > window.innerWidth || event.clientY < 0 || event.clientY > window.innerHeight;
+}
+
+// Handle wheel events (trackpad scrolling)
+function onWheel(e) {
+    e.preventDefault();
+
+    // Get normalized scroll deltas for x and y directions
+    const scrollDeltaX = e.deltaX * 0.02;
+    const scrollDeltaY = e.deltaY * 0.02;
+
+    // Mark that interaction has occurred and hide navbar hint
+    wasDragged = true;
+    if (wasDragged == true) {
+        navbarHint.classList.add("fade-out");
+    }
+
+    // Use a scaled factor for wheel sensitivity - increased by 4x
+    const wheelFactor = velocityFactor * 2.0;
+
+    // Create rotation quaternions for x and y axes
+    const xRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), scrollDeltaY * wheelFactor);
+
+    const yRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), scrollDeltaX * wheelFactor);
+
+    // Combine rotations
+    const rotationQuaternion = new THREE.Quaternion().multiplyQuaternions(yRotation, xRotation);
+
+    // Apply rotation to sphere
+    sphereRotation.multiplyQuaternions(rotationQuaternion, sphereRotation);
+    sphere.setRotationFromQuaternion(sphereRotation);
+
+    // Add to rotation velocity for inertia effect - increased velocity factor
+    rotationVelocity.x += Math.min(maxVelocity, Math.max(-maxVelocity, scrollDeltaX * wheelFactor * 0.2));
+    rotationVelocity.y += Math.min(maxVelocity, Math.max(-maxVelocity, scrollDeltaY * wheelFactor * 0.2));
+
+    // Apply less damping to maintain more velocity
+    rotationVelocity.multiplyScalar(0.97);
+
+    // Calculate velocity magnitude and update cube positions
+    const velocityMagnitude = rotationVelocity.length();
+    updateCubePositions(rotationQuaternion, velocityMagnitude);
+
+    // Update camera rotation
+    if (cameraControl) {
+        cameraControl.updateCameraRotation(camera, rotationVelocity, false);
+    }
+
+    // Start inertia animation if there's velocity and we're not already dragging
+    if (!isDragging && rotationVelocity.length() > 0.0001) {
+        animateInertia();
+    }
 }
 
 function darkenProjectCube(cube) {
     // Handle both single material and material array cases
     if (Array.isArray(cube.material)) {
-        cube.material.forEach(material => {
+        cube.material.forEach((material) => {
             if (material.map) {
                 // Create a dark overlay color
                 material.color = new THREE.Color(darknessFactor, darknessFactor, darknessFactor);

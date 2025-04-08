@@ -6,7 +6,7 @@ import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 import { dragInit } from "./js/dragControl";
 import { addProjects, cubes } from "./js/addProjects";
 import { projects } from "./js/projects";
-import { createEnvironment } from "./js/utils";
+import { createEnvironment, isRendering, pauseRenderer, resumeRenderer } from "./js/utils";
 import { addProjectCardToPage, uiSwitchState, uiInit } from "./js/ui";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
@@ -60,10 +60,23 @@ const textureLoader = new THREE.TextureLoader();
 const roughnessMap = textureLoader.load("assets/textures/mat/worn-shiny-metal-bl/worn-shiny-metal-Roughness.png");
 const normalMap = textureLoader.load("assets/textures/mat/worn-shiny-metal-bl/worn-shiny-metal-Normal-ogl.png");
 
+// Add initialization flag
+let isInitialized = false;
+
 // Initialize Three.js
-threeInit();
+try {
+    threeInit();
+} catch (error) {
+    console.error("Error during initialization:", error);
+    // If initialization fails, switch to fallback mode
+    enableFallbackMode();
+}
 
 function threeInit() {
+    // Only initialize once to prevent context loss
+    if (isInitialized) return;
+    
+    // Direct initialization without checks
     renderer = new THREE.WebGLRenderer({
         antialias: true,
         precision: "highp",
@@ -71,6 +84,8 @@ function threeInit() {
         alpha: true,
         stencil: false,
         depth: true,
+        preserveDrawingBuffer: true,
+        failIfMajorPerformanceCaveat: false
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -83,7 +98,7 @@ function threeInit() {
 
     renderer.domElement.classList.add("three-canvas");
     document.body.insertBefore(renderer.domElement, document.body.firstChild);
-
+    
     // Ensure the blur div is positioned correctly
     const blurElement = document.getElementById("blur");
     const mainContainer = document.querySelector(".main-container");
@@ -117,28 +132,14 @@ function threeInit() {
         fragmentShader: `
             varying vec3 vWorldPosition;
     
-            // Improved noise function
-            float random(vec2 uv) {
-                return fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453);
-            }
-
-            // Add dithering pattern
-            float dither(vec2 position) {
-                return (random(position) - 0.5) / 512.0;
-            }
-    
             void main() {
                 float y = vWorldPosition.y;
     
                 // Gradient transition with wider smoothing area
-                float gradient = smoothstep(-20.0, 18.0, y + 12.0);
+                float gradient = smoothstep(-100.0, -30.0, y - 16.0);
     
                 // Base color blend from white (floor) to black (top)
                 vec3 color = mix(vec3(1.0), vec3(0.0), gradient);
-    
-                // Much subtler noise and dithering
-                float noise = random(gl_FragCoord.xy) * 0.015;
-                color += noise + dither(gl_FragCoord.xy);
                 
                 // Ensure colors stay in valid range
                 color = clamp(color, 0.0, 1.0);
@@ -230,14 +231,22 @@ function threeInit() {
 
     afterimagePass = new AfterimagePass(0.65);
     composer.addPass(afterimagePass);
+
+    // Mark as initialized after successful setup
+    isInitialized = true;
 }
 
 function animate(msTime) {
+    // If rendering is paused, don't update or render anything
+    if (!isRendering) return;
+    
     // Update gradient shader time uniform if needed
-    gradientShader.uniforms.time.value = msTime * 0.001;
+    if (gradientShader && gradientShader.uniforms) {
+        gradientShader.uniforms.time.value = msTime * 0.001;
+    }
 
     // Update environment mesh rotation based on sphere rotation
-    if (envMesh && sphere) {
+    if (envMesh && sphere && sphere.quaternion) {
         // Get the sphere's current rotation as euler angles
         const sphereRotation = new THREE.Euler().setFromQuaternion(sphere.quaternion);
 
@@ -248,23 +257,31 @@ function animate(msTime) {
     }
 
     // Hide sphere and update cubemap
-    sphere.visible = false;
-    cubeCamera.position.copy(sphere.position);
-    cubeCamera.update(renderer, scene);
-    sphere.visible = true;
+    if (sphere && cubeCamera && renderer && scene) {
+        sphere.visible = false;
+        cubeCamera.position.copy(sphere.position);
+        cubeCamera.update(renderer, scene);
+        sphere.visible = true;
+    }
 
     // Update camera position
-    camera.position.y += (mouse.y * 0.7 - camera.position.y + (window.innerWidth < 768 ? 5.5 : 3.5)) * 0.03;
-    camera.position.x += (-mouse.x * 3.5 - camera.position.x) * 0.05;
+    if (camera && typeof mouse !== 'undefined') {
+        camera.position.y += (mouse.y * 0.7 - camera.position.y + (window.innerWidth < 768 ? 5.5 : 3.5)) * 0.03;
+        camera.position.x += (-mouse.x * 3.5 - camera.position.x) * 0.05;
+    }
 
     // Update cube positions
-    for (let i = 0; i < cubes.length; i++) {
-        const cube = cubes[i];
-        cube.lookAt(sphere.position);
+    if (cubes && cubes.length > 0 && sphere) {
+        for (let i = 0; i < cubes.length; i++) {
+            const cube = cubes[i];
+            if (cube) cube.lookAt(sphere.position);
+        }
     }
 
     // Render with post-processing
-    composer.render();
+    if (composer) {
+        composer.render();
+    }
 }
 
 export function reverseSelected() {
@@ -308,6 +325,12 @@ function onTouchStart(event) {
     raycaster.setFromCamera(click, camera);
     const intersects = raycaster.intersectObjects([sphere, ...cubes]);
 
+    // Check if a project card is already open
+    const existingProjectCards = document.querySelectorAll('.project-card');
+    if (existingProjectCards.length > 0) {
+        return; // Don't process further if a card is already open
+    }
+
     if (!wasSelected) {
         if (intersects.length > 0 && intersects[0].object !== sphere) {
             const selectedProject = intersects[0].object;
@@ -339,3 +362,48 @@ function onTouchStart(event) {
 }
 
 export { camera, scene, renderer, sphere };
+
+// Function to enable fallback mode when WebGL is not available
+function enableFallbackMode() {
+    // Show the list view as fallback
+    const listView = document.querySelector(".list-view");
+    const viewToggle = document.querySelector(".view-toggle");
+    const blur = document.getElementById("blur");
+    const navbarHint = document.querySelector(".navbar-hint");
+    
+    if (listView) {
+        listView.classList.add("active");
+        // Style changes for fallback mode
+        listView.style.transform = "translateX(0)";
+        listView.style.zIndex = "1000";
+        
+        // Hide blur since we won't have the 3D effect
+        if (blur) {
+            blur.classList.add("hide");
+        }
+        
+        // Hide navbar hint since it's not needed in list view
+        if (navbarHint) {
+            navbarHint.classList.add("hide");
+        }
+        
+        // Update toggle if it exists
+        if (viewToggle) {
+            viewToggle.classList.add("active");
+            // Disable the toggle button since we can't switch back to 3D
+            viewToggle.style.pointerEvents = "none";
+            viewToggle.style.opacity = "0.5";
+        }
+        
+        // Hide any three.js related elements
+        const threeCanvas = document.querySelector(".three-canvas");
+        if (threeCanvas) {
+            threeCanvas.style.display = "none";
+        }
+        
+        // Make sure the UI is initialized for viewing projects
+        if (typeof uiInit === 'function') {
+            uiInit();
+        }
+    }
+}

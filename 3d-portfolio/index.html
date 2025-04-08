@@ -1,76 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
 
-<head>
-    <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>PORTFOLIO</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PORTFOLIO</title>
+        <link rel="stylesheet" href="css/init.css" />
+    </head>
 
-    <link rel="stylesheet" href="css/init.css" />
-</head>
+    <body>
+        <div class="fade"></div>
+        <script>
+            const fadeElement = document.querySelector(".fade");
 
-<body>
-    <div class="fade"></div>
-    <script>
-        const fadeElement = document.querySelector(".fade");
+            setTimeout(function () {
+                fadeElement.classList.add("fade-out");
+            }, 770);
 
-        setTimeout(function () {
-            fadeElement.classList.add("fade-out");
-        }, 770);
+            // Listen for the 'transitionend' event and remove the element once the fade-out animation is complete
+            fadeElement.addEventListener("transitionend", function () {
+                fadeElement.remove();
+            });
+        </script>
 
-        // Listen for the 'transitionend' event and remove the element once the fade-out animation is complete
-        fadeElement.addEventListener("transitionend", function () {
-            fadeElement.remove();
-        });
-    </script>
-
-    <div class="main-container">
-        <div class="navbar">
-            <div class="navbar-name text-sm">
-                <div id="name">Bogdan Năstase</div>
-            </div>
-            <div class="navbar-right">
-                <a href="#" class="navbar-button" id="about-button">About</a>
-                <div class="view-toggle">
-                    <div class="toggle-slider"></div>
-                    <div class="toggle-text">
-                        <span style="margin-left:-4px">3D</span>
-                        <span>LIST</span>
+        <div class="main-container">
+            <div class="navbar">
+                <div class="navbar-name text-sm">
+                    <div id="name">Bogdan Năstase</div>
+                </div>
+                <div class="navbar-right">
+                    <div class="navbar-button button text-sm" id="about-button">About</div>
+                    <div class="view-toggle text-xs">
+                        <div class="toggle-slider"></div>
+                        <div class="toggle-text">
+                            <span style="margin-left: -6px">3D</span>
+                            <span style="margin-right: -2px">LIST</span>
+                        </div>
+                        <div class="toggle-cover toggle-cover-3d"></div>
+                        <div class="toggle-cover toggle-cover-list"></div>
                     </div>
-                    <div class="toggle-cover toggle-cover-3d"></div>
-                    <div class="toggle-cover toggle-cover-list"></div>
+                    <div class="button button-invert">
+                        <img src="/assets/UI/ball-button.png" alt="Invert colors" />
+                    </div>
                 </div>
-                <div class="button button-invert">
-                    <img src="/assets/UI/ball-button.png" alt="Invert colors">
-                </div>
+                <div class="navbar-hint text-sm">To browse, drag the sphere or scroll. To open a project, click an image.</div>
             </div>
-            <div class="navbar-hint text-sm">
-                To browse, drag the sphere. To open a project, click an image.
+            <div id="blur" class="hide"></div>
+
+            <!-- List View -->
+            <div class="list-view">
+                <table class="list-view-table">
+                    <thead>
+                        <tr>
+                            <th data-sort="title">Project Title<span class="sort-indicator"></span></th>
+                            <th data-sort="category">Category</th>
+                            <th data-sort="year" class="sort-active sort-desc">Year<span class="sort-indicator">↓</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Will be populated with JavaScript -->
+                    </tbody>
+                </table>
             </div>
         </div>
-        <div id="blur" class="hide"></div>
 
-        <!-- List View -->
-        <div class="list-view">
-            <table class="list-view-table">
-                <thead>
-                    <tr>
-                        <th data-sort="title">Project Title<span class="sort-indicator"></span></th>
-                        <th data-sort="category">Category</th>
-                        <th data-sort="year" class="sort-active sort-desc">Year<span class="sort-indicator">↓</span></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Will be populated with JavaScript -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <script type="module" src="/main.js"></script>
-    <script type="module" src="js/ui.js"></script>
-    <div class="invert"></div>
-</body>
-
+        <script type="module" src="/main.js"></script>
+        <script type="module" src="js/ui.js"></script>
+        <div class="invert"></div>
+    </body>
 </html>

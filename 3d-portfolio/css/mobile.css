@@ -1,37 +1,151 @@
+:root {
+    --text-xs: 0.563rem;
+    --text-sm: 0.75rem;
+    --text-md: 1.333rem;
+    --text-lg: 1.777rem;
+    --base-size: 16px;
+}
+
 @media screen and (max-width: 768px) {
-    .navbar {
+    /* Add overflow control to prevent horizontal scrolling */
+    html,
+    body {
+        overflow-x: hidden;
+        width: 100%;
+        position: relative;
+    }
+
+    /* Main container should respect viewport width */
+    .main-container {
+        width: 100vw;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* Project card specific mobile adjustments */
+    .project-card {
+        /* inset: 8px !important; */
+        inset: 10px;
         padding: 10px;
-        margin-top: -40px;
-        font-size: texts-sm;
+    }
+
+    /* Project info section needs to be stacked on mobile */
+    .project-info {
+        flex-direction: column !important;
+        gap: 8px;
+    }
+
+    .project-title {
+        width: 100% !important;
+        font-size: var(--text-title) !important;
+    }
+
+    .project-year,
+    .project-categories,
+    .project-description {
+        width: 100% !important;
+        flex-basis: auto !important;
+    }
+
+    /* Buttons positioning for mobile */
+    .button-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        margin-left: 0 !important;
+    }
+
+    .button-next {
+        margin-top: 0 !important;
+        align-self: flex-end !important;
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        z-index: 100;
+    }
+
+    /* Ensure blur div works properly on mobile */
+    #blur {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background-color: rgba(0, 0, 0, 0.65) !important;
+        z-index: 10 !important;
+        backdrop-filter: blur(15px) !important;
+        -webkit-backdrop-filter: blur(15px) !important;
+    }
+
+    #blur.hide {
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+
+    /* List view mobile adjustments */
+    .list-view {
+        width: 100% !important;
+        padding: 10px !important;
+        box-sizing: border-box;
+    }
+
+    .list-view-table {
+        width: 100% !important;
+        font-size: var(--text-sm) !important;
+    }
+
+    .list-view-table th,
+    .list-view-table td {
+        padding: 8px 4px !important;
+    }
+
+    .list-view-preview {
+        width: 50vw !important;
+        max-width: 50vw !important;
+    }
+
+    /* Media content should fit within boundaries */
+    img,
+    iframe,
+    video,
+    canvas {
+        max-width: 100%;
+        height: auto !important;
+    }
+
+    /* Fix for embedded iframes */
+    .slide iframe {
+        width: 100% !important;
+        height: 50vh !important;
+    }
+
+    .navbar {
+        margin-top: 8px;
+        margin: 0px;
+        padding: 4px;
+        font-size: var(--text-sm);
     }
 
     .navbar-name {
-        font-size: 1.2rem !important;
-    }
-
-
-    .navbar-name img {
-        width: 24px !important;
-        height: 24px !important;
+        font-size: var(--text-xs);
     }
 
     .button-invert img {
-        width: 32px !important;
-        height: 32px !important;
+        width: 20px !important;
+        height: 20px !important;
     }
 
     .navbar-hint {
-        font-size: 0.8rem !important;
-        margin-top: 100px;
-        width: 50vw;
+        font-size: var(--text-sm);
+        top: 44px;
+        padding: 0px;
+        width: 100%;
         height: 40px;
         line-height: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
     }
-
-
 
     /* Fix for invert functionality on mobile */
     .invert {
@@ -87,7 +201,7 @@
         padding: 10px 15px;
         border-radius: 5px;
         border: none;
-        font-size: 14px;
+        font-size: var(--text-sm);
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     }
 }
