@@ -35,26 +35,28 @@
                     <img src="/assets/UI/ball-button.png" alt="Invert colors" />
                 </div>
             </div>
-            <div class="navbar-right">
-                <div class="navbar-button button text-sm bold" id="about-button">About</div>
-                <div class="view-toggle text-xs">
+            <div class="navbar-right text-sm bold">
+                <div class="view-toggle button">
                     <div class="toggle-slider"></div>
                     <div class="toggle-text">
-                        <span style="margin-left: -6px">3D</span>
-                        <span style="margin-right: -2px">LIST</span>
+                        <div class="toggle-text-container">
+                            <span class="toggle-text-close">Close</span>
+                            <span class="toggle-text-index">Index</span>
+                        </div>
                     </div>
-                    <div class="toggle-cover toggle-cover-3d"></div>
-                    <div class="toggle-cover toggle-cover-list"></div>
+                    <div class="toggle-cover toggle-cover-index"></div>
+                    <div class="toggle-cover toggle-cover-close"></div>
                 </div>
+                <div class="navbar-button button " id="about-button">About</div>
             </div>
             <div class="navbar-hint text-sm">To browse, drag the sphere or scroll. To open a project, click an image.
             </div>
         </div>
         <div id="blur" class="hide"></div>
 
-        <!-- List View -->
-        <div class="list-view">
-            <table class="list-view-table">
+        <!-- Index View -->
+        <div class="index-view">
+            <table class="index-view-table">
                 <thead>
                     <tr>
                         <th data-sort="title">Project Title<span class="sort-indicator"></span></th>

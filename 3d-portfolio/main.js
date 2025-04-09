@@ -445,16 +445,16 @@ export { camera, scene, renderer, sphere };
 // Function to enable fallback mode when WebGL is not available
 function enableFallbackMode() {
     // Show the list view as fallback
-    const listView = document.querySelector(".list-view");
+    const indexView = document.querySelector(".index-view");
     const viewToggle = document.querySelector(".view-toggle");
     const blur = document.getElementById("blur");
     const navbarHint = document.querySelector(".navbar-hint");
 
-    if (listView) {
-        listView.classList.add("active");
+    if (indexView) {
+        indexView.classList.add("active");
         // Style changes for fallback mode
-        listView.style.transform = "translateX(0)";
-        listView.style.zIndex = "1000";
+        indexView.style.transform = "translateX(0)";
+        indexView.style.zIndex = "1000";
 
         // Hide blur since we won't have the 3D effect
         if (blur) {

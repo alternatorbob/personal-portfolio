@@ -30,11 +30,11 @@ export function uiInit() {
     if (nameElement) {
         nameElement.addEventListener("click", () => {
             const viewToggle = document.querySelector(".view-toggle");
-            const listView = document.querySelector(".list-view");
+            const indexView = document.querySelector(".index-view");
             const threeCanvas = document.querySelector(".three-canvas");
 
             if (viewToggle) viewToggle.classList.remove("active");
-            if (listView) listView.classList.remove("active");
+            if (indexView) indexView.classList.remove("active");
             if (threeCanvas) threeCanvas.style.pointerEvents = "auto";
         });
     }
@@ -53,13 +53,13 @@ export function uiInit() {
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
             const viewToggle = document.querySelector(".view-toggle");
-            const listView = document.querySelector(".list-view");
+            const indexView = document.querySelector(".index-view");
             const threeCanvas = document.querySelector(".three-canvas");
             const blur = document.getElementById("blur");
 
             if (viewToggle && viewToggle.classList.contains("active")) {
                 viewToggle.classList.remove("active");
-                if (listView) listView.classList.remove("active");
+                if (indexView) indexView.classList.remove("active");
                 if (threeCanvas) threeCanvas.style.pointerEvents = "auto";
                 
                 // Make sure to handle the blur div properly
@@ -76,7 +76,7 @@ export function uiInit() {
     // Single event handler for intercepting mouse clicks in UI areas
     const interceptUIEvents = (e) => {
         const navbar = document.querySelector(".navbar");
-        const listView = document.querySelector(".list-view");
+        const indexView = document.querySelector(".index-view");
         const aboutButton = document.getElementById("about-button");
 
         // Get coordinates, handling both mouse and touch events
@@ -94,8 +94,8 @@ export function uiInit() {
             }
         }
 
-        // Check specifically for about button clicks when in list view to keep blur
-        if (aboutButton && listView && listView.classList.contains("active")) {
+        // Check specifically for about button clicks when in index view to keep blur
+        if (aboutButton && indexView && indexView.classList.contains("active")) {
             const aboutRect = aboutButton.getBoundingClientRect();
             if (clientX >= aboutRect.left && clientX <= aboutRect.right && clientY >= aboutRect.top && clientY <= aboutRect.bottom) {
                 // Don't need to do anything extra, just prevent this from being handled below
@@ -103,8 +103,8 @@ export function uiInit() {
             }
         }
 
-        // Also block interactions on list view when active
-        if (listView && listView.classList.contains("active")) {
+        // Also block interactions on index view when active
+        if (indexView && indexView.classList.contains("active")) {
             e.stopPropagation();
             return;
         }
@@ -182,7 +182,7 @@ export function uiSwitchState(state) {
     const projectCards = document.querySelectorAll(".project-card");
     const aboutCard = document.getElementById("about-card");
     const threeCanvas = document.querySelector(".three-canvas");
-    const listView = document.querySelector(".list-view");
+    const indexView = document.querySelector(".index-view");
     const viewToggle = document.querySelector(".view-toggle");
     const blur = document.getElementById("blur");
 
@@ -199,9 +199,9 @@ export function uiSwitchState(state) {
         if (threeCanvas) {
             threeCanvas.style.visibility = "visible";
         }
-        // Show list view and update toggle state
-        if (listView) {
-            listView.classList.add("active");
+        // Show index view and update toggle state
+        if (indexView) {
+            indexView.classList.add("active");
         }
         if (viewToggle) {
             viewToggle.classList.add("active");
@@ -215,9 +215,9 @@ export function uiSwitchState(state) {
         if (threeCanvas) {
             threeCanvas.style.visibility = "visible";
         }
-        // Hide list view and update toggle state
-        if (listView) {
-            listView.classList.remove("active");
+        // Hide index view and update toggle state
+        if (indexView) {
+            indexView.classList.remove("active");
         }
         if (viewToggle) {
             viewToggle.classList.remove("active");
@@ -289,8 +289,8 @@ export function addCursorStyles(camera, cubes) {
 }
 
 function populateListView() {
-    const tableBody = document.querySelector(".list-view-table tbody");
-    const previewContainer = document.querySelector(".list-view-preview");
+    const tableBody = document.querySelector(".index-view-table tbody");
+    const previewContainer = document.querySelector(".index-view-preview");
     const previewImage = previewContainer ? previewContainer.querySelector("img") : null;
 
     if (!tableBody) return;
@@ -338,12 +338,12 @@ function populateListView() {
         // Add click event to row to open project
         row.addEventListener("click", function () {
             const viewToggle = document.querySelector(".view-toggle");
-            const listView = document.querySelector(".list-view");
+            const indexView = document.querySelector(".index-view");
             const threeCanvas = document.querySelector(".three-canvas");
             const blur = document.getElementById("blur");
 
             if (viewToggle) viewToggle.classList.remove("active");
-            if (listView) listView.classList.remove("active");
+            if (indexView) indexView.classList.remove("active");
             if (threeCanvas) threeCanvas.style.pointerEvents = "auto";
 
             // Keep the blur layer visible when transitioning to project card
@@ -364,22 +364,25 @@ function populateListView() {
 
 function initListViewToggle() {
     const viewToggle = document.querySelector(".view-toggle");
-    const listView = document.querySelector(".list-view");
+    const indexView = document.querySelector(".index-view");
     const threeCanvas = document.querySelector(".three-canvas");
 
-    if (!viewToggle || !listView || !threeCanvas) return;
+    if (!viewToggle || !indexView || !threeCanvas) return;
 
     viewToggle.addEventListener("click", () => {
-        if (listView.classList.contains("active")) {
+        if (indexView.classList.contains("active")) {
+            viewToggle.classList.remove("active");
             uiSwitchState("3d");
         } else {
+            viewToggle.classList.add("active");
+            navbar.hide();
             uiSwitchState("2d");
         }
     });
 }
 
 function initTableSorting() {
-    const tableHeaders = document.querySelectorAll(".list-view-table th[data-sort]");
+    const tableHeaders = document.querySelectorAll(".index-view-table th[data-sort]");
 
     // Set default sort by year descending
     sortProjects("year", "desc");
@@ -406,7 +409,7 @@ function initTableSorting() {
     };
 
     // Set initial sort indicators
-    const yearHeader = document.querySelector('.list-view-table th[data-sort="year"]');
+    const yearHeader = document.querySelector('.index-view-table th[data-sort="year"]');
     if (yearHeader) {
         yearHeader.classList.add("sort-active", "sort-desc");
         updateSortIndicators(yearHeader);
@@ -472,7 +475,7 @@ document.addEventListener("open-project", function (e) {
         const projectId = e.detail.projectId;
         const blur = document.getElementById("blur");
 
-        // Pause renderer when opening a project from list view
+        // Pause renderer when opening a project from index view
         pauseRenderer();
 
         // Ensure blur is visible

@@ -368,92 +368,102 @@ body {
 /* List View Toggle Button */
 .view-toggle {
     position: relative;
-    display: flex;
-    align-items: center;
-    width: 34px;
-    height: 12px;
-    background-color: transparent;
-    border: 0.55px solid #fff;
-    border-radius: 50px;
-    cursor: pointer;
     overflow: hidden;
-    z-index: 1000;
-    padding: 3px;
-    pointer-events: auto;
-    transition: border-color 0.75s ease-in-out;
+    width: 100px;
+    height: 30px;
+    cursor: pointer;
 }
 
-.view-toggle.active {
-    border-color: var(--text-color);
-}
-
-.toggle-slider {
+.view-toggle .toggle-text {
     position: absolute;
-    top: 50%;
-    left: 2px;
-    width: 14px;
-    height: 14px;
-    background-color: #fff;
-    border-radius: 50%;
-    transform: translateY(-50%);
-    transition: transform 0.3s ease, background-color 0.75s ease-in-out;
-    z-index: 2;
-}
-
-.view-toggle.active .toggle-slider {
-    transform: translate(22px, -50%);
-    background-color: var(--text-color);
-}
-
-.toggle-text {
-    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    padding: 0 8px;
-    box-sizing: border-box;
-    color: #fff;
-    font-size: var(--text-xs);
     pointer-events: none;
-    transition: color 0.75s ease-in-out;
-    z-index: 0;
 }
 
-.view-toggle.active .toggle-text {
-    color: var(--text-color);
+.view-toggle .toggle-text-container {
+    position: relative;
+    width: 40px;
+    height: 100%;
 }
 
-.toggle-cover {
+.view-toggle .toggle-text-close {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translate(-100%, -50%);
+    width: 100%;
+    text-align: center;
+    z-index: 1;
+    transition: transform 0.3s ease;
+}
+
+.view-toggle.active .toggle-text-close {
+    transform: translate(0, -50%);
+}
+
+.view-toggle .toggle-text-index {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    text-align: center;
+    z-index: 3;
+    transition: transform 0.3s ease;
+}
+
+.view-toggle.active .toggle-text-index {
+    transform: translate(100%, -50%);
+}
+
+.view-toggle .toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+}
+
+.view-toggle.active .toggle-slider {
+    transform: translateX(0);
+}
+
+.view-toggle .toggle-cover {
     position: absolute;
     top: 0;
     width: 50%;
     height: 100%;
-    background-color: var(--bg-color);
+    background-color: black;
     transition: transform 0.3s ease;
-    z-index: 1;
-    border-radius: 50px;
 }
 
-.toggle-cover-3d {
-    left: -3px;
+.view-toggle .toggle-cover-close {
+    right: 0;
+    transform: translateX(-40%);
+    z-index: 2;
 }
 
-.toggle-cover-list {
-    left: -2.5px;
+.view-toggle .toggle-cover-index {
+    left: 0;
+    transform: translateX(140%);
+    z-index: 4;
 }
 
-.view-toggle.active .toggle-cover-3d {
-    transform: translateX(100%);
-}
-
-.view-toggle.active .toggle-cover-list {
+.view-toggle.active .toggle-cover-close {
     transform: translateX(100%);
 }
 
 /* List View */
-.list-view {
+.index-view {
     position: fixed;
     top: 0;
     left: 0;
@@ -469,11 +479,11 @@ body {
     pointer-events: auto;
 }
 
-.list-view.active {
+.index-view.active {
     transform: translateX(0);
 }
 
-.list-view-table {
+.index-view-table {
     width: 100%;
     border-collapse: collapse;
     color: var(--text-color);
@@ -481,12 +491,12 @@ body {
     font-size: var(--text-sm);
 }
 
-.list-view-table thead {
+.index-view-table thead {
     border-bottom: 0.15px solid rgba(242, 242, 242, 1);
 }
 
-.list-view-table th,
-.list-view-table td {
+.index-view-table th,
+.index-view-table td {
     padding: 6px 6px;
     text-align: left;
     border-bottom: 0.15px solid rgba(242, 242, 242, 0.35);
@@ -495,59 +505,58 @@ body {
     vertical-align: top;
 }
 
-
-.list-view-table tbody tr:first-child td {
+.index-view-table tbody tr:first-child td {
     border-top: 1px solid rgba(242, 242, 242, 0.6);
 }
 
-.list-view-table th:first-child,
-.list-view-table td:first-child {
+.index-view-table th:first-child,
+.index-view-table td:first-child {
     padding-left: 0;
-    width: 25%;
+    width: 16%;
     /* Project title width */
 }
 
-.list-view-table th:nth-child(2),
-.list-view-table td:nth-child(2) {
+.index-view-table th:nth-child(2),
+.index-view-table td:nth-child(2) {
     width: 60%;
     /* Category width */
 }
 
-.list-view-table th:last-child,
-.list-view-table td:last-child {
+.index-view-table th:last-child,
+.index-view-table td:last-child {
     padding-right: 0;
     width: 10%;
     /* Year width */
 }
 
-.list-view-table tr {
+.index-view-table tr {
     cursor: pointer;
     transition: background-color 0.2s ease, opacity 0.11s ease-in-out;
 }
 
-.list-view-table tbody tr:hover {
+.index-view-table tbody tr:hover {
     background-color: rgba(128, 128, 128, 0.1);
     opacity: 0.4;
 }
 
-.list-view-table th {
+.index-view-table th {
     cursor: pointer;
     position: relative;
     user-select: none;
 }
 
-.list-view-table th .sort-indicator {
+.index-view-table th .sort-indicator {
     display: inline-block;
     margin-left: 5px;
     opacity: 0.4;
     transition: opacity 0.25s ease-in-out;
 }
 
-.list-view-table th.sort-active .sort-indicator {
+.index-view-table th.sort-active .sort-indicator {
     opacity: 1;
 }
 
-.list-view-preview {
+.index-view-preview {
     position: fixed;
     width: 16vw;
     max-width: 16vw;
@@ -562,14 +571,14 @@ body {
     transform: translate(-50%, -50%);
 }
 
-.list-view-preview img {
+.index-view-preview img {
     width: 100%;
     height: auto;
     display: block;
     object-fit: contain;
 }
 
-.list-view-preview.show {
+.index-view-preview.show {
     opacity: 1;
     visibility: visible;
 }

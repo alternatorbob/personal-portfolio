@@ -83,23 +83,23 @@
     }
 
     /* List view mobile adjustments */
-    .list-view {
+    .index-view {
         width: 100% !important;
         padding: 10px !important;
         box-sizing: border-box;
     }
 
-    .list-view-table {
+    .index-view-table {
         width: 100% !important;
         font-size: var(--text-sm) !important;
     }
 
-    .list-view-table th,
-    .list-view-table td {
+    .index-view-table th,
+    .index-view-table td {
         padding: 8px 4px !important;
     }
 
-    .list-view-preview {
+    .index-view-preview {
         width: 50vw !important;
         max-width: 50vw !important;
     }
