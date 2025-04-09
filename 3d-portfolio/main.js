@@ -6,14 +6,16 @@ import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 import { dragInit } from "./js/dragControl";
 import { addProjects, cubes } from "./js/addProjects";
 import { projects } from "./js/projects";
-import { createEnvironment, isRendering, pauseRenderer, resumeRenderer } from "./js/utils";
+import { createEnvironment, isRendering, pauseRenderer, resumeRenderer, easeInOutCubic } from "./js/utils";
 import { addProjectCardToPage, uiSwitchState, uiInit } from "./js/ui";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { AfterimagePass } from "three/examples/jsm/postprocessing/AfterimagePass.js";
+import { SMAAPass } from "three/examples/jsm/postprocessing/SMAAPass.js";
+import { VignetteShader } from 'three/addons/shaders/VignetteShader.js';
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 
-const mobileMessage = document.querySelector("#mobile-message");
 const mainContainer = document.querySelector(".main-container");
 export const navbarHint = document.querySelector(".navbar-hint");
 
@@ -32,6 +34,13 @@ export const backgroundRotationFactor = 0.3; // How much the background follows 
 export let originalSphereScale = 1.0;
 let envMesh; // Make environment mesh accessible globally
 
+// Add material state tracking
+let isGlassMaterial = false;
+let metalMaterial, glassMaterial;
+let transitionInProgress = false;
+let transitionStartTime = 0;
+const TRANSITION_DURATION = 720; // 1 second transition
+
 const clock = new THREE.Clock();
 export let intersectionTime = 0;
 
@@ -41,8 +50,13 @@ let click = new THREE.Vector2();
 const raycaster = new THREE.Raycaster();
 let cubeCamera, cubeRenderTarget;
 
+// TEXTURES / Post Processing
 // Define gradient shader in global scope
 let gradientShader;
+const shaderVignette = VignetteShader;
+const effectVignette = new ShaderPass(shaderVignette);
+effectVignette.uniforms['offset'].value = 0.8;
+effectVignette.uniforms['darkness'].value = 0.9;
 
 const textureManager = new THREE.LoadingManager();
 textureManager.onStart = function (url, itemsLoaded, itemsTotal) {
@@ -75,7 +89,7 @@ try {
 function threeInit() {
     // Only initialize once to prevent context loss
     if (isInitialized) return;
-    
+
     // Direct initialization without checks
     renderer = new THREE.WebGLRenderer({
         antialias: true,
@@ -87,6 +101,7 @@ function threeInit() {
         preserveDrawingBuffer: true,
         failIfMajorPerformanceCaveat: false
     });
+
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setAnimationLoop(animate);
@@ -98,7 +113,7 @@ function threeInit() {
 
     renderer.domElement.classList.add("three-canvas");
     document.body.insertBefore(renderer.domElement, document.body.firstChild);
-    
+
     // Ensure the blur div is positioned correctly
     const blurElement = document.getElementById("blur");
     const mainContainer = document.querySelector(".main-container");
@@ -151,7 +166,7 @@ function threeInit() {
 
     // Create environment cube using the globally defined shader
     envMesh = new THREE.Mesh(
-        new THREE.BoxGeometry(300, 300, 300),
+        new THREE.BoxGeometry(1000, 1000, 1000),
         new THREE.ShaderMaterial({
             uniforms: gradientShader.uniforms,
             vertexShader: gradientShader.vertexShader,
@@ -177,7 +192,7 @@ function threeInit() {
     cubeCamera = new THREE.CubeCamera(0.1, camFar, cubeRenderTarget);
 
     // Update sphere material
-    const sphereMaterial = new THREE.MeshStandardMaterial({
+    metalMaterial = new THREE.MeshStandardMaterial({
         envMap: cubeRenderTarget.texture,
         metalness: 1.0,
         roughness: 0.4,
@@ -185,6 +200,24 @@ function threeInit() {
         normalMap: normalMap,
         normalScale: new THREE.Vector2(1.5, 1.5),
         envMapIntensity: 0.6,
+        transparent: true,
+        opacity: 1.0
+    });
+
+    // Create glass material
+    glassMaterial = new THREE.MeshPhysicalMaterial({
+        envMap: cubeRenderTarget.texture,
+        metalness: 0.0,
+        roughness: 0.1,
+        transmission: 0.9,
+        thickness: 1.0,
+        envMapIntensity: 0.9,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.0,
+        ior: 1.309,
+        reflectivity: 1.0,
+        transparent: true,
+        opacity: 0.0
     });
 
     // Improve texture quality
@@ -195,10 +228,26 @@ function threeInit() {
 
     const sphereGeometry = new THREE.IcosahedronGeometry(sphereRadius, 32);
 
-    sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    sphere.castShadow = true;
-    originalSphereScale = sphere.scale.x;
-    scene.add(sphere);
+    // Create a group to hold both materials
+    const materialGroup = new THREE.Group();
+    const metalSphere = new THREE.Mesh(sphereGeometry, metalMaterial);
+    const glassSphere = new THREE.Mesh(sphereGeometry, glassMaterial);
+    materialGroup.add(metalSphere);
+    materialGroup.add(glassSphere);
+    materialGroup.castShadow = true;
+    originalSphereScale = materialGroup.scale.x;
+    scene.add(materialGroup);
+    sphere = materialGroup;
+
+    // Add spacebar event listener
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && !transitionInProgress) {
+            e.preventDefault();
+            isGlassMaterial = !isGlassMaterial;
+            transitionInProgress = true;
+            transitionStartTime = performance.now();
+        }
+    });
 
     // Initial cube camera update
     cubeCamera.position.copy(sphere.position);
@@ -223,15 +272,20 @@ function threeInit() {
     renderPass = new RenderPass(scene, camera);
     composer.addPass(renderPass);
 
+    // Add SMAA pass
+    const smaaPass = new SMAAPass();
+    composer.addPass(smaaPass);
+
     bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.08, 0.85, 0.95);
-    bloomPass.threshold = 0.95;
+    bloomPass.threshold = 0.85;
     bloomPass.radius = 0.85;
     bloomPass.strength = 0.08;
     composer.addPass(bloomPass);
 
-    afterimagePass = new AfterimagePass(0.65);
+    afterimagePass = new AfterimagePass(0.55);
     composer.addPass(afterimagePass);
 
+    // composer.addPass(effectVignette);
     // Mark as initialized after successful setup
     isInitialized = true;
 }
@@ -239,7 +293,31 @@ function threeInit() {
 function animate(msTime) {
     // If rendering is paused, don't update or render anything
     if (!isRendering) return;
-    
+
+    // Handle material transition
+    if (transitionInProgress) {
+        const elapsed = msTime - transitionStartTime;
+        const rawProgress = Math.min(elapsed / TRANSITION_DURATION, 1);
+        const progress = easeInOutCubic(rawProgress);
+        
+        if (isGlassMaterial) {
+            // Fading to glass
+            metalMaterial.opacity = 1 - progress;
+            glassMaterial.opacity = progress;
+        } else {
+            // Fading to metal
+            metalMaterial.opacity = progress;
+            glassMaterial.opacity = 1 - progress;
+        }
+
+        if (rawProgress >= 1) {
+            transitionInProgress = false;
+            // Ensure final opacity values
+            metalMaterial.opacity = isGlassMaterial ? 0 : 1;
+            glassMaterial.opacity = isGlassMaterial ? 1 : 0;
+        }
+    }
+
     // Update gradient shader time uniform if needed
     if (gradientShader && gradientShader.uniforms) {
         gradientShader.uniforms.time.value = msTime * 0.001;
@@ -250,10 +328,10 @@ function animate(msTime) {
         // Get the sphere's current rotation as euler angles
         const sphereRotation = new THREE.Euler().setFromQuaternion(sphere.quaternion);
 
-        // Apply scaled rotation to environment mesh
-        envMesh.rotation.x = -sphereRotation.x * backgroundRotationFactor;
-        envMesh.rotation.z = -sphereRotation.y * backgroundRotationFactor; // Use Y rotation for Z-axis tilt
-        envMesh.rotation.y = sphereRotation.z * backgroundRotationFactor * 0.5; // Subtle Y-axis rotation
+        // Only rotate around Y axis for horizontal movement
+        // envMesh.rotation.y = -sphereRotation.y * backgroundRotationFactor * 3; // Reduced factor for more subtle movement
+        // envMesh.rotation.x = 0; // No X rotation
+        // envMesh.rotation.z = 0; // No Z rotation
     }
 
     // Hide sphere and update cubemap
@@ -370,23 +448,23 @@ function enableFallbackMode() {
     const viewToggle = document.querySelector(".view-toggle");
     const blur = document.getElementById("blur");
     const navbarHint = document.querySelector(".navbar-hint");
-    
+
     if (listView) {
         listView.classList.add("active");
         // Style changes for fallback mode
         listView.style.transform = "translateX(0)";
         listView.style.zIndex = "1000";
-        
+
         // Hide blur since we won't have the 3D effect
         if (blur) {
             blur.classList.add("hide");
         }
-        
+
         // Hide navbar hint since it's not needed in list view
         if (navbarHint) {
             navbarHint.classList.add("hide");
         }
-        
+
         // Update toggle if it exists
         if (viewToggle) {
             viewToggle.classList.add("active");
@@ -394,13 +472,13 @@ function enableFallbackMode() {
             viewToggle.style.pointerEvents = "none";
             viewToggle.style.opacity = "0.5";
         }
-        
+
         // Hide any three.js related elements
         const threeCanvas = document.querySelector(".three-canvas");
         if (threeCanvas) {
             threeCanvas.style.display = "none";
         }
-        
+
         // Make sure the UI is initialized for viewing projects
         if (typeof uiInit === 'function') {
             uiInit();

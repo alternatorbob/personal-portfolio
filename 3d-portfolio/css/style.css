@@ -3,6 +3,12 @@
     --bg-color: #000000;
     --text-color: #f2f2f2;
     --invert-filter: none;
+    --text-xs: 0.563rem;
+    --text-sm: 0.75rem;
+    --text-md: 1.333rem;
+    --text-lg: 1.777rem;
+    --text-title: 1.333rem;
+    --base-size: 16px;
 }
 
 /* Add inverted colors class that changes the CSS variables */
@@ -28,11 +34,23 @@
     font-size: var(--text-xs);
 }
 
+.bold {
+    font-weight: bold;
+}
+
 /* Apply the CSS variables to elements */
 body {
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", sans-serif;
+    font-size: var(--base-size);
+    line-height: 1.5;
     color: var(--text-color);
     background-color: var(--bg-color);
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Apply invert filter to specific elements */
@@ -71,6 +89,10 @@ body {
     pointer-events: none;
 }
 
+.navbar>* {
+    display: flex;
+}
+
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -92,8 +114,17 @@ body {
 }
 
 .navbar-name {
-    display: flex;
-    font-weight: bold;
+    font-size: var(--text-sm);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.navbar-center {
+    align-items: center;
+    justify-content: center;
 }
 
 #about-button {
@@ -105,18 +136,25 @@ body {
 }
 
 .navbar-right {
-    display: flex;
     align-items: center;
     gap: 24px;
 }
 
-.navbar-right > * {
+.navbar-right>* {
     transition: opacity 0.2s ease-in-out;
 }
 
-.navbar-name,
+/* .navbar-name,
 .navbar-right,
 .navbar-hint {
+    background-color: black;
+    border-radius: 50px;
+    padding: 10px;
+    height: 10px;
+} */
+
+
+.navbar>* {
     background-color: black;
     border-radius: 50px;
     padding: 10px;
@@ -128,10 +166,13 @@ body {
 }
 
 .navbar-button {
-    font-weight: bold;
-    cursor: pointer;
-    text-decoration: none;
     color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    cursor: pointer;
 }
 
 .navbar-hint {
@@ -139,9 +180,11 @@ body {
     align-items: center;
     text-align: center;
     position: absolute;
+    z-index: 1000;
     left: 50%;
     transform: translateX(-50%);
-    color: white; /* TODO: change color */
+    color: white;
+    /* TODO: change color */
     font-weight: bold;
 
     border-radius: 24px;
@@ -149,7 +192,12 @@ body {
     padding-left: 12px;
     padding-right: 12px;
 
-    transition: opacity 0.75s ease-in;
+    transition: opacity 0.75s ease-in, visibility 0s linear 0.75s;
+}
+
+.navbar-hint.fade-out {
+    opacity: 0;
+    visibility: hidden;
 }
 
 .navbar-link {
@@ -192,13 +240,21 @@ body {
 }
 
 .project-title {
-    font-weight: bold;
-    margin-top: -2px;
-    width: 26rem;
+    font-size: var(--text-title);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    width: 50%;
+    flex-basis: 50%;
 }
 
 .project-categories {
-    width: 10rem;
+    font-size: var(--text-sm);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    width: 30%;
+    flex-basis: 30%;
 }
 
 .project-year {
@@ -298,6 +354,7 @@ body {
     width: 20px;
     object-fit: contain;
     display: block;
+    align-self: center;
 }
 
 /* Blur effect for Three.js canvas */
@@ -439,7 +496,6 @@ body {
 
 .list-view-table thead {
     border-bottom: 0.15px solid rgba(242, 242, 242, 1);
-    font-weight: bold;
 }
 
 .list-view-table th,

@@ -76,6 +76,13 @@ let isHoveringOverSphere = false;
 // Track if we've already played the hover animation
 let hoverAnimationPlayed = false;
 
+// Add keyboard control parameters
+const nudgeFactor = 0.01; // Base velocity for arrow key nudges
+const velocityBuildUp = 1.05; // How much velocity builds up when holding keys
+const maxNudgeVelocity = 0.1; // Maximum velocity from keyboard controls
+let keyState = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+let keyHoldTime = { ArrowUp: 0, ArrowDown: 0, ArrowLeft: 0, ArrowRight: 0 };
+
 // Define touch event handlers before they're used
 // Touch event handlers
 const onTouchStart = function (e) {
@@ -129,6 +136,12 @@ const onTouchStart = function (e) {
 
     if (wasDragged == true) {
         navbarHint.classList.add("fade-out");
+        // Remove the element after transition completes
+        navbarHint.addEventListener("transitionend", function() {
+            if (navbarHint.classList.contains("fade-out")) {
+                navbarHint.remove();
+            }
+        }, { once: true });
     }
 
     lastMousePosition.set(touch.clientX, touch.clientY);
@@ -206,7 +219,7 @@ const onTouchEnd = function () {
 export function dragInit() {
     // isMobile is already initialized at the top of the file
     
-    // Initialize camera control
+    // Initialize camera control after environment creation
     cameraControl = createEnvironment(sphere.parent);
 
     // Now that we have originalSphereScale available, set the correct values
@@ -259,10 +272,17 @@ export function dragInit() {
 
     // Start the spring animation
     animateSpring();
+
+    // Add keyboard event listeners
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keyup', onKeyUp);
 }
 
 function animateSpring() {
     requestAnimationFrame(animateSpring);
+
+    // Update keyboard controls in the main animation loop
+    updateKeyboardControls();
 
     // Calculate spring physics with improved smoothness
     // Use appropriate spring stiffness based on device type
@@ -408,6 +428,12 @@ function onMouseDown(e) {
 
     if (wasDragged == true) {
         navbarHint.classList.add("fade-out");
+        // Remove the element after transition completes
+        navbarHint.addEventListener("transitionend", function() {
+            if (navbarHint.classList.contains("fade-out")) {
+                navbarHint.remove();
+            }
+        }, { once: true });
     }
 
     lastMousePosition.set(e.clientX, e.clientY);
@@ -457,9 +483,7 @@ function animateInertia() {
 
             // Apply rotation based on velocity components
             const xRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), rotationVelocity.y);
-
             const yRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), rotationVelocity.x);
-
             const rotationQuaternion = new THREE.Quaternion().multiplyQuaternions(yRotation, xRotation);
 
             // Apply rotation to sphere
@@ -620,6 +644,12 @@ function onWheel(e) {
     wasDragged = true;
     if (wasDragged == true) {
         navbarHint.classList.add("fade-out");
+        // Remove the element after transition completes
+        navbarHint.addEventListener("transitionend", function() {
+            if (navbarHint.classList.contains("fade-out")) {
+                navbarHint.remove();
+            }
+        }, { once: true });
     }
 
     // Use a scaled factor for wheel sensitivity - increased by 4x
@@ -672,4 +702,89 @@ function darkenProjectCube(cube) {
         // Create a dark overlay color
         cube.material.color = new THREE.Color(darknessFactor, darknessFactor, darknessFactor);
     }
+}
+
+function onKeyDown(e) {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+        keyState[e.key] = true;
+        keyHoldTime[e.key] = performance.now();
+        
+        // Mark that interaction has occurred and hide navbar hint
+        wasDragged = true;
+        if (wasDragged == true) {
+            navbarHint.classList.add("fade-out");
+            // Remove the element after transition completes
+            navbarHint.addEventListener("transitionend", function() {
+                if (navbarHint.classList.contains("fade-out")) {
+                    navbarHint.remove();
+                }
+            }, { once: true });
+        }
+    }
+}
+
+function onKeyUp(e) {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+        keyState[e.key] = false;
+        keyHoldTime[e.key] = 0;
+        
+        // Start inertia animation when key is released
+        if (rotationVelocity.length() > 0.0001) {
+            animateInertia();
+        }
+    }
+}
+
+function updateKeyboardControls() {
+    if (!keyState.ArrowUp && !keyState.ArrowDown && !keyState.ArrowLeft && !keyState.ArrowRight) {
+        return;
+    }
+
+    // Calculate rotation based on key states and hold time
+    let xRotation = 0;
+    let yRotation = 0;
+    const currentTime = performance.now();
+
+    if (keyState.ArrowUp) {
+        const holdTime = (currentTime - keyHoldTime.ArrowUp) / 1000; // Convert to seconds
+        xRotation -= nudgeFactor * (1 + holdTime * 0.5); // Increase effect with hold time
+    }
+    if (keyState.ArrowDown) {
+        const holdTime = (currentTime - keyHoldTime.ArrowDown) / 1000;
+        xRotation += nudgeFactor * (1 + holdTime * 0.5);
+    }
+    if (keyState.ArrowLeft) {
+        const holdTime = (currentTime - keyHoldTime.ArrowLeft) / 1000;
+        yRotation -= nudgeFactor * (1 + holdTime * 0.5);
+    }
+    if (keyState.ArrowRight) {
+        const holdTime = (currentTime - keyHoldTime.ArrowRight) / 1000;
+        yRotation += nudgeFactor * (1 + holdTime * 0.5);
+    }
+
+    // Apply rotation with velocity buildup
+    const xQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), xRotation);
+    const yQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), yRotation);
+    const rotationQuaternion = new THREE.Quaternion().multiplyQuaternions(yQuat, xQuat);
+
+    // Apply rotation to sphere
+    sphereRotation.multiplyQuaternions(rotationQuaternion, sphereRotation);
+    sphere.setRotationFromQuaternion(sphereRotation);
+
+    // Update velocity with buildup based on hold time
+    const holdTimeMultiplier = 1 + Math.max(
+        keyState.ArrowUp ? (currentTime - keyHoldTime.ArrowUp) / 1000 : 0,
+        keyState.ArrowDown ? (currentTime - keyHoldTime.ArrowDown) / 1000 : 0,
+        keyState.ArrowLeft ? (currentTime - keyHoldTime.ArrowLeft) / 1000 : 0,
+        keyState.ArrowRight ? (currentTime - keyHoldTime.ArrowRight) / 1000 : 0
+    ) * 0.5;
+
+    rotationVelocity.x = Math.min(maxNudgeVelocity, Math.max(-maxNudgeVelocity, rotationVelocity.x * velocityBuildUp + yRotation * holdTimeMultiplier));
+    rotationVelocity.y = Math.min(maxNudgeVelocity, Math.max(-maxNudgeVelocity, rotationVelocity.y * velocityBuildUp + xRotation * holdTimeMultiplier));
+
+    // Don't update cube positions for keyboard controls
+    // const velocityMagnitude = rotationVelocity.length();
+    // updateCubePositions(rotationQuaternion, velocityMagnitude);
 }

@@ -43,12 +43,15 @@ export function uiInit() {
     const aboutButton = document.getElementById("about-button");
     if (aboutButton) {
         aboutButton.addEventListener("click", () => {
-            pauseRenderer(); // Pause renderer when about button is clicked
+            navbarHint.classList.add("fade-out");
+            // Remove the element after transition completes
+            navbarHint.addEventListener("transitionend", function() {
+                if (navbarHint.classList.contains("fade-out")) {
+                    navbarHint.remove();
+                }
+            }, { once: true });
 
-            // Hide navbar hint when about button is clicked
-            if (navbarHint) {
-                navbarHint.classList.add("fade-out");
-            }
+            pauseRenderer(); // Pause renderer when about button is clicked
 
             uiSwitchState("about");
         });
@@ -187,6 +190,9 @@ export function uiSwitchState(state) {
     const projectCards = document.querySelectorAll(".project-card");
     const aboutCard = document.getElementById("about-card");
     const threeCanvas = document.querySelector(".three-canvas");
+    const listView = document.querySelector(".list-view");
+    const viewToggle = document.querySelector(".view-toggle");
+    const blur = document.getElementById("blur");
 
     // Handle about card
     if (state === "about") {
@@ -200,11 +206,31 @@ export function uiSwitchState(state) {
         if (threeCanvas) {
             threeCanvas.style.visibility = "visible";
         }
+        // Show list view and update toggle state
+        if (listView) {
+            listView.classList.add("active");
+        }
+        if (viewToggle) {
+            viewToggle.classList.add("active");
+        }
+        if (blur) {
+            blur.classList.remove("hide");
+        }
     } else if (state === "3d") {
         resumeRenderer(); // Resume renderer in 3D view
         // 3D view - ensure three.js canvas is visible
         if (threeCanvas) {
             threeCanvas.style.visibility = "visible";
+        }
+        // Hide list view and update toggle state
+        if (listView) {
+            listView.classList.remove("active");
+        }
+        if (viewToggle) {
+            viewToggle.classList.remove("active");
+        }
+        if (blur) {
+            blur.classList.add("hide");
         }
         
         // Close any open cards
@@ -269,74 +295,102 @@ export function addCursorStyles(camera, cubes) {
     });
 }
 
+function populateListView() {
+    const tableBody = document.querySelector(".list-view-table tbody");
+    const previewContainer = document.querySelector(".list-view-preview");
+    const previewImage = previewContainer ? previewContainer.querySelector("img") : null;
+
+    if (!tableBody) return;
+
+    // Clear existing rows
+    tableBody.innerHTML = "";
+
+    // Add rows for each project
+    sortedProjects.forEach((project) => {
+        const row = document.createElement("tr");
+        row.id = project.id;
+
+        // Create and add cells
+        const titleCell = document.createElement("td");
+        titleCell.textContent = project.title;
+        row.appendChild(titleCell);
+
+        const categoryCell = document.createElement("td");
+        categoryCell.textContent = project.categories.join(", ");
+        row.appendChild(categoryCell);
+
+        const yearCell = document.createElement("td");
+        yearCell.textContent = project.year;
+        row.appendChild(yearCell);
+
+        // Add hover events for preview
+        if (previewContainer && previewImage && project.images && project.images.length > 0) {
+            row.addEventListener("mouseenter", (e) => {
+                previewImage.src = project.images[0];
+                previewContainer.style.left = `${e.clientX}px`;
+                previewContainer.style.top = `${e.clientY}px`;
+                previewContainer.classList.add("show");
+            });
+
+            row.addEventListener("mousemove", (e) => {
+                previewContainer.style.left = `${e.clientX}px`;
+                previewContainer.style.top = `${e.clientY}px`;
+            });
+
+            row.addEventListener("mouseleave", () => {
+                previewContainer.classList.remove("show");
+            });
+        }
+
+        // Add click event to row to open project
+        row.addEventListener("click", function () {
+            const viewToggle = document.querySelector(".view-toggle");
+            const listView = document.querySelector(".list-view");
+            const threeCanvas = document.querySelector(".three-canvas");
+            const blur = document.getElementById("blur");
+
+            if (viewToggle) viewToggle.classList.remove("active");
+            if (listView) listView.classList.remove("active");
+            if (threeCanvas) threeCanvas.style.pointerEvents = "auto";
+
+            // Keep the blur layer visible when transitioning to project card
+            if (blur) {
+                blur.classList.remove("hide");
+            }
+
+            document.dispatchEvent(
+                new CustomEvent("open-project", {
+                    detail: { projectId: project.id },
+                })
+            );
+        });
+
+        tableBody.appendChild(row);
+    });
+}
+
 function initListViewToggle() {
     const viewToggle = document.querySelector(".view-toggle");
     const listView = document.querySelector(".list-view");
     const threeCanvas = document.querySelector(".three-canvas");
-    const blur = document.getElementById("blur");
-    let isListViewActive = false;
 
-    // Create preview container and image
-    const previewContainer = document.createElement("div");
-    previewContainer.className = "list-view-preview";
-    const previewImage = document.createElement("img");
-    previewContainer.appendChild(previewImage);
-    document.body.appendChild(previewContainer);
+    if (!viewToggle || !listView || !threeCanvas) return;
 
-    if (viewToggle && listView) {
-        viewToggle.addEventListener("click", function () {
-            isListViewActive = !isListViewActive;
-
-            if (isListViewActive) {
-                pauseRenderer(); // Pause renderer when list view is active
-                viewToggle.classList.add("active");
-                listView.classList.add("active");
-
-                // Show blur layer
-                if (blur) {
-                    blur.classList.remove("hide");
-                }
-
-                // Hide navbar hint when switching to list view
-                if (navbarHint) {
-                    navbarHint.classList.add("fade-out");
-                }
-
-                // Disable pointer events on canvas
-                if (threeCanvas) {
-                    threeCanvas.style.pointerEvents = "none";
-                }
-
-                // Populate the list view
-                populateListView(previewContainer, previewImage);
-            } else {
-                resumeRenderer(); // Resume renderer when returning to 3D view
-                viewToggle.classList.remove("active");
-                listView.classList.remove("active");
-
-                // Hide blur layer
-                if (blur) {
-                    blur.classList.add("hide");
-                }
-
-                // Re-enable pointer events on canvas
-                if (threeCanvas) {
-                    threeCanvas.style.pointerEvents = "auto";
-                }
-            }
-        });
-    }
-
-    // Initialize sorting functionality
-    initTableSorting(previewContainer, previewImage);
+    viewToggle.addEventListener("click", () => {
+        if (listView.classList.contains("active")) {
+            uiSwitchState("3d");
+        } else {
+            uiSwitchState("2d");
+        }
+    });
 }
 
-function initTableSorting(previewContainer, previewImage) {
+function initTableSorting() {
     const tableHeaders = document.querySelectorAll(".list-view-table th[data-sort]");
 
     // Set default sort by year descending
     sortProjects("year", "desc");
-    populateListView(previewContainer, previewImage);
+    populateListView();
 
     // Update sort indicators for all headers
     const updateSortIndicators = (activeHeader) => {
@@ -360,8 +414,10 @@ function initTableSorting(previewContainer, previewImage) {
 
     // Set initial sort indicators
     const yearHeader = document.querySelector('.list-view-table th[data-sort="year"]');
-    yearHeader.classList.add("sort-active", "sort-desc");
-    updateSortIndicators(yearHeader);
+    if (yearHeader) {
+        yearHeader.classList.add("sort-active", "sort-desc");
+        updateSortIndicators(yearHeader);
+    }
 
     tableHeaders.forEach((header) => {
         header.addEventListener("click", function () {
@@ -383,79 +439,9 @@ function initTableSorting(previewContainer, previewImage) {
             sortProjects(column, newOrder);
 
             // Repopulate the list view with the sorted projects
-            populateListView(previewContainer, previewImage);
+            populateListView();
         });
     });
-}
-
-function populateListView(previewContainer, previewImage) {
-    const tableBody = document.querySelector(".list-view-table tbody");
-
-    if (tableBody) {
-        // Clear existing rows
-        tableBody.innerHTML = "";
-
-        // Add a row for each project
-        sortedProjects.forEach((project) => {
-            const row = document.createElement("tr");
-            row.id = project.id;
-
-            // Create and add cells
-            const titleCell = document.createElement("td");
-            titleCell.textContent = project.title;
-            row.appendChild(titleCell);
-
-            const categoryCell = document.createElement("td");
-            categoryCell.textContent = project.categories.join(", ");
-            row.appendChild(categoryCell);
-
-            const yearCell = document.createElement("td");
-            yearCell.textContent = project.year;
-            row.appendChild(yearCell);
-
-            // Add hover events for preview
-            if (project.content && project.content.images && project.content.images.length > 0) {
-                row.addEventListener("mouseenter", (e) => {
-                    previewImage.src = project.content.images[0];
-                    previewContainer.style.left = `${e.clientX}px`;
-                    previewContainer.style.top = `${e.clientY}px`;
-                    previewContainer.classList.add("show");
-                });
-
-                row.addEventListener("mousemove", (e) => {
-                    previewContainer.style.left = `${e.clientX}px`;
-                    previewContainer.style.top = `${e.clientY}px`;
-                });
-
-                row.addEventListener("mouseleave", () => {
-                    previewContainer.classList.remove("show");
-                });
-            }
-
-            // Add click event to row to open project
-            row.addEventListener("click", function () {
-                const viewToggle = document.querySelector(".view-toggle");
-                const listView = document.querySelector(".list-view");
-                const threeCanvas = document.querySelector(".three-canvas");
-                const blur = document.getElementById("blur");
-
-                if (viewToggle) viewToggle.classList.remove("active");
-                if (listView) listView.classList.remove("active");
-                if (threeCanvas) threeCanvas.style.pointerEvents = "auto";
-
-                // Keep the blur layer visible when transitioning to project card
-                // (Don't add the hide class to the blur element)
-
-                document.dispatchEvent(
-                    new CustomEvent("open-project", {
-                        detail: { projectId: project.id },
-                    })
-                );
-            });
-
-            tableBody.appendChild(row);
-        });
-    }
 }
 
 function sortProjects(column, order) {
