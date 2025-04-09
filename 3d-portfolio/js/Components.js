@@ -263,7 +263,7 @@ export class ProjectCard extends Card {
 
         // Add title
         const title = document.createElement("div");
-        title.className = "project-title text-lg column";
+        title.className = "project-title text-lg bold column";
         title.textContent = this.project.title;
         info.appendChild(title);
 

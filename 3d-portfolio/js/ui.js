@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { projects } from "./projects";
 import { findObjectById, isMobileDevice, pauseRenderer, resumeRenderer } from "./utils";
-import { wasSelected, reverseSelected, navbarHint } from "../main";
+import { wasSelected, reverseSelected, navbar } from "../main";
 import { AboutCard, ProjectCard } from "./Components";
 
 // Global variables
@@ -43,16 +43,8 @@ export function uiInit() {
     const aboutButton = document.getElementById("about-button");
     if (aboutButton) {
         aboutButton.addEventListener("click", () => {
-            navbarHint.classList.add("fade-out");
-            // Remove the element after transition completes
-            navbarHint.addEventListener("transitionend", function() {
-                if (navbarHint.classList.contains("fade-out")) {
-                    navbarHint.remove();
-                }
-            }, { once: true });
-
+            navbar.hide();
             pauseRenderer(); // Pause renderer when about button is clicked
-
             uiSwitchState("about");
         });
     }
@@ -196,7 +188,8 @@ export function uiSwitchState(state) {
 
     // Handle about card
     if (state === "about") {
-        pauseRenderer(); // Pause when about card opens
+        navbar.hide();
+        pauseRenderer();
         if (!aboutCard) {
             createAboutPage(mainContainer);
         }

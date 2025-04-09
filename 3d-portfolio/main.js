@@ -8,6 +8,7 @@ import { addProjects, cubes } from "./js/addProjects";
 import { projects } from "./js/projects";
 import { createEnvironment, isRendering, pauseRenderer, resumeRenderer, easeInOutCubic } from "./js/utils";
 import { addProjectCardToPage, uiSwitchState, uiInit } from "./js/ui";
+import { Navbar } from "./js/navbar";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
@@ -17,7 +18,7 @@ import { VignetteShader } from 'three/addons/shaders/VignetteShader.js';
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 
 const mainContainer = document.querySelector(".main-container");
-export const navbarHint = document.querySelector(".navbar-hint");
+export const navbar = new Navbar();
 
 export let wasSelected = false;
 

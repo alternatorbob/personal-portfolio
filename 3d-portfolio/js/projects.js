@@ -20,7 +20,7 @@ export const projects = [
         description:
             "ELPE is a visual identity project completed at ECAL under the supervision of the head of the Graphic Design department, Angelo Benedetto. I was tasked to develop a dynamic visual identity for a hypothetical art space. The concept takes the glass lens and utilises its refractive property as an optical typographical effect.",
         year: "2020",
-        categories: ["graphic design", "art direction"],
+        categories: ["Graphic Design", "Creative Direction"],
 
         content: {
             images: [

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { camera, renderer, sphere, navbarHint, originalSphereScale } from "../main";
+import { camera, renderer, sphere, navbar, originalSphereScale } from "../main";
 import { cubes, cubeOriginalDimensions } from "./addProjects";
 import { uiSwitchState, addProjectCardToPage } from "./ui";
 import { createEnvironment, isMobileDevice, pauseRenderer } from "./utils";
@@ -106,7 +106,7 @@ const onTouchStart = function (e) {
     if (intersections.length > 0) {
         const intersectedObject = intersections[0].object;
         if (cubes.includes(intersectedObject)) {
-            // If a cube is clicked, switch to 2D mode and open the gallery
+            // If a cube is clicked, switch to project view and open the gallery
             const projectId = intersectedObject.name;
 
             // Mark project as viewed and darken its texture after 1s delay
@@ -117,7 +117,10 @@ const onTouchStart = function (e) {
                 }, 170);
             }
 
-            uiSwitchState("2d");
+            // Hide navbar when opening a project
+            navbar.hide();
+
+            // Open project card without switching to list view
             addProjectCardToPage(projectId, document.querySelector(".main-container"));
             return;
         }
@@ -135,13 +138,7 @@ const onTouchStart = function (e) {
     }
 
     if (wasDragged == true) {
-        navbarHint.classList.add("fade-out");
-        // Remove the element after transition completes
-        navbarHint.addEventListener("transitionend", function() {
-            if (navbarHint.classList.contains("fade-out")) {
-                navbarHint.remove();
-            }
-        }, { once: true });
+        navbar.hide();
     }
 
     lastMousePosition.set(touch.clientX, touch.clientY);
@@ -400,7 +397,7 @@ function onMouseDown(e) {
     if (intersections.length > 0) {
         const intersectedObject = intersections[0].object;
         if (cubes.includes(intersectedObject)) {
-            // If a cube is clicked, switch to 2D mode and open the gallery
+            // If a cube is clicked, switch to project view and open the gallery
             const projectId = intersectedObject.name;
 
             // Mark project as viewed and darken its texture after 1s delay
@@ -411,8 +408,12 @@ function onMouseDown(e) {
                 }, 170);
             }
 
-            uiSwitchState("2d");
+            // Hide navbar when opening a project
+            navbar.hide();
+
+            // Open project card without switching to list view
             addProjectCardToPage(projectId, document.querySelector(".main-container"));
+            return;
         } else {
             // If the sphere is clicked, handle dragging
             intersectionPoint = intersections[0].point;
@@ -427,13 +428,7 @@ function onMouseDown(e) {
     }
 
     if (wasDragged == true) {
-        navbarHint.classList.add("fade-out");
-        // Remove the element after transition completes
-        navbarHint.addEventListener("transitionend", function() {
-            if (navbarHint.classList.contains("fade-out")) {
-                navbarHint.remove();
-            }
-        }, { once: true });
+        navbar.hide();
     }
 
     lastMousePosition.set(e.clientX, e.clientY);
@@ -643,13 +638,7 @@ function onWheel(e) {
     // Mark that interaction has occurred and hide navbar hint
     wasDragged = true;
     if (wasDragged == true) {
-        navbarHint.classList.add("fade-out");
-        // Remove the element after transition completes
-        navbarHint.addEventListener("transitionend", function() {
-            if (navbarHint.classList.contains("fade-out")) {
-                navbarHint.remove();
-            }
-        }, { once: true });
+        navbar.hide();
     }
 
     // Use a scaled factor for wheel sensitivity - increased by 4x
@@ -713,13 +702,7 @@ function onKeyDown(e) {
         // Mark that interaction has occurred and hide navbar hint
         wasDragged = true;
         if (wasDragged == true) {
-            navbarHint.classList.add("fade-out");
-            // Remove the element after transition completes
-            navbarHint.addEventListener("transitionend", function() {
-                if (navbarHint.classList.contains("fade-out")) {
-                    navbarHint.remove();
-                }
-            }, { once: true });
+            navbar.hide();
         }
     }
 }
