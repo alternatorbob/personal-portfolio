@@ -37,39 +37,29 @@
             </div>
             <div class="navbar-right text-sm bold">
                 <div class="view-toggle button">
-                    <div class="toggle-slider"></div>
-                    <div class="toggle-text">
-                        <div class="toggle-text-container">
-                            <span class="toggle-text-close">Close</span>
-                            <span class="toggle-text-index">Index</span>
-                        </div>
-                    </div>
-                    <div class="toggle-cover toggle-cover-index"></div>
-                    <div class="toggle-cover toggle-cover-close"></div>
+                    <span id="index">Index</span>
                 </div>
-                <div class="navbar-button button " id="about-button">About</div>
+                <div class="navbar-button button" id="about-button">About</div>
             </div>
-            <div class="navbar-hint text-sm">To browse, drag the sphere or scroll. To open a project, click an image.
-            </div>
+            <div class="navbar-hint text-sm">To browse, drag the sphere or scroll. To open a project, click an image.</div>
         </div>
         <div id="blur" class="hide"></div>
+    </div>
 
-        <!-- Index View -->
-        <div class="index-view">
-            <table class="index-view-table">
-                <thead>
-                    <tr>
-                        <th data-sort="title">Project Title<span class="sort-indicator"></span></th>
-                        <th data-sort="category">Category</th>
-                        <th data-sort="year" class="sort-active sort-desc">Year<span class="sort-indicator">↓</span>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Will be populated with JavaScript -->
-                </tbody>
-            </table>
-        </div>
+    <!-- Index View - moved outside main container -->
+    <div class="index-view">
+        <table class="index-view-table">
+            <thead>
+                <tr>
+                    <th data-sort="title">Project Title<span class="sort-indicator"></span></th>
+                    <th data-sort="category">Category</th>
+                    <th data-sort="year" class="sort-active sort-desc">Year<span class="sort-indicator">↓</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Will be populated with JavaScript -->
+            </tbody>
+        </table>
     </div>
 
     <script type="module" src="/main.js"></script>

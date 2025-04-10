@@ -429,4 +429,31 @@ export class ProjectCard extends Card {
             if (originalOnClose) originalOnClose();
         };
     }
+}
+
+/**
+ * PreviewContainer class for showing project previews in the list view
+ */
+export class PreviewContainer {
+    constructor() {
+        this.element = document.createElement("div");
+        this.element.className = "index-view-preview";
+        document.body.appendChild(this.element);
+    }
+
+    /**
+     * Show a preview image
+     * @param {string} imageSrc - Source URL of the image to show
+     */
+    show(imageSrc) {
+        this.element.innerHTML = `<img src="${imageSrc}" alt="" />`;
+        this.element.classList.add("show");
+    }
+
+    /**
+     * Hide the preview
+     */
+    hide() {
+        this.element.classList.remove("show");
+    }
 } 

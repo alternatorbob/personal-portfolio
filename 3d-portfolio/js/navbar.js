@@ -10,11 +10,14 @@ export class Navbar {
     hide() {
         if (!this.element) return;
         
-        this.element.classList.add("fade-out");
-        this.element.addEventListener("transitionend", () => {
-            if (this.element.classList.contains("fade-out")) {
-                this.element.remove();
-                this.element = null;
+        // Store a reference to the element before removing it
+        const element = this.element;
+        this.element = null;
+        
+        element.classList.add("fade-out");
+        element.addEventListener("transitionend", () => {
+            if (element && element.classList.contains("fade-out")) {
+                element.remove();
             }
         }, { once: true });
     }
