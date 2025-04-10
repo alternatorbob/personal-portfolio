@@ -14,10 +14,10 @@ export class Card {
      */
     constructor(options = {}) {
         const { id, container, onClose } = options;
-        
+
         this.id = id || `card-${Date.now()}`;
         this.container = container;
-        this.onClose = onClose || (() => {});
+        this.onClose = onClose || (() => { });
         this.element = null;
         this.closeButton = null;
         this.escKeyHandler = null;
@@ -31,7 +31,7 @@ export class Card {
         const card = document.createElement("div");
         card.className = "project-card";
         card.id = this.id;
-        
+
         return card;
     }
 
@@ -43,9 +43,9 @@ export class Card {
         const closeBtn = document.createElement("div");
         closeBtn.className = "button-close";
         closeBtn.innerHTML = '<img src="/assets/UI/close-button.png" class="button" alt="close project button"/>';
-        
+
         closeBtn.addEventListener("click", () => this.close());
-        
+
         parent.appendChild(closeBtn);
         this.closeButton = closeBtn;
     }
@@ -60,7 +60,7 @@ export class Card {
                 this.removeEscKeyHandler();
             }
         };
-        
+
         document.addEventListener("keydown", this.escKeyHandler);
     }
 
@@ -88,7 +88,7 @@ export class Card {
         this.container.appendChild(this.element);
         this.addEscKeyHandler();
         this.open();
-        
+
         return this.element;
     }
 
@@ -141,7 +141,7 @@ export class Card {
         if (blur) {
             blur.classList.add("hide");
         }
-        
+
         // Remove project-card-open class from navbar to trigger fade-in transition
         if (navbar) {
             navbar.classList.remove("project-card-open");
@@ -154,7 +154,7 @@ export class Card {
         // Wait for animation to complete before removing
         setTimeout(() => {
             this.removeEscKeyHandler();
-            
+
             // Reset wasSelected state if needed
             if (typeof reverseSelected === "function") {
                 if (wasSelected) {
@@ -163,10 +163,10 @@ export class Card {
             } else if (typeof wasSelected !== "undefined" && wasSelected) {
                 wasSelected = false;
             }
-            
+
             // Execute the onClose callback
             this.onClose();
-            
+
             // Remove the element if it's still in the DOM
             if (this.element && this.element.parentNode) {
                 this.element.parentNode.removeChild(this.element);
@@ -191,7 +191,7 @@ export class AboutCard extends Card {
             id: "about-card",
             ...options
         });
-        
+
         this.content = options.content || {
             title: "About",
             description: ""
@@ -203,7 +203,7 @@ export class AboutCard extends Card {
      */
     createCardElement() {
         const card = super.createCardElement();
-        
+
         // Create info div like in project card for consistent layout
         const info = document.createElement("div");
         info.className = "project-info";
@@ -223,7 +223,7 @@ export class AboutCard extends Card {
 
         // Add close button
         this.addCloseButton(info);
-        
+
         return card;
     }
 }
@@ -244,7 +244,7 @@ export class ProjectCard extends Card {
             id: options.project?.id || `project-${Date.now()}`,
             ...options
         });
-        
+
         this.project = options.project || {};
         this.currentSlideIndex = 0;
         this.slides = [];
@@ -255,7 +255,7 @@ export class ProjectCard extends Card {
      */
     createCardElement() {
         const card = super.createCardElement();
-        
+
         // Create info section
         const info = document.createElement("div");
         info.className = "project-info";
@@ -290,10 +290,10 @@ export class ProjectCard extends Card {
 
         // Create gallery section
         this.createGallery(card);
-        
+
         // Add keyboard navigation
         this.setupKeyboardNavigation();
-        
+
         return card;
     }
 
@@ -304,7 +304,7 @@ export class ProjectCard extends Card {
     createGallery(card) {
         // Skip if no content available
         if (!this.project.content) return;
-        
+
         const gallery = document.createElement("div");
         gallery.className = "project-gallery";
         card.appendChild(gallery);
@@ -314,23 +314,23 @@ export class ProjectCard extends Card {
         gallery.appendChild(slideshowContainer);
 
         // Add next button if there are multiple items to display
-        const hasMultipleItems = 
+        const hasMultipleItems =
             (this.project.content.images?.length || 0) +
             (this.project.content.videos?.length || 0) +
             (this.project.content.gifs?.length || 0) > 1;
-            
+
         if (hasMultipleItems) {
             const nextBtn = document.createElement("div");
             nextBtn.className = "button-next button";
             nextBtn.innerHTML = '<img src="/assets/UI/next-button.png" alt="" />';
             gallery.appendChild(nextBtn);
-            
+
             nextBtn.addEventListener("click", () => this.showNextSlide());
         }
 
         // Create slides
         this.createSlides(slideshowContainer);
-        
+
         // Preload images for smoother transitions
         this.preloadImages();
     }
@@ -341,9 +341,9 @@ export class ProjectCard extends Card {
      */
     createSlides(container) {
         const { images = [], videos = [], gifs = [] } = this.project.content || {};
-        
+
         const numSlides = images.length + videos.length + gifs.length;
-        
+
         for (let i = 0; i < numSlides; i++) {
             const slide = document.createElement("div");
             slide.className = "slide";
@@ -372,7 +372,7 @@ export class ProjectCard extends Card {
      */
     preloadImages() {
         const { images = [], gifs = [] } = this.project.content || {};
-        
+
         [...images, ...gifs].forEach(src => {
             const img = new Image();
             img.src = src;
@@ -384,7 +384,7 @@ export class ProjectCard extends Card {
      */
     showNextSlide() {
         if (this.slides.length <= 1) return;
-        
+
         // Calculate the index of the next slide
         const nextIndex = (this.currentSlideIndex + 1) % this.slides.length;
 
@@ -416,12 +416,12 @@ export class ProjectCard extends Card {
                 this.showNextSlide();
             }
         };
-        
+
         document.addEventListener("keydown", keyHandler);
-        
+
         // Store the handler for cleanup
         this._keyboardHandler = keyHandler;
-        
+
         // Make sure to clean up when the card is closed
         const originalOnClose = this.onClose;
         this.onClose = () => {
@@ -446,8 +446,30 @@ export class PreviewContainer {
      * @param {string} imageSrc - Source URL of the image to show
      */
     show(imageSrc) {
-        this.element.innerHTML = `<img src="${imageSrc}" alt="" />`;
-        this.element.classList.add("show");
+        const img = new Image();
+        img.src = imageSrc;
+
+        img.onload = () => {
+            // Get the current max-width value (30vw)
+            const maxWidth = window.innerWidth * 0.3;
+            const maxHeight = window.innerHeight * 0.2;
+
+            // Check if image is portrait (height > width)
+            if (img.height > img.width) {
+                // Calculate new height based on max-width while maintaining aspect ratio
+                const aspectRatio = img.height / img.width;
+                const newHeight = maxHeight * aspectRatio;
+
+                // Set the container's height to match the image's new height
+                this.element.style.height = `${newHeight}px`;
+            } else {
+                // For landscape images, reset to default height
+                this.element.style.height = 'auto';
+            }
+
+            this.element.innerHTML = `<img src="${imageSrc}" alt="" />`;
+            this.element.classList.add("show");
+        };
     }
 
     /**

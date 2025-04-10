@@ -188,6 +188,17 @@ function initListViewToggle() {
             if (blur) blur.classList.add("hide");
             indexText.textContent = "Index";
             resumeRenderer();
+
+            // Update navbar background
+            const navbarName = document.querySelector('.navbar-name');
+            const navbarCenter = document.querySelector('.navbar-center');
+            const navbarRight = document.querySelector('.navbar-right');
+            const navbarHint = document.querySelector('.navbar-hint');
+
+            if (navbarName) navbarName.style.backgroundColor = 'black';
+            if (navbarCenter) navbarCenter.style.backgroundColor = 'black';
+            if (navbarRight) navbarRight.style.backgroundColor = 'black';
+            if (navbarHint) navbarHint.style.backgroundColor = 'black';
         } else {
             // Open index view
             navbar.hide();
@@ -197,6 +208,17 @@ function initListViewToggle() {
             if (blur) blur.classList.remove("hide");
             indexText.textContent = "Close";
             pauseRenderer();
+
+            // Update navbar background
+            const navbarName = document.querySelector('.navbar-name');
+            const navbarCenter = document.querySelector('.navbar-center');
+            const navbarRight = document.querySelector('.navbar-right');
+            const navbarHint = document.querySelector('.navbar-hint');
+
+            if (navbarName) navbarName.style.backgroundColor = '#202020';
+            if (navbarCenter) navbarCenter.style.backgroundColor = '#202020';
+            if (navbarRight) navbarRight.style.backgroundColor = '#202020';
+            if (navbarHint) navbarHint.style.backgroundColor = '#202020';
         }
     });
 }
@@ -263,7 +285,7 @@ export function addProjectCardToPage(projectId, container) {
             }
         }
     });
-    
+
     return projectCard.render();
 }
 
@@ -305,6 +327,17 @@ const uiActions = {
         if (viewToggle) viewToggle.classList.add("active");
         if (blur) blur.classList.remove("hide");
         if (indexText) indexText.textContent = "Close";
+
+        // Update navbar background
+        const navbarName = document.querySelector('.navbar-name');
+        const navbarCenter = document.querySelector('.navbar-center');
+        const navbarRight = document.querySelector('.navbar-right');
+        const navbarHint = document.querySelector('.navbar-hint');
+
+        if (navbarName) navbarName.style.backgroundColor = '#202020';
+        if (navbarCenter) navbarCenter.style.backgroundColor = '#202020';
+        if (navbarRight) navbarRight.style.backgroundColor = '#202020';
+        if (navbarHint) navbarHint.style.backgroundColor = '#202020';
     },
 
     showThreeD() {
@@ -316,6 +349,17 @@ const uiActions = {
         if (viewToggle) viewToggle.classList.remove("active");
         if (blur) blur.classList.add("hide");
         if (indexText) indexText.textContent = "Index";
+
+        // Update navbar background
+        const navbarName = document.querySelector('.navbar-name');
+        const navbarCenter = document.querySelector('.navbar-center');
+        const navbarRight = document.querySelector('.navbar-right');
+        const navbarHint = document.querySelector('.navbar-hint');
+
+        if (navbarName) navbarName.style.backgroundColor = 'black';
+        if (navbarCenter) navbarCenter.style.backgroundColor = 'black';
+        if (navbarRight) navbarRight.style.backgroundColor = 'black';
+        if (navbarHint) navbarHint.style.backgroundColor = 'black';
 
         // Close any open project cards
         projectCards.forEach(card => {
