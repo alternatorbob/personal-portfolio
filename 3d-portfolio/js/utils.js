@@ -103,12 +103,7 @@ export function findObjectById(objectsArray, id) {
 }
 
 function createEnvironment(scene) {
-    // Load the 2D image as a texture
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load("/assets/textures/hdr/28.03.2023_fade_background.jpg");
-    const fadeBg = loader.load("/assets/textures/hdr/28.03.2023_fade_background_S.jpg", (texture) => {
-        scene.background = texture;
-    });
+    // Remove background texture loading since we don't need it anymore
 
     // Camera orbit parameters
     const cameraOrbit = {

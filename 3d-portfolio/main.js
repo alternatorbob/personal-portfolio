@@ -152,7 +152,7 @@ function threeInit() {
                 float y = vWorldPosition.y;
     
                 // Gradient transition with wider smoothing area
-                float gradient = smoothstep(-100.0, -30.0, y - 16.0);
+                float gradient = smoothstep(-100.0, 30.0, y + 100.0);
     
                 // Base color blend from white (floor) to black (top)
                 vec3 color = mix(vec3(1.0), vec3(0.0), gradient);
@@ -167,7 +167,7 @@ function threeInit() {
 
     // Create environment cube using the globally defined shader
     envMesh = new THREE.Mesh(
-        new THREE.BoxGeometry(1000, 1000, 1000),
+        new THREE.BoxGeometry(1500, 1500, 1500),
         new THREE.ShaderMaterial({
             uniforms: gradientShader.uniforms,
             vertexShader: gradientShader.vertexShader,
@@ -175,6 +175,7 @@ function threeInit() {
             side: THREE.BackSide,
         })
     );
+    envMesh.position.set(0, -200, 0);
     scene.add(envMesh);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -322,17 +323,6 @@ function animate(msTime) {
     // Update gradient shader time uniform if needed
     if (gradientShader && gradientShader.uniforms) {
         gradientShader.uniforms.time.value = msTime * 0.001;
-    }
-
-    // Update environment mesh rotation based on sphere rotation
-    if (envMesh && sphere && sphere.quaternion) {
-        // Get the sphere's current rotation as euler angles
-        const sphereRotation = new THREE.Euler().setFromQuaternion(sphere.quaternion);
-
-        // Only rotate around Y axis for horizontal movement
-        // envMesh.rotation.y = -sphereRotation.y * backgroundRotationFactor * 3; // Reduced factor for more subtle movement
-        // envMesh.rotation.x = 0; // No X rotation
-        // envMesh.rotation.z = 0; // No Z rotation
     }
 
     // Hide sphere and update cubemap
