@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { projects } from "./projects";
+import content from "../src/content.json";
 import { findObjectById, isMobileDevice, pauseRenderer, resumeRenderer } from "./utils";
 import { wasSelected, reverseSelected, navbar } from "../main";
 import { AboutCard, ProjectCard } from "./Components";
@@ -18,7 +18,7 @@ if (navBarHint) {
 
 export function uiInit() {
     // Initialize sortedProjects with projects array
-    sortedProjects = [...projects];
+    sortedProjects = [...content.projects];
 
     // Initialize UI components
     initNavbar();
@@ -56,7 +56,6 @@ export function uiInit() {
             const viewToggle = document.querySelector(".view-toggle");
             const indexView = document.querySelector(".index-view");
             const threeCanvas = document.querySelector(".three-canvas");
-            const blur = document.getElementById("blur");
             const aboutCard = document.getElementById("about-card");
             const indexText = document.getElementById("index");
             const projectCard = document.querySelector(".project-card");
@@ -86,7 +85,7 @@ export function uiInit() {
                 viewToggle.classList.remove("active");
                 if (indexView) indexView.classList.remove("active");
                 if (threeCanvas) threeCanvas.style.pointerEvents = "auto";
-                if (blur) blur.classList.add("hide");
+                setBlurLayer(false);
                 if (indexText) indexText.textContent = "Index";
                 resumeRenderer();
             }
@@ -224,17 +223,7 @@ function initListViewToggle() {
 }
 
 // About page content
-const aboutContent = {
-    title: "About",
-    description: `
-       <p> Bogdan Nastase is an experience designer based in Amsterdam working across 
-       interaction, digital, and sound design. Currently working as an Interaction Designer at 
-       Random Studio, he develops concept-driven work for clients in culture, fashion, and sports, 
-       and collaborates with architects on spatial projects involving contemporary technology. 
-       Parallel to this, he supports artists as a creative technologist and works as a designer 
-       and creative director for electronic music labels. </p>
-    `,
-};
+const aboutContent = content.about;
 
 // Function to create about page using the AboutCard component
 export function createAboutPage(container) {
@@ -251,6 +240,21 @@ export function createAboutPage(container) {
             }
         }
     });
+    
+    // Render the about card
+    aboutCard.render();
+}
+
+// Add universal blur layer control function
+function setBlurLayer(show) {
+    const blur = document.getElementById("blur");
+    if (blur) {
+        if (show) {
+            blur.classList.remove("hide");
+        } else {
+            blur.classList.add("hide");
+        }
+    }
 }
 
 //dispatch mouseup event to stop sphere drag when project is open
@@ -263,7 +267,7 @@ export function addProjectCardToPage(projectId, container) {
         return null; // Don't create another card if one exists already
     }
 
-    const project = findObjectById(projects, projectId);
+    const project = findObjectById(content.projects, projectId);
     if (!project) return;
 
     // Check if we're in index view
@@ -277,8 +281,7 @@ export function addProjectCardToPage(projectId, container) {
         onClose: () => {
             if (isInIndexView) {
                 // If in index view, just close the project card
-                const blur = document.getElementById("blur");
-                if (blur) blur.classList.remove("hide");
+                setBlurLayer(true);
             } else {
                 // If not in index view, return to 3D view
                 uiSwitchState("3d");
@@ -286,6 +289,8 @@ export function addProjectCardToPage(projectId, container) {
         }
     });
 
+    // Show blur layer when opening project card
+    setBlurLayer(true);
     return projectCard.render();
 }
 
@@ -311,46 +316,55 @@ const uiActions = {
     showAbout() {
         navbar.hide();
         pauseRenderer();
+        setBlurLayer(true);
+        
         if (!uiElements.aboutCard) {
             createAboutPage(uiElements.mainContainer);
+        } else {
+            // If card exists but is hidden, show it
+            const aboutCard = uiElements.aboutCard;
+            aboutCard.style.transform = "translateY(0)";
+            aboutCard.style.opacity = "1";
+            aboutCard.style.visibility = "visible";
+            aboutCard.classList.add("show");
         }
     },
 
     showIndex() {
         pauseRenderer();
-        const { threeCanvas, indexView, viewToggle, blur, indexText } = uiElements;
+        const { threeCanvas, indexView, viewToggle, indexText } = uiElements;
         
         if (threeCanvas) threeCanvas.style.pointerEvents = "none";
         if (indexView) {
             indexView.classList.add("active");
         }
         if (viewToggle) viewToggle.classList.add("active");
-        if (blur) blur.classList.remove("hide");
+        setBlurLayer(true);
         if (indexText) indexText.textContent = "Close";
 
-        // Update navbar background
+        // Remove navbar background when index is open
         const navbarName = document.querySelector('.navbar-name');
         const navbarCenter = document.querySelector('.navbar-center');
         const navbarRight = document.querySelector('.navbar-right');
         const navbarHint = document.querySelector('.navbar-hint');
 
-        if (navbarName) navbarName.style.backgroundColor = '#202020';
-        if (navbarCenter) navbarCenter.style.backgroundColor = '#202020';
-        if (navbarRight) navbarRight.style.backgroundColor = '#202020';
-        if (navbarHint) navbarHint.style.backgroundColor = '#202020';
+        if (navbarName) navbarName.style.backgroundColor = 'transparent';
+        if (navbarCenter) navbarCenter.style.backgroundColor = 'transparent';
+        if (navbarRight) navbarRight.style.backgroundColor = 'transparent';
+        if (navbarHint) navbarHint.style.backgroundColor = 'transparent';
     },
 
     showThreeD() {
         resumeRenderer();
-        const { threeCanvas, indexView, viewToggle, blur, indexText, projectCards } = uiElements;
+        const { threeCanvas, indexView, viewToggle, indexText, projectCards } = uiElements;
         
         if (threeCanvas) threeCanvas.style.visibility = "visible";
         if (indexView) indexView.classList.remove("active");
         if (viewToggle) viewToggle.classList.remove("active");
-        if (blur) blur.classList.add("hide");
+        setBlurLayer(false);
         if (indexText) indexText.textContent = "Index";
 
-        // Update navbar background
+        // Restore navbar background when index is closed
         const navbarName = document.querySelector('.navbar-name');
         const navbarCenter = document.querySelector('.navbar-center');
         const navbarRight = document.querySelector('.navbar-right');

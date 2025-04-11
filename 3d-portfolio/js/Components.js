@@ -1,5 +1,6 @@
 import { pauseRenderer, resumeRenderer } from "./utils";
 import { reverseSelected, wasSelected } from "../main";
+import content from "../src/content.json";
 
 /**
  * Base Card class that provides common functionality for project and about cards
@@ -188,14 +189,11 @@ export class AboutCard extends Card {
      */
     constructor(options = {}) {
         super({
-            id: "about-card",
+            className: "about-card",
             ...options
         });
 
-        this.content = options.content || {
-            title: "About",
-            description: ""
-        };
+        this.content = options.content || content.about;
     }
 
     /**
@@ -203,28 +201,89 @@ export class AboutCard extends Card {
      */
     createCardElement() {
         const card = super.createCardElement();
+        card.style.display = "flex";
+        card.style.position = "absolute";
+        card.style.width = "46vw";
+        card.style.height = "46vh";
+        card.style.alignSelf = "center";
+        card.style.justifySelf = "center";
+        card.style.padding = "110px";
 
-        // Create info div like in project card for consistent layout
-        const info = document.createElement("div");
-        info.className = "project-info";
-        card.appendChild(info);
+        // Create the content container
+        const contentContainer = document.createElement("div");
+        contentContainer.className = "about-content text-sm p-line-height";
 
-        const title = document.createElement("h2");
-        title.className = "project-card-title text-lg column";
-        title.textContent = this.content.title;
-        title.style.textAlign = "center";
-        info.appendChild(title);
+        // Add profile text
+        const profile = document.createElement("p");
+        profile.className = "profile-text";
+        profile.textContent = this.content.profile;
+        contentContainer.appendChild(profile);
 
-        const description = document.createElement("div");
-        description.className = "column text-sm";
-        description.innerHTML = this.content.description;
-        description.style.textAlign = "center";
-        info.appendChild(description);
+        const contactContainer = document.createElement("div");
+        contactContainer.className = "contact-container";
+        contentContainer.appendChild(contactContainer);
+
+        // Add contact information
+        const contact = document.createElement("div");
+        contact.className = "contact-info";
+        contact.innerHTML = this.content.contact.replace(/\n/g, '<br>');
+        contactContainer.appendChild(contact);
+
+        // Add social links
+        const socials = document.createElement("div");
+        socials.className = "social-links";
+
+        const entries = Object.entries(this.content.socials);
+        entries.forEach(([platform, link], index) => {
+            const socialLink = document.createElement("a");
+            socialLink.href = link;
+            socialLink.target = "_blank";
+            socialLink.rel = "noopener noreferrer";
+            socialLink.textContent = platform + (index < entries.length - 1 ? ", " : "");
+            socialLink.classList.add("button");
+            socials.appendChild(socialLink);
+        });
+
+        contactContainer.appendChild(socials);
 
         // Add close button
-        this.addCloseButton(info);
+        const closeButton = document.createElement("div");
+        closeButton.className = "button-close";
+        closeButton.innerHTML = '<img src="/assets/UI/close-button.png" class="button" alt="close project button"/>';
+        closeButton.onclick = () => {
+            if (this.onClose) {
+                this.onClose();
+            }
+            this.close();
+        };
+
+        // Append all elements
+        card.appendChild(contentContainer);
+        card.appendChild(closeButton);
 
         return card;
+    }
+
+    /**
+     * Render the about card
+     */
+    render() {
+        this.element = this.createCardElement();
+        this.container.appendChild(this.element);
+
+        // Show blur layer
+        const blur = document.getElementById("blur");
+        if (blur) {
+            blur.classList.remove("hide");
+        }
+
+        // Add ESC key handler
+        this.addEscKeyHandler();
+
+        // Animate the card in
+        this.open();
+
+        return this.element;
     }
 }
 
@@ -261,17 +320,23 @@ export class ProjectCard extends Card {
         info.className = "project-info";
         card.appendChild(info);
 
-        // Add title
+        // Create title container
         const title = document.createElement("div");
-        title.className = "project-title text-lg bold column";
-        title.textContent = this.project.title;
-        info.appendChild(title);
+        title.className = "project-title text-lg column";
 
-        // Add categories
+        // Add categories first
         const categories = document.createElement("div");
-        categories.className = "project-categories column text-sm";
+        categories.className = "project-categories all-caps column text-sm";
         categories.textContent = this.project.categories.join(", ");
-        info.appendChild(categories);
+        title.appendChild(categories);
+
+        // Add title text
+        const titleText = document.createElement("div");
+        titleText.className = "project-title-text bold";
+        titleText.textContent = this.project.title;
+        title.appendChild(titleText);
+
+        info.appendChild(title);
 
         // Add year
         const year = document.createElement("div");
@@ -281,7 +346,7 @@ export class ProjectCard extends Card {
 
         // Add description
         const description = document.createElement("div");
-        description.className = "project-description column text-sm";
+        description.className = "project-description column text-sm p-line-height";
         description.textContent = this.project.description;
         info.appendChild(description);
 
@@ -408,12 +473,42 @@ export class ProjectCard extends Card {
     }
 
     /**
+     * Show the previous slide in the gallery
+     */
+    showPreviousSlide() {
+        if (this.slides.length <= 1) return;
+
+        // Calculate the index of the previous slide
+        const prevIndex = (this.currentSlideIndex - 1 + this.slides.length) % this.slides.length;
+
+        // Position the previous slide off-screen to the left
+        this.slides[prevIndex].style.transition = "none";
+        this.slides[prevIndex].style.transform = "translateX(-100%)";
+
+        // Force reflow to ensure the position is set before starting animation
+        this.slides[prevIndex].offsetHeight;
+
+        // Move the current slide out to the right
+        this.slides[this.currentSlideIndex].style.transition = "transform 0.3s ease-in-out";
+        this.slides[this.currentSlideIndex].style.transform = "translateX(100%)";
+
+        // Animate the previous slide in from the left
+        this.slides[prevIndex].style.transition = "transform 0.3s ease-in-out";
+        this.slides[prevIndex].style.transform = "translateX(0)";
+
+        // Update the current index
+        this.currentSlideIndex = prevIndex;
+    }
+
+    /**
      * Set up keyboard navigation for the card
      */
     setupKeyboardNavigation() {
         const keyHandler = (e) => {
             if (e.key === "ArrowRight") {
                 this.showNextSlide();
+            } else if (e.key === "ArrowLeft") {
+                this.showPreviousSlide();
             }
         };
 
@@ -461,10 +556,12 @@ export class PreviewContainer {
                 const newHeight = maxHeight * aspectRatio;
 
                 // Set the container's height to match the image's new height
-                this.element.style.height = `${newHeight}px`;
+                // this.element.style.height = `${newHeight}px`;
+                this.element.style.width = `${maxWidth / 1.5}px`;
             } else {
                 // For landscape images, reset to default height
                 this.element.style.height = 'auto';
+                this.element.style.width = `${maxWidth}px`;
             }
 
             this.element.innerHTML = `<img src="${imageSrc}" alt="" />`;

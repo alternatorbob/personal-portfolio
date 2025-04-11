@@ -213,18 +213,18 @@ const onTouchEnd = function () {
     }
 };
 
-export function dragInit() {
+export function dragInit(cameraControl) {
     // isMobile is already initialized at the top of the file
     
-    // Initialize camera control after environment creation
-    cameraControl = createEnvironment(sphere.parent);
-
     // Now that we have originalSphereScale available, set the correct values
     targetScale = originalSphereScale;
     currentScale = originalSphereScale;
 
     // Ensure sphere starts at the correct size
     sphere.scale.set(originalSphereScale, originalSphereScale, originalSphereScale);
+
+    // Initialize camera control after environment creation
+    cameraControl = createEnvironment(sphere.parent);
 
     // Initialize cube positions and randomized properties
     for (let cube of cubes) {

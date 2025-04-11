@@ -32,7 +32,8 @@
             </div>
             <div class="navbar-center">
                 <div class="button button-invert">
-                    <img src="/assets/UI/ball-button.png" alt="Invert colors" />
+                    <img src="/assets/UI/ball-button-metal.png" alt="Metal mode" class="metal-button" />
+                    <img src="/assets/UI/ball-button-glass.png" alt="Glass mode" class="glass-button" style="position:absolute"/>
                 </div>
             </div>
             <div class="navbar-right text-sm bold">
@@ -41,7 +42,8 @@
                 </div>
                 <div class="navbar-button button" id="about-button">About</div>
             </div>
-            <div class="navbar-hint text-sm">To browse, drag the sphere or scroll. To open a project, click an image.</div>
+            <div class="navbar-hint text-sm bold">To browse, drag the sphere or scroll. To open a project, click an image.
+            </div>
         </div>
         <div id="blur" class="hide"></div>
     </div>
@@ -49,13 +51,6 @@
     <!-- Index View - moved outside main container -->
     <div class="index-view">
         <table class="index-view-table">
-            <thead>
-                <tr>
-                    <th data-sort="title">Project Title<span class="sort-indicator"></span></th>
-                    <th data-sort="category">Category</th>
-                    <th data-sort="year" class="sort-active sort-desc">Year<span class="sort-indicator">↓</span></th>
-                </tr>
-            </thead>
             <tbody>
                 <!-- Will be populated with JavaScript -->
             </tbody>

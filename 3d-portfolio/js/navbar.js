@@ -1,3 +1,5 @@
+import content from "../src/content.json";
+
 export class Navbar {
     constructor() {
         this.element = document.querySelector(".navbar-hint");

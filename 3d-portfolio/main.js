@@ -5,8 +5,8 @@ import * as THREE from "three";
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 import { dragInit } from "./js/dragControl";
 import { addProjects, cubes } from "./js/addProjects";
-import { projects } from "./js/projects";
 import { createEnvironment, isRendering, pauseRenderer, resumeRenderer, easeInOutCubic } from "./js/utils";
+import content from "./src/content.json";
 import { addProjectCardToPage, uiSwitchState, uiInit } from "./js/ui";
 import { Navbar } from "./js/navbar";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
@@ -248,6 +248,12 @@ function threeInit() {
             isGlassMaterial = !isGlassMaterial;
             transitionInProgress = true;
             transitionStartTime = performance.now();
+            
+            // Toggle the glass-mode class on the button-invert element
+            const buttonInvert = document.querySelector('.button-invert');
+            if (buttonInvert) {
+                buttonInvert.classList.toggle('glass-mode');
+            }
         }
     });
 
@@ -255,8 +261,11 @@ function threeInit() {
     cubeCamera.position.copy(sphere.position);
     cubeCamera.update(renderer, scene);
 
-    addProjects(projects);
-    dragInit();
+    // Initialize camera control before dragInit
+    const cameraControl = createEnvironment(sphere.parent);
+
+    addProjects(content.projects);
+    dragInit(cameraControl);
     uiInit();
 
     // Setup post-processing
@@ -301,7 +310,7 @@ function animate(msTime) {
         const elapsed = msTime - transitionStartTime;
         const rawProgress = Math.min(elapsed / TRANSITION_DURATION, 1);
         const progress = easeInOutCubic(rawProgress);
-        
+
         if (isGlassMaterial) {
             // Fading to glass
             metalMaterial.opacity = 1 - progress;

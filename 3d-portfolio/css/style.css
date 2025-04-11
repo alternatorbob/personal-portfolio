@@ -11,6 +11,8 @@
     --text-title: 1.333rem;
     --base-size: 16px;
     --navbar-padding: 10px;
+    --p-line-height: 1.2;
+    --title-line-height: 1.0;
 }
 
 /* Add inverted colors class that changes the CSS variables */
@@ -38,6 +40,10 @@
 
 .bold {
     font-weight: bold;
+}
+
+.p-line-height {
+    line-height: var(--p-line-height);
 }
 
 /* Apply the CSS variables to elements */
@@ -99,23 +105,23 @@ body {
     flex-shrink: 0;
     pointer-events: auto;
     z-index: 3;
-    transition: opacity 0.4s ease-in-out, backdrop-filter 0.4s ease-in-out, visibility 0.4s ease-in-out;
+    transition: opacity 0.28s ease-in-out, backdrop-filter 0.28s ease-in-out, visibility 0.28s ease-in-out;
 }
 
-.navbar > * {
+.navbar>* {
     display: flex;
     background-color: black;
     border-radius: 50px;
     padding: var(--navbar-padding);
     height: 10px;
-    transition: background-color 0.32s ease-in-out;
+    transition: background-color 0.22s ease-in-out;
 }
 
-.navbar.index-active > * {
-    background-color: var(--project-bg-color) !important;
+.navbar.index-active>* {
+    background-color: transparent !important;
 }
 
-.view-toggle.active ~ .navbar > * {
+.view-toggle.active~.navbar>* {
     background-color: var(--project-bg-color);
 }
 
@@ -150,7 +156,7 @@ body {
 
 .navbar-right {
     align-items: center;
-    gap: 24px;
+    gap: 16px;
 }
 
 .navbar-right>* {
@@ -180,9 +186,6 @@ body {
     left: 50%;
     transform: translateX(-50%);
     color: white;
-    /* TODO: change color */
-    font-weight: bold;
-
     border-radius: 50px;
     padding: 10px;
     height: 10px;
@@ -225,31 +228,42 @@ body {
 
 .project-info {
     display: flex;
-    justify-content: space-between;
+    flex-direction: row;
+    gap: 8px;
     margin-bottom: 24px;
     flex-shrink: 0;
-}
-
-.project-title-group {
-    flex-basis: 30vw;
 }
 
 .project-title {
     font-size: var(--text-title);
     color: var(--text-color);
-    margin-top: -18px;
+    line-height: var(--title-line-height);
+    margin: 0;
     padding: 0;
-    width: 50%;
-    flex-basis: 50%;
+    width: 25vw;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.project-title-text {
+    font-size: var(--text-lg);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    margin-top: 4px;
+    margin-left: -1px;
 }
 
 .project-categories {
     font-size: var(--text-sm);
     color: var(--text-color);
+    letter-spacing: 0.125px;
     margin: 0;
     padding: 0;
-    width: 30%;
-    flex-basis: 30%;
+    width: 100%;
+    order: -1;
+    /* This will make categories appear before the title text */
 }
 
 .project-year {
@@ -258,6 +272,8 @@ body {
 
 .project-description {
     flex-basis: 60vw;
+    margin-top: 2px;
+
 }
 
 .project-gallery {
@@ -305,8 +321,81 @@ body {
     align-self: flex-start;
 }
 
-#about-card {
+.about-card {
+    position: absolute;
+    background-color: var(--project-bg-color);
+    border-radius: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: transform 0.3s ease-in-out;
+}
+
+.about-card .about-content {
     display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.about-card .profile-text {
+    font-size: var(--text-sm);
+    line-height: var(--p-line-height);
+}
+
+.about-card .contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.about-card .contact-info p {
+    font-size: var(--text-sm);
+    line-height: var(--p-line-height);
+}
+
+.contact-container {
+    display: flex;
+    gap: 40px;
+}
+
+.about-card .social-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.social-links a {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+
+.about-card .social-links a {
+    font-size: var(--text-sm);
+    color: var(--text-color);
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+.about-card .social-links a:hover {
+    opacity: 0.7;
+}
+
+.about-card .button-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px;
+    line-height: 1;
+    transition: opacity 0.2s ease;
+}
+
+.about-card .button-close:hover {
+    opacity: 0.7;
 }
 
 /* Remove all existing invert-related CSS and replace with: */
@@ -337,7 +426,7 @@ body {
 
 .button {
     cursor: pointer;
-    transition: opacity 0.22s ease-in;
+    transition: opacity 0.1s ease-in;
     opacity: 1;
 }
 
@@ -345,11 +434,36 @@ body {
     opacity: 0.65;
 }
 
+.button-invert {
+    position: relative;
+    width: 20px;
+    height: 20px;
+}
+
 .button-invert img {
     width: 20px;
+    height: 20px;
     object-fit: contain;
-    display: block;
-    align-self: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: opacity 0.72s ease-in-out;
+}
+
+.button-invert .metal-button {
+    opacity: 1;
+}
+
+.button-invert .glass-button {
+    opacity: 0;
+}
+
+.button-invert.glass-mode .metal-button {
+    opacity: 0;
+}
+
+.button-invert.glass-mode .glass-button {
+    opacity: 1;
 }
 
 /* Blur effect for Three.js canvas */
@@ -491,12 +605,12 @@ body {
 }
 
 .index-view-table thead {
-    border-bottom: 0.15px solid rgba(242, 242, 242, 1);
+    /* border-bottom: 0.15px solid rgba(242, 242, 242, 1); */
 }
 
 .index-view-table th,
 .index-view-table td {
-    padding: 6px 6px;
+    padding: 4px;
     text-align: left;
     border-bottom: 0.15px solid rgba(242, 242, 242, 0.35);
     color: var(--text-color);
@@ -505,7 +619,7 @@ body {
 }
 
 .index-view-table tbody tr:first-child td {
-    border-top: 1px solid rgba(242, 242, 242, 0.6);
+    border-top: 0.15px solid rgba(242, 242, 242, 0.35);
 }
 
 .index-view-table th:first-child,
@@ -526,6 +640,7 @@ body {
     padding-right: 0;
     width: 10%;
     /* Year width */
+    text-align: right;
 }
 
 .index-view-table tr {
@@ -567,7 +682,7 @@ body {
     visibility: hidden;
     transition: opacity 0.15s ease-in-out, visibility 0.15s ease-in-out;
     pointer-events: none;
-    top: 16vh;
+    top: 15vh;
     left: 50%;
 }
 
@@ -581,4 +696,8 @@ body {
 .index-view-preview.show {
     opacity: 1;
     visibility: visible;
+}
+
+.all-caps {
+    text-transform: uppercase;
 }
