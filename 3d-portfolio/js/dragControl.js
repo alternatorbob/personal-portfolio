@@ -8,15 +8,14 @@ let isDragging = false;
 let wasDragged = false;
 let lastMousePosition = new THREE.Vector2();
 export let mousePosition = new THREE.Vector2();
-let intersectionPoint; // Required for touch interactions
 let lastTime = 0; // Track time for velocity calculations
 
 // Spring effect parameters
-const springCompression = 0.87; // How much the sphere shrinks when pressed
-const mobileSpringCompression = 0.85; // Larger spring for mobile devices (15% larger than before)
+const springCompression = 0.93; // How much the sphere shrinks when pressed
+const mobileSpringCompression = 0.95; // Larger spring for mobile devices (15% larger than before)
 const springDamping = 0.55; // Damping factor for the spring
-const springStiffness = 0.15; // Stiffness of the spring
-const mobileSpringStiffness = 0.12; // Softer spring stiffness for mobile devices
+const springStiffness = 0.08; // Stiffness of the spring
+const mobileSpringStiffness = 0.012; // Softer spring stiffness for mobile devices
 // Initialize isMobile right away to avoid reference errors
 let isMobile = isMobileDevice(); // Flag to check if the user is on mobile
 let targetScale = 1.0; // Default value until we have originalSphereScale
@@ -32,15 +31,15 @@ let cubeScalingEnabled = false; // Will be enabled after initialization
 
 const raycaster = new THREE.Raycaster();
 
-// Create a quaternion to store the sphere rotation
-const sphereRotation = new THREE.Quaternion();
-// Add velocity tracking
+// ROTARY ENCODER SYSTEM - Complete separation of sphere and world
+// The sphere stays visually stable, only the world rotates
+const worldRotation = new THREE.Quaternion();  // Controls cube orbital positions
 let rotationVelocity = new THREE.Vector3();
-const dampingFactor = 0.96; // Even stronger damping
-const velocityFactor = 0.0089; // Drastically reduced
-const mobileVelocityFactor = 0.012; // Drastically reduced for mobile
-const maxVelocity = 0.7; // Drastically reduced maximum velocity
-const mobileMaxVelocity = 0.65; // Drastically reduced for mobile
+const dampingFactor = 0.94; // Reduced damping for quicker settling
+const velocityFactor = 0.006; // Reduced sensitivity for smoother control
+const mobileVelocityFactor = 0.008; // Reduced mobile sensitivity 
+const maxVelocity = 0.15; // Reduced maximum velocity
+const mobileMaxVelocity = 0.15; // Reduced mobile maximum velocity
 
 // Track viewed projects
 const viewedProjects = new Set();
@@ -84,7 +83,7 @@ let keyState = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight:
 let keyHoldTime = { ArrowUp: 0, ArrowDown: 0, ArrowLeft: 0, ArrowRight: 0 };
 
 // Define touch event handlers before they're used
-// Touch event handlers
+// Touch event handlers - Pure 2D screen input
 const onTouchStart = function (e) {
     e.preventDefault();
 
@@ -98,11 +97,14 @@ const onTouchStart = function (e) {
     }
 
     const touch = e.touches[0];
+    
+    // Check if we're clicking on a cube for project opening
     raycaster.setFromCamera(
         new THREE.Vector2((touch.clientX / window.innerWidth) * 2 - 1, (-touch.clientY / window.innerHeight) * 2 + 1),
         camera
     );
-    const intersections = raycaster.intersectObjects([sphere, ...cubes]);
+    const intersections = raycaster.intersectObjects(cubes); // Only check cubes for project opening
+    
     if (intersections.length > 0) {
         const intersectedObject = intersections[0].object;
         if (cubes.includes(intersectedObject)) {
@@ -121,18 +123,15 @@ const onTouchStart = function (e) {
             addProjectCardToPage(projectId, document.querySelector(".main-container"));
             return;
         }
-
-        // Store the intersection point and enable dragging
-        intersectionPoint = intersections[0].point;
-        isDragging = true;
-        wasDragged = true;
-
-        // Reset velocity when starting to drag
-        rotationVelocity.set(0, 0, 0);
-
-        // Apply compression effect for mobile
-        targetScale = mobileSpringCompression * originalSphereScale;
     }
+
+    // For sphere interaction, use pure 2D screen coordinates
+    // No 3D raycasting, no position dependency
+    isDragging = true;
+    wasDragged = true;
+
+    // Apply appropriate spring compression effect based on device type
+    targetScale = isMobile ? mobileSpringCompression * originalSphereScale : springCompression * originalSphereScale;
 
     if (wasDragged == true) {
         navbarHint.classList.add("fade-out");
@@ -165,30 +164,17 @@ const onTouchMove = function (e) {
         return;
     }
 
-    // Apply a fixed factor for direct rotation control (lower for mobile)
+    // Apply movement delta directly to world rotation (rotary encoder style)
     const factor = mobileVelocityFactor;
+    applyRotationToWorld(mouseDelta.x * factor, mouseDelta.y * factor);
 
-    // Apply direct rotation based on touch movement
-    const xRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), mouseDelta.y * factor);
-    const yRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), mouseDelta.x * factor);
-    const rotationQuaternion = new THREE.Quaternion().multiplyQuaternions(yRotation, xRotation);
-
-    // Apply rotation
-    sphereRotation.multiplyQuaternions(rotationQuaternion, sphereRotation);
-    sphere.setRotationFromQuaternion(sphereRotation);
-
-    // Update velocity for inertia
-    rotationVelocity.x = Math.min(mobileMaxVelocity, Math.max(-mobileMaxVelocity, mouseDelta.x * factor * 0.1));
-    rotationVelocity.y = Math.min(mobileMaxVelocity, Math.max(-mobileMaxVelocity, mouseDelta.y * factor * 0.1));
+    // Update velocity for inertia - reduced for smoother feel
+    rotationVelocity.x = Math.min(mobileMaxVelocity, Math.max(-mobileMaxVelocity, mouseDelta.x * factor * 0.08));
+    rotationVelocity.y = Math.min(mobileMaxVelocity, Math.max(-mobileMaxVelocity, mouseDelta.y * factor * 0.08));
 
     // Calculate velocity magnitude and update cube positions
     const velocityMagnitude = rotationVelocity.length();
-    updateCubePositions(rotationQuaternion, velocityMagnitude);
-
-    // When on mobile, don't update camera rotation to prevent getting stuck
-    if (cameraControl && !isMobile) {
-        cameraControl.updateCameraRotation(camera, rotationVelocity, true);
-    }
+    updateCubePositions(velocityMagnitude);
 
     lastMousePosition.copy(mousePosition);
     lastTime = performance.now();
@@ -202,7 +188,6 @@ const onTouchEnd = function () {
         // Reset camera rotation to prevent sticking on mobile
         if (isMobile && cameraControl) {
             rotationVelocity.multiplyScalar(0.5); // Reduce velocity on touch end for mobile
-            cameraControl.updateCameraRotation(camera, new THREE.Vector3(0, 0, 0), false);
         }
 
         // Start inertia animation if there's velocity
@@ -226,7 +211,7 @@ export function dragInit() {
     targetScale = originalSphereScale;
     currentScale = originalSphereScale;
 
-    // Ensure sphere starts at the correct size
+    // Ensure sphere starts at the correct size and neutral rotation
     sphere.scale.set(originalSphereScale, originalSphereScale, originalSphereScale);
 
     // Initialize cube positions and randomized properties
@@ -276,6 +261,21 @@ export function dragInit() {
     // Add keyboard event listeners
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('keyup', onKeyUp);
+}
+
+// CORE ROTARY ENCODER FUNCTION
+// This applies rotation only to the world, sphere stays completely static
+function applyRotationToWorld(xDelta, yDelta) {
+    // Create rotation quaternions from input deltas
+    const xRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), yDelta);
+    const yRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), xDelta);
+    const deltaRotation = new THREE.Quaternion().multiplyQuaternions(yRotation, xRotation);
+
+    // Apply to world rotation only - sphere stays completely static
+    worldRotation.multiplyQuaternions(deltaRotation, worldRotation);
+    
+    // Make sphere rotate to match the accumulated world rotation (no jumping)
+    sphere.quaternion.copy(worldRotation);
 }
 
 function animateSpring() {
@@ -395,8 +395,10 @@ function onMouseDown(e) {
         return; // Don't process further if a card is already open
     }
 
+    // Check if we're clicking on a cube for project opening
     raycaster.setFromCamera(new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, (-e.clientY / window.innerHeight) * 2 + 1), camera);
-    const intersections = raycaster.intersectObjects([sphere, ...cubes]);
+    const intersections = raycaster.intersectObjects(cubes); // Only check cubes for project opening
+    
     if (intersections.length > 0) {
         const intersectedObject = intersections[0].object;
         if (cubes.includes(intersectedObject)) {
@@ -413,18 +415,17 @@ function onMouseDown(e) {
 
             uiSwitchState("2d");
             addProjectCardToPage(projectId, document.querySelector(".main-container"));
-        } else {
-            // If the sphere is clicked, handle dragging
-            intersectionPoint = intersections[0].point;
-            isDragging = true;
-            wasDragged = true;
-            // Reset velocity when starting to drag
-            rotationVelocity.set(0, 0, 0);
-
-            // Apply appropriate spring compression effect based on device type
-            targetScale = isMobile ? mobileSpringCompression * originalSphereScale : springCompression * originalSphereScale;
+            return;
         }
     }
+
+    // For sphere interaction, use pure 2D screen coordinates
+    // No 3D raycasting, no position dependency - any click starts dragging
+    isDragging = true;
+    wasDragged = true;
+
+    // Apply appropriate spring compression effect based on device type
+    targetScale = isMobile ? mobileSpringCompression * originalSphereScale : springCompression * originalSphereScale;
 
     if (wasDragged == true) {
         navbarHint.classList.add("fade-out");
@@ -444,11 +445,6 @@ function onMouseUp() {
     if (isDragging) {
         isDragging = false;
         renderer.domElement.style.cursor = "auto";
-
-        // Update camera rotation with isDragging false immediately
-        if (cameraControl) {
-            cameraControl.updateCameraRotation(camera, rotationVelocity, false);
-        }
 
         // Start inertia animation if there's velocity
         if (rotationVelocity.length() > 0.0001) {
@@ -481,22 +477,11 @@ function animateInertia() {
                 return;
             }
 
-            // Apply rotation based on velocity components
-            const xRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), rotationVelocity.y);
-            const yRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), rotationVelocity.x);
-            const rotationQuaternion = new THREE.Quaternion().multiplyQuaternions(yRotation, xRotation);
-
-            // Apply rotation to sphere
-            sphereRotation.multiplyQuaternions(rotationQuaternion, sphereRotation);
-            sphere.setRotationFromQuaternion(sphereRotation);
+            // Apply velocity to world rotation
+            applyRotationToWorld(rotationVelocity.x, rotationVelocity.y);
 
             // Update cube positions
-            updateCubePositions(rotationQuaternion, velocityMagnitude);
-
-            // On mobile devices, limit camera rotation during inertia to prevent getting stuck
-            if (cameraControl && (!isMobile || velocityMagnitude < 0.1)) {
-                cameraControl.updateCameraRotation(camera, rotationVelocity, false);
-            }
+            updateCubePositions(velocityMagnitude);
 
             animationFrameId = requestAnimationFrame(animate);
         } else {
@@ -506,14 +491,15 @@ function animateInertia() {
     animate();
 }
 
-function updateCubePositions(rotationQuaternion, velocityMagnitude) {
+function updateCubePositions(velocityMagnitude) {
     for (let cube of cubes) {
-        // Get the current orbital position
-        let orbitalPosition = cubePositions.get(cube.uuid);
-
-        // Apply rotation to orbital position
-        orbitalPosition.applyQuaternion(rotationQuaternion);
-        cubePositions.set(cube.uuid, orbitalPosition);
+        // Get the original position and apply world's total rotation
+        const originalPosition = cubeOriginalPositions.get(cube.uuid);
+        const orbitalPosition = originalPosition.clone();
+        orbitalPosition.applyQuaternion(worldRotation);
+        
+        // Update the stored orbital position for consistency
+        cubePositions.set(cube.uuid, orbitalPosition.clone());
 
         // Calculate outward offset based on velocity
         const directionFromCenter = orbitalPosition.clone().sub(sphere.position).normalize();
@@ -540,7 +526,6 @@ function returnCubesToOriginalPositions() {
 
         for (let cube of cubes) {
             const currentOutwardOffset = cubeOutwardOffsets.get(cube.uuid);
-
             const returnSpeed = cubeReturnSpeeds.get(cube.uuid);
 
             if (currentOutwardOffset.length() > 0.01) {
@@ -548,8 +533,16 @@ function returnCubesToOriginalPositions() {
                 currentOutwardOffset.multiplyScalar(1 - returnSpeed);
                 cubeOutwardOffsets.set(cube.uuid, currentOutwardOffset);
 
-                // Apply position
-                cube.position.copy(cubePositions.get(cube.uuid)).add(currentOutwardOffset);
+                // Get the original position and apply world's current rotation
+                const originalPosition = cubeOriginalPositions.get(cube.uuid);
+                const orbitalPosition = originalPosition.clone();
+                orbitalPosition.applyQuaternion(worldRotation);
+                
+                // Update stored position for consistency
+                cubePositions.set(cube.uuid, orbitalPosition.clone());
+
+                // Apply position with offset
+                cube.position.copy(orbitalPosition).add(currentOutwardOffset);
                 cube.lookAt(sphere.position);
                 allCubesInPosition = false;
             }
@@ -571,11 +564,6 @@ function onMouseMove(e) {
         isDragging = false;
         renderer.domElement.style.cursor = "auto";
 
-        // Update camera rotation with isDragging false immediately
-        if (cameraControl) {
-            cameraControl.updateCameraRotation(camera, rotationVelocity, false);
-        }
-
         // Start inertia animation if there's velocity
         if (rotationVelocity.length() > 0.0001) {
             animateInertia();
@@ -593,32 +581,17 @@ function onMouseMove(e) {
     // Calculate mouse movement delta
     const mouseDelta = new THREE.Vector2().subVectors(mousePosition, lastMousePosition);
 
-    // Apply a fixed factor for direct rotation control
+    // Apply movement delta directly to world rotation (rotary encoder style)
     const factor = velocityFactor;
+    applyRotationToWorld(mouseDelta.x * factor, mouseDelta.y * factor);
 
-    // Apply direct rotation based on mouse movement
-    const xRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), mouseDelta.y * factor);
-
-    const yRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), mouseDelta.x * factor);
-
-    const rotationQuaternion = new THREE.Quaternion().multiplyQuaternions(yRotation, xRotation);
-
-    // Apply rotation to sphere
-    sphereRotation.multiplyQuaternions(rotationQuaternion, sphereRotation);
-    sphere.setRotationFromQuaternion(sphereRotation);
-
-    // Update velocity for inertia
-    rotationVelocity.x = Math.min(maxVelocity, Math.max(-maxVelocity, mouseDelta.x * factor * 0.1));
-    rotationVelocity.y = Math.min(maxVelocity, Math.max(-maxVelocity, mouseDelta.y * factor * 0.1));
+    // Update velocity for inertia - reduced for smoother feel
+    rotationVelocity.x = Math.min(maxVelocity, Math.max(-maxVelocity, mouseDelta.x * factor * 0.08));
+    rotationVelocity.y = Math.min(maxVelocity, Math.max(-maxVelocity, mouseDelta.y * factor * 0.08));
 
     // Calculate velocity magnitude and update cube positions
     const velocityMagnitude = rotationVelocity.length();
-    updateCubePositions(rotationQuaternion, velocityMagnitude);
-
-    // Update camera rotation
-    if (cameraControl) {
-        cameraControl.updateCameraRotation(camera, rotationVelocity, true);
-    }
+    updateCubePositions(velocityMagnitude);
 
     lastMousePosition.copy(mousePosition);
     lastTime = performance.now();
@@ -652,36 +625,22 @@ function onWheel(e) {
         }, { once: true });
     }
 
-    // Use a scaled factor for wheel sensitivity - increased by 4x
-    const wheelFactor = velocityFactor * 2.0;
+    // Use a scaled factor for wheel sensitivity - reduced for smoother feel
+    const wheelFactor = velocityFactor * 1.5;
 
-    // Create rotation quaternions for x and y axes
-    const xRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), scrollDeltaY * wheelFactor);
+    // Apply movement delta directly to world rotation (rotary encoder style)
+    applyRotationToWorld(scrollDeltaX * wheelFactor, scrollDeltaY * wheelFactor);
 
-    const yRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), scrollDeltaX * wheelFactor);
+    // Add to rotation velocity for inertia effect - reduced velocity factor for smoother feel
+    rotationVelocity.x += Math.min(maxVelocity, Math.max(-maxVelocity, scrollDeltaX * wheelFactor * 0.15));
+    rotationVelocity.y += Math.min(maxVelocity, Math.max(-maxVelocity, scrollDeltaY * wheelFactor * 0.15));
 
-    // Combine rotations
-    const rotationQuaternion = new THREE.Quaternion().multiplyQuaternions(yRotation, xRotation);
-
-    // Apply rotation to sphere
-    sphereRotation.multiplyQuaternions(rotationQuaternion, sphereRotation);
-    sphere.setRotationFromQuaternion(sphereRotation);
-
-    // Add to rotation velocity for inertia effect - increased velocity factor
-    rotationVelocity.x += Math.min(maxVelocity, Math.max(-maxVelocity, scrollDeltaX * wheelFactor * 0.2));
-    rotationVelocity.y += Math.min(maxVelocity, Math.max(-maxVelocity, scrollDeltaY * wheelFactor * 0.2));
-
-    // Apply less damping to maintain more velocity
-    rotationVelocity.multiplyScalar(0.97);
+    // Apply more damping to settle velocity quicker
+    rotationVelocity.multiplyScalar(0.95);
 
     // Calculate velocity magnitude and update cube positions
     const velocityMagnitude = rotationVelocity.length();
-    updateCubePositions(rotationQuaternion, velocityMagnitude);
-
-    // Update camera rotation
-    if (cameraControl) {
-        cameraControl.updateCameraRotation(camera, rotationVelocity, false);
-    }
+    updateCubePositions(velocityMagnitude);
 
     // Start inertia animation if there's velocity and we're not already dragging
     if (!isDragging && rotationVelocity.length() > 0.0001) {
@@ -764,14 +723,8 @@ function updateKeyboardControls() {
         yRotation += nudgeFactor * (1 + holdTime * 0.5);
     }
 
-    // Apply rotation with velocity buildup
-    const xQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), xRotation);
-    const yQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), yRotation);
-    const rotationQuaternion = new THREE.Quaternion().multiplyQuaternions(yQuat, xQuat);
-
-    // Apply rotation to sphere
-    sphereRotation.multiplyQuaternions(rotationQuaternion, sphereRotation);
-    sphere.setRotationFromQuaternion(sphereRotation);
+    // Apply movement delta directly to world rotation (rotary encoder style)
+    applyRotationToWorld(yRotation, xRotation);
 
     // Update velocity with buildup based on hold time
     const holdTimeMultiplier = 1 + Math.max(
@@ -783,8 +736,26 @@ function updateKeyboardControls() {
 
     rotationVelocity.x = Math.min(maxNudgeVelocity, Math.max(-maxNudgeVelocity, rotationVelocity.x * velocityBuildUp + yRotation * holdTimeMultiplier));
     rotationVelocity.y = Math.min(maxNudgeVelocity, Math.max(-maxNudgeVelocity, rotationVelocity.y * velocityBuildUp + xRotation * holdTimeMultiplier));
+}
 
-    // Don't update cube positions for keyboard controls
-    // const velocityMagnitude = rotationVelocity.length();
-    // updateCubePositions(rotationQuaternion, velocityMagnitude);
+// Export function to update cube positions based on current world rotation
+export function updateCubesForSphereRotation() {
+    if (!cubes || cubes.length === 0) return;
+    
+    for (let cube of cubes) {
+        // Get the original position and apply world's current rotation
+        const originalPosition = cubeOriginalPositions.get(cube.uuid);
+        if (!originalPosition) continue;
+        
+        const orbitalPosition = originalPosition.clone();
+        orbitalPosition.applyQuaternion(worldRotation);
+        
+        // Update stored position
+        cubePositions.set(cube.uuid, orbitalPosition.clone());
+        
+        // Apply position (with any existing outward offset)
+        const currentOutwardOffset = cubeOutwardOffsets.get(cube.uuid) || new THREE.Vector3(0, 0, 0);
+        cube.position.copy(orbitalPosition).add(currentOutwardOffset);
+        cube.lookAt(sphere.position);
+    }
 }

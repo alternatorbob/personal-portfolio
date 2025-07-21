@@ -377,6 +377,7 @@ function initListViewToggle() {
     if (!viewToggle || !listView || !threeCanvas) return;
 
     viewToggle.addEventListener("click", () => {
+        console.log("viewToggle clicked");
         if (listView.classList.contains("active")) {
             uiSwitchState("3d");
         } else {

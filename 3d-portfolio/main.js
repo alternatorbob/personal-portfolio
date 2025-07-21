@@ -3,17 +3,17 @@ import "./css/global_styles.css";
 import "./css/mobile.css";
 import * as THREE from "three";
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
-import { dragInit } from "./js/dragControl";
+import { dragInit, updateCubesForSphereRotation } from "./js/dragControl";
 import { addProjects, cubes } from "./js/addProjects";
 import { projects } from "./js/projects";
 import { createEnvironment, isRendering, pauseRenderer, resumeRenderer, easeInOutCubic } from "./js/utils";
-import { addProjectCardToPage, uiSwitchState, uiInit } from "./js/ui";
+import { uiInit } from "./js/ui";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { AfterimagePass } from "three/examples/jsm/postprocessing/AfterimagePass.js";
 import { SMAAPass } from "three/examples/jsm/postprocessing/SMAAPass.js";
-import { VignetteShader } from 'three/addons/shaders/VignetteShader.js';
+import { VignetteShader } from "three/addons/shaders/VignetteShader.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 
 const mainContainer = document.querySelector(".main-container");
@@ -55,8 +55,8 @@ let cubeCamera, cubeRenderTarget;
 let gradientShader;
 const shaderVignette = VignetteShader;
 const effectVignette = new ShaderPass(shaderVignette);
-effectVignette.uniforms['offset'].value = 0.8;
-effectVignette.uniforms['darkness'].value = 0.9;
+effectVignette.uniforms["offset"].value = 0.8;
+effectVignette.uniforms["darkness"].value = 0.9;
 
 const textureManager = new THREE.LoadingManager();
 textureManager.onStart = function (url, itemsLoaded, itemsTotal) {
@@ -99,7 +99,7 @@ function threeInit() {
         stencil: false,
         depth: true,
         preserveDrawingBuffer: true,
-        failIfMajorPerformanceCaveat: false
+        failIfMajorPerformanceCaveat: false,
     });
 
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -201,7 +201,7 @@ function threeInit() {
         normalScale: new THREE.Vector2(1.5, 1.5),
         envMapIntensity: 0.6,
         transparent: true,
-        opacity: 1.0
+        opacity: 1.0,
     });
 
     // Create glass material
@@ -217,7 +217,7 @@ function threeInit() {
         ior: 1.309,
         reflectivity: 1.0,
         transparent: true,
-        opacity: 0.0
+        opacity: 0.0,
     });
 
     // Improve texture quality
@@ -240,8 +240,8 @@ function threeInit() {
     sphere = materialGroup;
 
     // Add spacebar event listener
-    document.addEventListener('keydown', (e) => {
-        if (e.code === 'Space' && !transitionInProgress) {
+    document.addEventListener("keydown", (e) => {
+        if (e.code === "Space" && !transitionInProgress) {
             e.preventDefault();
             isGlassMaterial = !isGlassMaterial;
             transitionInProgress = true;
@@ -257,33 +257,33 @@ function threeInit() {
     dragInit();
     uiInit();
 
-    // Setup post-processing
-    composer = new EffectComposer(
-        renderer,
-        new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
-            minFilter: THREE.LinearFilter,
-            magFilter: THREE.LinearFilter,
-            format: THREE.RGBAFormat,
-            encoding: THREE.sRGBEncoding,
-            samples: 4,
-        })
-    );
+    // // Setup post-processing
+    // composer = new EffectComposer(
+    //     renderer,
+    //     new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+    //         minFilter: THREE.LinearFilter,
+    //         magFilter: THREE.LinearFilter,
+    //         format: THREE.RGBAFormat,
+    //         encoding: THREE.sRGBEncoding,
+    //         samples: 4,
+    //     })
+    // );
 
-    renderPass = new RenderPass(scene, camera);
-    composer.addPass(renderPass);
+    // renderPass = new RenderPass(scene, camera);
+    // composer.addPass(renderPass);
 
-    // Add SMAA pass
-    const smaaPass = new SMAAPass();
-    composer.addPass(smaaPass);
+    // // Add SMAA pass
+    // const smaaPass = new SMAAPass();
+    // composer.addPass(smaaPass);
 
-    bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.08, 0.85, 0.95);
-    bloomPass.threshold = 0.85;
-    bloomPass.radius = 0.85;
-    bloomPass.strength = 0.08;
-    composer.addPass(bloomPass);
+    // bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.08, 0.85, 0.95);
+    // bloomPass.threshold = 0.85;
+    // bloomPass.radius = 0.85;
+    // bloomPass.strength = 0.08;
+    // composer.addPass(bloomPass);
 
-    afterimagePass = new AfterimagePass(0.55);
-    composer.addPass(afterimagePass);
+    // afterimagePass = new AfterimagePass(0.15);
+    // composer.addPass(afterimagePass);
 
     // composer.addPass(effectVignette);
     // Mark as initialized after successful setup
@@ -299,7 +299,7 @@ function animate(msTime) {
         const elapsed = msTime - transitionStartTime;
         const rawProgress = Math.min(elapsed / TRANSITION_DURATION, 1);
         const progress = easeInOutCubic(rawProgress);
-        
+
         if (isGlassMaterial) {
             // Fading to glass
             metalMaterial.opacity = 1 - progress;
@@ -343,23 +343,20 @@ function animate(msTime) {
     }
 
     // Update camera position
-    if (camera && typeof mouse !== 'undefined') {
+    if (camera && typeof mouse !== "undefined") {
         camera.position.y += (mouse.y * 0.7 - camera.position.y + (window.innerWidth < 768 ? 5.5 : 3.5)) * 0.03;
         camera.position.x += (-mouse.x * 3.5 - camera.position.x) * 0.05;
     }
 
-    // Update cube positions
-    if (cubes && cubes.length > 0 && sphere) {
-        for (let i = 0; i < cubes.length; i++) {
-            const cube = cubes[i];
-            if (cube) cube.lookAt(sphere.position);
-        }
-    }
+    // Update cube positions to follow sphere rotation
+    updateCubesForSphereRotation();
 
     // Render with post-processing
-    if (composer) {
-        composer.render();
-    }
+    // if (composer) {
+    //     composer.render();
+    // }
+
+    renderer.render(scene, camera);
 }
 
 export function reverseSelected() {
@@ -376,8 +373,8 @@ function onWindowResized() {
 
     renderer.setSize(width, height);
     renderer.setPixelRatio(pixelRatio);
-    composer.setSize(width, height);
-    composer.setPixelRatio(pixelRatio);
+    // composer.setSize(width, height);
+    // composer.setPixelRatio(pixelRatio);
 }
 
 // Add touch event listeners
@@ -392,52 +389,7 @@ document.addEventListener(
     { passive: false }
 );
 
-window.addEventListener("touchstart", onTouchStart, false);
-
-function onTouchStart(event) {
-    event.preventDefault();
-    const touch = event.touches[0];
-    click.x = (touch.clientX / window.innerWidth) * 2 - 1;
-    click.y = -(touch.clientY / window.innerHeight) * 2 + 1;
-
-    raycaster.setFromCamera(click, camera);
-    const intersects = raycaster.intersectObjects([sphere, ...cubes]);
-
-    // Check if a project card is already open
-    const existingProjectCards = document.querySelectorAll('.project-card');
-    if (existingProjectCards.length > 0) {
-        return; // Don't process further if a card is already open
-    }
-
-    if (!wasSelected) {
-        if (intersects.length > 0 && intersects[0].object !== sphere) {
-            const selectedProject = intersects[0].object;
-
-            // Handle material color change for array of materials
-            if (Array.isArray(selectedProject.material)) {
-                // Set color for all materials in the array
-                selectedProject.material.forEach((mat) => {
-                    if (mat && mat.color) {
-                        mat.color.set(0x202020);
-                    }
-                });
-            } else if (selectedProject.material && selectedProject.material.color) {
-                // Fallback for single material
-                selectedProject.material.color.set(0x202020);
-            }
-
-            renderer.domElement.style.cursor = "pointer";
-
-            if (selectedProject) {
-                wasSelected = true;
-                addProjectCardToPage(selectedProject.name, mainContainer);
-                uiSwitchState("2d");
-            }
-        } else {
-            renderer.domElement.style.cursor = "auto";
-        }
-    }
-}
+// Remove the global touchstart event listener and onTouchStart function
 
 export { camera, scene, renderer, sphere };
 
@@ -480,7 +432,7 @@ function enableFallbackMode() {
         }
 
         // Make sure the UI is initialized for viewing projects
-        if (typeof uiInit === 'function') {
+        if (typeof uiInit === "function") {
             uiInit();
         }
     }

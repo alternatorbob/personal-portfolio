@@ -157,11 +157,7 @@ export class Card {
             
             // Reset wasSelected state if needed
             if (typeof reverseSelected === "function") {
-                if (wasSelected) {
-                    reverseSelected();
-                }
-            } else if (typeof wasSelected !== "undefined" && wasSelected) {
-                wasSelected = false;
+                reverseSelected();
             }
             
             // Execute the onClose callback

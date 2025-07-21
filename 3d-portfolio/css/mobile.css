@@ -137,9 +137,9 @@
 
     .navbar-hint {
         font-size: var(--text-sm);
-        top: 44px;
-        padding: 0px;
-        width: 100%;
+        bottom: 20%;
+        padding: 0.2em;
+        width: 90%;
         height: 40px;
         line-height: 14px;
         display: flex;
@@ -226,3 +226,15 @@ body.mobile-inverted .three-canvas {
 }
 
 /* Remove these styles since they're now inside the media query */
+.mobile-break {
+  display: none;
+}
+@media (max-width: 768px) {
+  .mobile-break {
+    display: inline;
+  }
+  .mobile-break::after {
+    content: "\A";
+    white-space: pre;
+  }
+}
