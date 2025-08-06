@@ -16,8 +16,9 @@ import { SMAAPass } from "three/examples/jsm/postprocessing/SMAAPass.js";
 import { VignetteShader } from "three/addons/shaders/VignetteShader.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 
+// Don't show content immediately - wait for loading to complete
+
 const mainContainer = document.querySelector(".main-container");
-export const navbarHint = document.querySelector(".navbar-hint");
 
 export let wasSelected = false;
 
@@ -65,17 +66,40 @@ textureManager.onStart = function (url, itemsLoaded, itemsTotal) {
 
 textureManager.onLoad = function () {
     console.log("All textures are loaded");
-    // all textures are loaded
-    // ...
+    texturesLoaded = true;
+    checkLoadingComplete();
 };
 
-const textureLoader = new THREE.TextureLoader();
+const textureLoader = new THREE.TextureLoader(textureManager);
 
 const roughnessMap = textureLoader.load("assets/textures/mat/worn-shiny-metal-bl/worn-shiny-metal-Roughness.png");
 const normalMap = textureLoader.load("assets/textures/mat/worn-shiny-metal-bl/worn-shiny-metal-Normal-ogl.png");
 
 // Add initialization flag
 let isInitialized = false;
+let texturesLoaded = false;
+
+// Function to handle loading completion and blackout
+function checkLoadingComplete() {
+    if (isInitialized && texturesLoaded) {
+        console.log("Loading complete - starting fade sequence");
+        
+        // Mark JavaScript as loaded and show content
+        document.body.classList.add('js-loaded');
+        
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+            // Keep blackout for a brief moment, then fade out smoothly
+            setTimeout(() => {
+                loadingScreen.classList.add('hide');
+                // Remove the loading screen after fade completes
+                setTimeout(() => {
+                    loadingScreen.remove();
+                }, 5000); // Match CSS transition duration
+            }, 300); // Brief pause before fade
+        }
+    }
+}
 
 // Initialize Three.js
 try {
@@ -151,7 +175,8 @@ function threeInit() {
                 float y = vWorldPosition.y;
     
                 // Gradient transition with wider smoothing area
-                float gradient = smoothstep(-100.0, -30.0, y - 16.0);
+                float gradient = smoothstep(-50.0, 100.0, y + 200.0);
+                
     
                 // Base color blend from white (floor) to black (top)
                 vec3 color = mix(vec3(1.0), vec3(0.0), gradient);
@@ -164,9 +189,25 @@ function threeInit() {
         `,
     };
 
-    // Create environment cube using the globally defined shader
+    // Create environment with subdivision for smoother look
+    // Option 1: Subdivided Cube (current geometry with more faces)
+    // Alternative geometries to try (comment/uncomment to test):
     envMesh = new THREE.Mesh(
-        new THREE.BoxGeometry(1000, 1000, 1000),
+        // Option 1: Subdivided Cube (current - more faces than original)
+        // new THREE.BoxGeometry(1000, 1000, 1000, 20, 20, 20), // 20x20x20 subdivision
+        
+        // Option 2: Sphere (smoothest, most faces)
+        // new THREE.SphereGeometry(700, 64, 32), // radius, widthSegments, heightSegments
+        
+        // Option 3: Icosahedron (organic, spherical but faceted)
+        // new THREE.IcosahedronGeometry(700, 4), // radius, subdivision_level (0-5)
+        
+        // Option 4: Cylinder (good for horizons, infinite feeling)
+        // new THREE.CylinderGeometry(1000, 1000, 1000, 32, 20), // topRadius, bottomRadius, height, radialSegments, heightSegments
+        
+        // Option 5: Dodecahedron (12-sided, unique look)
+        new THREE.DodecahedronGeometry(700, 2), // radius, subdivision_level (0-3)
+        
         new THREE.ShaderMaterial({
             uniforms: gradientShader.uniforms,
             vertexShader: gradientShader.vertexShader,
@@ -288,6 +329,7 @@ function threeInit() {
     // composer.addPass(effectVignette);
     // Mark as initialized after successful setup
     isInitialized = true;
+    checkLoadingComplete();
 }
 
 function animate(msTime) {
@@ -395,26 +437,36 @@ export { camera, scene, renderer, sphere };
 
 // Function to enable fallback mode when WebGL is not available
 function enableFallbackMode() {
-    // Show the list view as fallback
-    const listView = document.querySelector(".list-view");
+    console.log("Fallback mode - starting fade sequence");
+    
+    // Mark JavaScript as loaded and show content
+    document.body.classList.add('js-loaded');
+    
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+        // Keep blackout for a brief moment, then fade out smoothly
+        setTimeout(() => {
+            loadingScreen.classList.add('hide');
+            setTimeout(() => {
+                loadingScreen.remove();
+            }, 1000);
+        }, 300); // Brief pause before fade
+    }
+
+    // Show the index view as fallback
+    const indexView = document.querySelector(".index-view");
     const viewToggle = document.querySelector(".view-toggle");
     const blur = document.getElementById("blur");
-    const navbarHint = document.querySelector(".navbar-hint");
 
-    if (listView) {
-        listView.classList.add("active");
+    if (indexView) {
+        indexView.classList.add("active");
         // Style changes for fallback mode
-        listView.style.transform = "translateX(0)";
-        listView.style.zIndex = "1000";
+        indexView.style.transform = "translateX(0)";
+        indexView.style.zIndex = "1000";
 
         // Hide blur since we won't have the 3D effect
         if (blur) {
             blur.classList.add("hide");
-        }
-
-        // Hide navbar hint since it's not needed in list view
-        if (navbarHint) {
-            navbarHint.classList.add("hide");
         }
 
         // Update toggle if it exists

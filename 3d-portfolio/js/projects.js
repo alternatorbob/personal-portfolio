@@ -20,7 +20,7 @@ export const projects = [
         description:
             "ELPE is a visual identity project completed at ECAL under the supervision of the head of the Graphic Design department, Angelo Benedetto. I was tasked to develop a dynamic visual identity for a hypothetical art space. The concept takes the glass lens and utilises its refractive property as an optical typographical effect.",
         year: "2020",
-        categories: ["graphic design", "art direction"],
+        categories: ["Graphic Design", "Art Direction"],
 
         content: {
             images: [
@@ -40,7 +40,7 @@ export const projects = [
         title: "Portfolio for Juri Roemmel",
         id: "Juri",
         description:
-            "Personal portfolio website designed and programmed for Industrial Designer and ECAL Alumni Juri Roemmel.",
+            "Portfolio website designed and programmed for Industrial Designer and ECAL Alumni Juri Roemmel.",
         year: "2021",
         categories: ["Web Design", "Web Development"],
         content: {
@@ -56,7 +56,7 @@ export const projects = [
         description:
             "Made in collaboration with Industrial Designer Alex Sinh Nguyen, I worked on the MIDI Clock. Tasked to reimagine, the now considered obsolete object, we created an alarm clock that generates tomorrow’s alarm sound based on geographical data you record during the day. Map direction are translated into MIDI notes and different neighbourhoods unlock different sounds and instruments.",
         year: "2022",
-        categories: ["Interaction", "Hardware + Software"],
+        categories: ["Interaction", "Electronics,  Code"],
         content: {
             images: [
                 "/projects/MIDI_Clock/MIDI_Cover.webp",
@@ -88,7 +88,7 @@ export const projects = [
         description:
             "Made in collaboration with Interaction Designer Tickie Bindner, we created the Physical Sequencer. A device that generates sound based on the distance at which various objects are placed around it. Using a LiDar sensor for data, the device is a Teensy based synth with an onboard battery and speaker which freedom in exploring the sounds one can create with their environment",
         year: "2022",
-        categories: ["Interaction", "CAD", "Hardware + Software"],
+        categories: ["Interaction", "CAD", "Electronics, Code"],
         content: {
             images: [
                 "/projects/Physical_Sequencer/Sequencer_1.webp",
@@ -131,7 +131,7 @@ export const projects = [
         description:
             "Made in collaboration with Interaction Designer Tickie Bindner during a one week workshop with Yehwan Song. Tasked to create a project that explores the website and the mobile experiences’ relationship with the space, we made the connection between the scrollbar of a webpage and the handrail of a set of stairs. We made a phone case that attached to the handrail and transmitted data from a rotary encoder, via wifi, to the web page which would scroll in increments as the user went up the steps. Each step had its own section of the website thus creating a relationship between the physical and the digital.",
         year: "2022",
-        categories: ["Interaction", "Hardware + Software", "Graphic Design"],
+        categories: ["Interaction", "Electronics, Code", "Graphic Design"],
         content: {
             images: ["projects/Scroll/Scroll_Cover.webp"],
             videos: [
@@ -184,7 +184,7 @@ export const projects = [
         description: `Made in collaboration with Industrial Designers Denise Merlette, Giulia Burrus and Léa Omez, during a one week workshop on “Soft Electronics” with Claire Eliot. We created three timers that invoke the human perception of time. Each has an approximate interval, between 3-5 minutes, 10-15 or 30-45. 
         The objects leverage the elastic properties of the chosen materials. By sewing a pattern of conductive wire into the fabric, stretching the material varies the resistance the circuit can pick up, which in turn sets the timer.`,
         year: "2022",
-        categories: ["Interaction", "Hardware + Software"],
+        categories: ["Interaction", "Electronics, Code"],
         content: {
             images: [
                 "/projects/Stretching_Time/Stretch_1.webp",
@@ -219,7 +219,7 @@ export const projects = [
         description:
             "Made in collaboration with Interaction Designer Antoine Contreras during a one week workshop with Ted Davis. Using a p5.js library that enables vintage oscilloscope to reproduce digital canvases, we wanted to create a game, as a sort of hommage to the early days of computing powered by CRT displays. The inherent limited size at which images can be displayed, was leveraged by structuring the game around a small patch of the map. Furthermore we reward the user for trying to break the rules, this is a maze game which allows you to pass through the walls of the maze, however decreasing the frequency of the display at each pass, thus making it harder to see the map.",
         year: "2019",
-        categories: ["Interaction", "Software"],
+        categories: ["Interaction", "Code"],
         content: {
             images: ["/projects/XYScope/XYScope_Cover.webp"],
             gifs: ["/projects/XYScope/XYScope.gif"],

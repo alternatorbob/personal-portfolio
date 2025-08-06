@@ -14,7 +14,6 @@ export class Card {
      */
     constructor(options = {}) {
         const { id, container, onClose } = options;
-        
         this.id = id || `card-${Date.now()}`;
         this.container = container;
         this.onClose = onClose || (() => {});
@@ -287,10 +286,45 @@ export class ProjectCard extends Card {
         // Create gallery section
         this.createGallery(card);
         
+        // Handle mobile layout restructuring
+        this.handleMobileLayout(card, year, description);
+        
         // Add keyboard navigation
         this.setupKeyboardNavigation();
         
         return card;
+    }
+
+    /**
+     * Handle mobile layout restructuring
+     * @param {HTMLElement} card - Card element
+     * @param {HTMLElement} year - Year element
+     * @param {HTMLElement} description - Description element
+     */
+    handleMobileLayout(card, year, description) {
+        // Check if we're on mobile (viewport width <= 768px)
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile) {
+            // Create a container for year and description below gallery
+            const infoBelowContainer = document.createElement("div");
+            infoBelowContainer.className = "project-info-below";
+            
+            // Clone the year and description elements
+            const yearClone = year.cloneNode(true);
+            const descriptionClone = description.cloneNode(true);
+            
+            // Add cloned elements to the below container
+            infoBelowContainer.appendChild(yearClone);
+            infoBelowContainer.appendChild(descriptionClone);
+            
+            // Hide the original year and description in project-info
+            year.style.display = 'none';
+            description.style.display = 'none';
+            
+            // Append the below container to the card (after gallery)
+            card.appendChild(infoBelowContainer);
+        }
     }
 
     /**
@@ -348,6 +382,8 @@ export class ProjectCard extends Card {
                 slide.innerHTML = `<img src="${images[i]}" alt="" />`;
             } else if (videos.length > 0) {
                 slide.innerHTML = `${videos[i - images.length]}`;
+                // Handle Vimeo iframe to remove vp-center class
+                this.setupVimeoIframe(slide);
             } else if (gifs.length > 0) {
                 slide.innerHTML = `<img src="${gifs[i - images.length - videos.length]}" alt="" />`;
             }
@@ -360,6 +396,90 @@ export class ProjectCard extends Card {
 
             container.appendChild(slide);
             this.slides.push(slide);
+        }
+    }
+
+    /**
+     * Setup Vimeo iframe to remove vp-center class from the iframe body
+     * @param {HTMLElement} slide - The slide element containing the Vimeo iframe
+     */
+    setupVimeoIframe(slide) {
+        // Wait for the iframe to be added to the DOM
+        setTimeout(() => {
+            const iframe = slide.querySelector('iframe[src*="player.vimeo.com"]');
+            if (!iframe) return;
+
+            // Only process if Vimeo Player API is available
+            if (typeof Vimeo === 'undefined') {
+                console.warn('Vimeo Player API not available');
+                return;
+            }
+
+            try {
+                // Create a Vimeo Player instance
+                const player = new Vimeo.Player(iframe);
+
+                // Listen for when the player is ready
+                player.ready().then(() => {
+                    // Inject CSS to override vp-center styles
+                    this.injectVimeoStyles(iframe);
+                }).catch((error) => {
+                    console.warn('Vimeo player setup failed:', error);
+                });
+
+                // Also try to inject styles on play event as a fallback
+                player.on('play', () => {
+                    this.injectVimeoStyles(iframe);
+                });
+
+            } catch (error) {
+                console.warn('Error setting up Vimeo player:', error);
+            }
+        }, 100);
+    }
+
+    /**
+     * Inject CSS styles to override Vimeo's vp-center class
+     * @param {HTMLElement} iframe - The Vimeo iframe element
+     */
+    injectVimeoStyles(iframe) {
+        try {
+            // Since we can't directly access cross-origin iframe content,
+            // we'll add CSS that affects the iframe container behavior
+            const style = document.createElement('style');
+            style.textContent = `
+                /* Override Vimeo's centering for project videos */
+                .project-card .slide iframe[src*="player.vimeo.com"] {
+                    object-fit: cover !important;
+                    object-position: top !important;
+                }
+                
+                /* Ensure the iframe takes full slide dimensions */
+                .project-card .slide {
+                    overflow: hidden;
+                }
+                
+                .project-card .slide iframe[src*="player.vimeo.com"] {
+                    width: 100% !important;
+                    height: 100% !important;
+                    border: none !important;
+                }
+            `;
+            
+            // Add unique identifier to avoid duplicate styles
+            style.id = `vimeo-override-${this.id}`;
+            
+            // Remove any existing override for this card
+            const existingStyle = document.getElementById(style.id);
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+            
+            // Add the new style to the document head
+            document.head.appendChild(style);
+            
+        } catch (error) {
+            console.warn('Error injecting Vimeo styles:', error);
         }
     }
 
@@ -404,6 +524,16 @@ export class ProjectCard extends Card {
     }
 
     /**
+     * Clean up Vimeo styles when the card is closed
+     */
+    cleanupVimeoStyles() {
+        const styleElement = document.getElementById(`vimeo-override-${this.id}`);
+        if (styleElement) {
+            styleElement.remove();
+        }
+    }
+
+    /**
      * Set up keyboard navigation for the card
      */
     setupKeyboardNavigation() {
@@ -422,6 +552,8 @@ export class ProjectCard extends Card {
         const originalOnClose = this.onClose;
         this.onClose = () => {
             document.removeEventListener("keydown", this._keyboardHandler);
+            // Clean up Vimeo styles
+            this.cleanupVimeoStyles();
             if (originalOnClose) originalOnClose();
         };
     }

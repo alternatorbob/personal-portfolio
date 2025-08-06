@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import { camera, renderer, sphere, navbarHint, originalSphereScale } from "../main";
+import { camera, renderer, sphere, originalSphereScale } from "../main";
 import { cubes, cubeOriginalDimensions } from "./addProjects";
-import { uiSwitchState, addProjectCardToPage } from "./ui";
+import { uiSwitchState, addProjectCardToPage, setIndexStateForProjectOpening } from "./ui";
 import { createEnvironment, isMobileDevice, pauseRenderer } from "./utils";
 
 let isDragging = false;
@@ -35,11 +35,11 @@ const raycaster = new THREE.Raycaster();
 // The sphere stays visually stable, only the world rotates
 const worldRotation = new THREE.Quaternion();  // Controls cube orbital positions
 let rotationVelocity = new THREE.Vector3();
-const dampingFactor = 0.94; // Reduced damping for quicker settling
-const velocityFactor = 0.006; // Reduced sensitivity for smoother control
+const dampingFactor = 0.975; // Reduced damping for quicker settling
+const velocityFactor = 0.004; // Reduced sensitivity for smoother control
 const mobileVelocityFactor = 0.008; // Reduced mobile sensitivity 
-const maxVelocity = 0.15; // Reduced maximum velocity
-const mobileMaxVelocity = 0.15; // Reduced mobile maximum velocity
+const maxVelocity = 0.05; // Reduced maximum velocity
+const mobileMaxVelocity = 0.05; // Reduced mobile maximum velocity
 
 // Track viewed projects
 const viewedProjects = new Set();
@@ -98,18 +98,28 @@ const onTouchStart = function (e) {
 
     const touch = e.touches[0];
     
-    // Check if we're clicking on a cube for project opening
+    // Check if we're clicking on sphere or cubes - prioritize sphere
     raycaster.setFromCamera(
         new THREE.Vector2((touch.clientX / window.innerWidth) * 2 - 1, (-touch.clientY / window.innerHeight) * 2 + 1),
         camera
     );
-    const intersections = raycaster.intersectObjects(cubes); // Only check cubes for project opening
     
-    if (intersections.length > 0) {
-        const intersectedObject = intersections[0].object;
+    // Check sphere intersection first
+    const sphereIntersections = raycaster.intersectObject(sphere, true);
+    const cubeIntersections = raycaster.intersectObjects(cubes);
+    
+    // If sphere is hit, prioritize sphere interaction over cubes
+    if (sphereIntersections.length > 0) {
+        // Sphere interaction takes priority - continue to sphere dragging logic below
+    } else if (cubeIntersections.length > 0) {
+        // Only open project if sphere is not hit
+        const intersectedObject = cubeIntersections[0].object;
         if (cubes.includes(intersectedObject)) {
             // If a cube is clicked, switch to 2D mode and open the gallery
             const projectId = intersectedObject.name;
+
+            // Track index state when opening project from 3D view
+            setIndexStateForProjectOpening();
 
             // Mark project as viewed and darken its texture after 1s delay
             if (!viewedProjects.has(projectId)) {
@@ -119,7 +129,7 @@ const onTouchStart = function (e) {
                 }, 170);
             }
 
-            uiSwitchState("2d");
+            uiSwitchState("project");
             addProjectCardToPage(projectId, document.querySelector(".main-container"));
             return;
         }
@@ -132,16 +142,6 @@ const onTouchStart = function (e) {
 
     // Apply appropriate spring compression effect based on device type
     targetScale = isMobile ? mobileSpringCompression * originalSphereScale : springCompression * originalSphereScale;
-
-    if (wasDragged == true) {
-        navbarHint.classList.add("fade-out");
-        // Remove the element after transition completes
-        navbarHint.addEventListener("transitionend", function() {
-            if (navbarHint.classList.contains("fade-out")) {
-                navbarHint.remove();
-            }
-        }, { once: true });
-    }
 
     lastMousePosition.set(touch.clientX, touch.clientY);
     lastTime = performance.now();
@@ -395,15 +395,25 @@ function onMouseDown(e) {
         return; // Don't process further if a card is already open
     }
 
-    // Check if we're clicking on a cube for project opening
+    // Check if we're clicking on sphere or cubes - prioritize sphere
     raycaster.setFromCamera(new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, (-e.clientY / window.innerHeight) * 2 + 1), camera);
-    const intersections = raycaster.intersectObjects(cubes); // Only check cubes for project opening
     
-    if (intersections.length > 0) {
-        const intersectedObject = intersections[0].object;
+    // Check sphere intersection first
+    const sphereIntersections = raycaster.intersectObject(sphere, true);
+    const cubeIntersections = raycaster.intersectObjects(cubes);
+    
+    // If sphere is hit, prioritize sphere interaction over cubes
+    if (sphereIntersections.length > 0) {
+        // Sphere interaction takes priority - continue to sphere dragging logic below
+    } else if (cubeIntersections.length > 0) {
+        // Only open project if sphere is not hit
+        const intersectedObject = cubeIntersections[0].object;
         if (cubes.includes(intersectedObject)) {
             // If a cube is clicked, switch to 2D mode and open the gallery
             const projectId = intersectedObject.name;
+
+            // Track index state when opening project from 3D view
+            setIndexStateForProjectOpening();
 
             // Mark project as viewed and darken its texture after 1s delay
             if (!viewedProjects.has(projectId)) {
@@ -413,7 +423,7 @@ function onMouseDown(e) {
                 }, 170);
             }
 
-            uiSwitchState("2d");
+            uiSwitchState("project");
             addProjectCardToPage(projectId, document.querySelector(".main-container"));
             return;
         }
@@ -426,16 +436,6 @@ function onMouseDown(e) {
 
     // Apply appropriate spring compression effect based on device type
     targetScale = isMobile ? mobileSpringCompression * originalSphereScale : springCompression * originalSphereScale;
-
-    if (wasDragged == true) {
-        navbarHint.classList.add("fade-out");
-        // Remove the element after transition completes
-        navbarHint.addEventListener("transitionend", function() {
-            if (navbarHint.classList.contains("fade-out")) {
-                navbarHint.remove();
-            }
-        }, { once: true });
-    }
 
     lastMousePosition.set(e.clientX, e.clientY);
     lastTime = performance.now();
@@ -610,20 +610,11 @@ function onWheel(e) {
     e.preventDefault();
 
     // Get normalized scroll deltas for x and y directions
-    const scrollDeltaX = e.deltaX * 0.02;
-    const scrollDeltaY = e.deltaY * 0.02;
+    const scrollDeltaX = e.deltaX * 0.07;
+    const scrollDeltaY = e.deltaY * 0.07;
 
-    // Mark that interaction has occurred and hide navbar hint
+    // Mark that interaction has occurred
     wasDragged = true;
-    if (wasDragged == true) {
-        navbarHint.classList.add("fade-out");
-        // Remove the element after transition completes
-        navbarHint.addEventListener("transitionend", function() {
-            if (navbarHint.classList.contains("fade-out")) {
-                navbarHint.remove();
-            }
-        }, { once: true });
-    }
 
     // Use a scaled factor for wheel sensitivity - reduced for smoother feel
     const wheelFactor = velocityFactor * 1.5;
@@ -669,17 +660,8 @@ function onKeyDown(e) {
         keyState[e.key] = true;
         keyHoldTime[e.key] = performance.now();
         
-        // Mark that interaction has occurred and hide navbar hint
+        // Mark that interaction has occurred
         wasDragged = true;
-        if (wasDragged == true) {
-            navbarHint.classList.add("fade-out");
-            // Remove the element after transition completes
-            navbarHint.addEventListener("transitionend", function() {
-                if (navbarHint.classList.contains("fade-out")) {
-                    navbarHint.remove();
-                }
-            }, { once: true });
-        }
     }
 }
 

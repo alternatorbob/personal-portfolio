@@ -1,78 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
 
-<head>
-    <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>PORTFOLIO</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PORTFOLIO</title>
+        <!-- Inline loading screen CSS - loads immediately to prevent FOUC -->
+        <style>
+            /* Immediate loading screen - inline to prevent FOUC */
+            #loading-screen {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: #000000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000000;
+                opacity: 1;
+                transition: opacity 5s ease-out;
+            }
 
-    <link rel="stylesheet" href="css/init.css" />
-</head>
+            #loading-screen.hide {
+                opacity: 0;
+                transition: opacity 5s ease-out;
+                pointer-events: none;
+            }
 
-<body>
-    <div class="fade"></div>
-    <script>
-        const fadeElement = document.querySelector(".fade");
+            /* Hide all content until JavaScript loads and processes */
+            body:not(.js-loaded) .main-container,
+            body:not(.js-loaded) .navbar,
+            body:not(.js-loaded) .three-canvas,
+            body:not(.js-loaded) .index-view,
+            body:not(.js-loaded) script {
+                opacity: 0 !important;
+                visibility: hidden !important;
+            }
 
-        setTimeout(function () {
-            fadeElement.classList.add("fade-out");
-        }, 770);
+            /* Show content only after JavaScript loads */
+            body.js-loaded .main-container,
+            body.js-loaded .navbar,
+            body.js-loaded .three-canvas {
+                opacity: 1;
+                visibility: visible;
+            }
 
-        // Listen for the 'transitionend' event and remove the element once the fade-out animation is complete
-        fadeElement.addEventListener("transitionend", function () {
-            fadeElement.remove();
-        });
-    </script>
+            /* Ensure invert functionality is never hidden */
+            .invert {
+                opacity: 0 !important;
+                visibility: visible !important;
+                transition: opacity 0.3s ease-in-out !important;
+            }
 
-    <div class="main-container">
-        <div class="navbar">
-            <div class="navbar-name text-sm bold">
-                <div id="name">Bogdan Năstase</div>
-            </div>
-            <div class="navbar-center">
-                <div class="button button-invert">
-                    <img src="/assets/UI/ball-button.png" alt="Invert colors" />
+            .invert.show {
+                opacity: 1 !important;
+            }
+
+            /* Animated loader styling */
+            .loader {
+                width: 20px;
+                aspect-ratio: 1;
+                border-radius: 50%;
+                background: #fff;
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3);
+                animation: l1 1s infinite;
+            }
+            @keyframes l1 {
+                100% {box-shadow: 0 0 0 30px rgba(255, 255, 255, 0)}
+            }
+        </style>
+
+        <link rel="stylesheet" href="css/init.css" />
+    </head>
+
+    <body>
+        <!-- Blackout Screen -->
+        <div id="loading-screen">
+            <div class="loader"></div>
+        </div>
+
+        <div class="main-container">
+            <div class="navbar">
+                <div class="navbar-name text-sm font-bold">
+                    <div id="name">Bogdan Năstase</div>
                 </div>
-            </div>
-            <div class="navbar-right">
-                <div class="navbar-button button text-sm bold" id="about-button">About</div>
-                <div class="view-toggle text-xs">
-                    <div class="toggle-slider"></div>
-                    <div class="toggle-text">
-                        <span style="margin-left: -6px">3D</span>
-                        <span style="margin-right: -2px">LIST</span>
+                <div class="navbar-center">
+                    <div class="button button-invert">
+                        <img src="/assets/UI/ball-button.png" alt="Invert colors" />
                     </div>
-                    <div class="toggle-cover toggle-cover-3d"></div>
-                    <div class="toggle-cover toggle-cover-list"></div>
+                </div>
+                <div class="navbar-right">
+                    <div class="navbar-button button text-sm font-bold" id="about-button">About</div>
+                    <div class="view-toggle text-sm font-bold">Index</div>
                 </div>
             </div>
-            <div class="navbar-hint text-sm">To browse, drag the sphere<span class="mobile-break"></span> or scroll. To open a project, click an image.
+            <div id="blur" class="hide"></div>
+
+            <!-- Index View -->
+            <div class="index-view">
+                <div class="index-view-grid">
+                    <!-- Will be populated with JavaScript -->
+                </div>
+                <div class="index-view-preview">
+                    <img src="" alt="Project Preview" />
+                </div>
             </div>
         </div>
-        <div id="blur" class="hide"></div>
 
-        <!-- List View -->
-        <div class="list-view">
-            <table class="list-view-table">
-                <thead>
-                    <tr>
-                        <th data-sort="title">Project Title<span class="sort-indicator"></span></th>
-                        <th data-sort="category">Category</th>
-                        <th data-sort="year" class="sort-active sort-desc">Year<span class="sort-indicator">↓</span>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Will be populated with JavaScript -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <script type="module" src="/main.js"></script>
-    <script type="module" src="js/ui.js"></script>
-    <div class="invert"></div>
-</body>
-
+        <script type="module" src="/main.js"></script>
+        <script type="module" src="js/ui.js"></script>
+        <div class="invert"></div>
+    </body>
 </html>
