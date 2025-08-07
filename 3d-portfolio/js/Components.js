@@ -423,17 +423,20 @@ export class ProjectCard extends Card {
                 gallery.appendChild(infoBelowContainer);
             }
 
-            // Modify slide positioning for mobile (only show first slide, position relatively)
+            // Modify slide positioning for mobile - use display toggle instead of transforms
             const slides = card.querySelectorAll('.slide');
             slides.forEach((slide, index) => {
+                slide.style.position = 'relative';
+                slide.style.top = 'auto';
+                slide.style.left = 'auto';
+                slide.style.width = '100%';
+                slide.style.height = 'auto';
+                slide.style.transform = 'none';
+                
+                // Show only the current slide (first slide initially)
                 if (index === 0) {
-                    // Show first slide with relative positioning
-                    slide.style.position = 'relative';
-                    slide.style.top = 'auto';
-                    slide.style.left = 'auto';
-                    slide.style.transform = 'none';
+                    slide.style.display = 'block';
                 } else {
-                    // Hide other slides on mobile
                     slide.style.display = 'none';
                 }
             });
@@ -639,23 +642,33 @@ export class ProjectCard extends Card {
     showNextSlide() {
         if (this.slides.length <= 1) return;
 
+        // Check if we're on mobile
+        const isMobile = window.innerWidth <= 768;
+
         // Calculate the index of the next slide
         const nextIndex = (this.currentSlideIndex + 1) % this.slides.length;
 
-        // Position the next slide off-screen to the right
-        this.slides[nextIndex].style.transition = "none";
-        this.slides[nextIndex].style.transform = "translateX(100%)";
+        if (isMobile) {
+            // Mobile: use display toggling for better content adaptation
+            this.slides[this.currentSlideIndex].style.display = "none";
+            this.slides[nextIndex].style.display = "block";
+        } else {
+            // Desktop: use transform animations
+            // Position the next slide off-screen to the right
+            this.slides[nextIndex].style.transition = "none";
+            this.slides[nextIndex].style.transform = "translateX(100%)";
 
-        // Force reflow to ensure the position is set before starting animation
-        this.slides[nextIndex].offsetHeight;
+            // Force reflow to ensure the position is set before starting animation
+            this.slides[nextIndex].offsetHeight;
 
-        // Move the current slide out to the left
-        this.slides[this.currentSlideIndex].style.transition = "transform 0.3s ease-in-out";
-        this.slides[this.currentSlideIndex].style.transform = "translateX(-100%)";
+            // Move the current slide out to the left
+            this.slides[this.currentSlideIndex].style.transition = "transform 0.3s ease-in-out";
+            this.slides[this.currentSlideIndex].style.transform = "translateX(-100%)";
 
-        // Animate the next slide in from the right
-        this.slides[nextIndex].style.transition = "transform 0.3s ease-in-out";
-        this.slides[nextIndex].style.transform = "translateX(0)";
+            // Animate the next slide in from the right
+            this.slides[nextIndex].style.transition = "transform 0.3s ease-in-out";
+            this.slides[nextIndex].style.transform = "translateX(0)";
+        }
 
         // Update the current index
         this.currentSlideIndex = nextIndex;
