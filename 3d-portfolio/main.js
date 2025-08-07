@@ -162,7 +162,7 @@ async function threeInit() {
     window.addEventListener("resize", onWindowResized);
 
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, camFar);
-    camera.position.z = window.innerWidth < 768 ? 20 : 15;
+    camera.position.z = window.innerWidth < 768 ? 21.5 : 15;
     camera.position.y = window.innerWidth < 768 ? 12 : 3.5;
 
     scene = new THREE.Scene();
@@ -230,7 +230,7 @@ async function threeInit() {
     );
     scene.add(envMesh);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.475);
     scene.add(ambientLight);
 
     // Set up cube render target with higher resolution for better quality

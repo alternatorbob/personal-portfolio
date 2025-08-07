@@ -59,8 +59,14 @@ export function uiInit(projects) {
             const indexView = document.querySelector(".index-view");
             const threeCanvas = document.querySelector(".three-canvas");
             const blur = document.getElementById("blur");
+            const projectCards = document.querySelectorAll(".project-card");
 
-            if (viewToggle && viewToggle.classList.contains("active")) {
+            // Check if any project card is currently open
+            const hasOpenProjectCard = projectCards.length > 0 && 
+                Array.from(projectCards).some(card => card.classList.contains("show"));
+
+            // Only close index mode if no project card is open
+            if (viewToggle && viewToggle.classList.contains("active") && !hasOpenProjectCard) {
                 viewToggle.classList.remove("active");
                 if (indexView) indexView.classList.remove("active");
                 if (threeCanvas) threeCanvas.style.pointerEvents = "auto";

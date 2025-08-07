@@ -347,7 +347,20 @@ export class ProjectCard extends Card {
         // Add description
         const description = document.createElement("div");
         description.className = "project-description column text-sm";
-        description.textContent = this.project.description;
+        
+        // Handle new description format with HTML content
+        if (this.project.content && this.project.content.description) {
+            // Render HTML content from the description array
+            this.project.content.description.forEach(item => {
+                if (item.type === "paragraph" && item.html) {
+                    description.innerHTML += item.html;
+                }
+            });
+        } else {
+            // Fallback to old format
+            description.textContent = this.project.description;
+        }
+        
         info.appendChild(description);
 
         // Add close button
@@ -376,24 +389,69 @@ export class ProjectCard extends Card {
         const isMobile = window.innerWidth <= 768;
 
         if (isMobile) {
-            // Create a container for year and description below gallery
+            // Get the client element from project-info
+            const clientElement = card.querySelector('.project-client');
+            
+            // Create a container for client-year and description
             const infoBelowContainer = document.createElement("div");
             infoBelowContainer.className = "project-info-below";
 
-            // Clone the year and description elements
-            const yearClone = year.cloneNode(true);
+            // Create client-year parent div
+            const clientYearDiv = document.createElement("div");
+            clientYearDiv.className = "project-client-year text-sm";
+            
+            // Combine client and year with comma separator
+            const clientText = clientElement ? clientElement.textContent : "N/A";
+            const yearText = year.textContent;
+            clientYearDiv.innerHTML = `${clientText}, ${yearText}`;
+
+            // Clone the description element
             const descriptionClone = description.cloneNode(true);
 
-            // Add cloned elements to the below container
-            infoBelowContainer.appendChild(yearClone);
+            // Add client-year div and description to the below container
+            infoBelowContainer.appendChild(clientYearDiv);
             infoBelowContainer.appendChild(descriptionClone);
 
-            // Hide the original year and description in project-info
+            // Hide the original client, year and description in project-info
+            if (clientElement) clientElement.style.display = "none";
             year.style.display = "none";
             description.style.display = "none";
 
-            // Append the below container to the card (after gallery)
-            card.appendChild(infoBelowContainer);
+            // Find the gallery container and append the info below the slideshow
+            const gallery = card.querySelector('.project-gallery');
+            if (gallery) {
+                gallery.appendChild(infoBelowContainer);
+            }
+
+            // Modify slide positioning for mobile (only show first slide, position relatively)
+            const slides = card.querySelectorAll('.slide');
+            slides.forEach((slide, index) => {
+                if (index === 0) {
+                    // Show first slide with relative positioning
+                    slide.style.position = 'relative';
+                    slide.style.top = 'auto';
+                    slide.style.left = 'auto';
+                    slide.style.transform = 'none';
+                } else {
+                    // Hide other slides on mobile
+                    slide.style.display = 'none';
+                }
+            });
+
+            // Move next button directly to the project card for mobile
+            const nextButton = card.querySelector('.button-next');
+            if (nextButton) {
+                // Remove from gallery and append to card
+                nextButton.remove();
+                card.appendChild(nextButton);
+                
+                // Set positioning
+                nextButton.style.position = 'absolute';
+                nextButton.style.bottom = '16px';
+                nextButton.style.right = '16px';
+                nextButton.style.top = 'auto';
+                nextButton.style.marginTop = '0';
+            }
         }
     }
 
@@ -461,7 +519,7 @@ export class ProjectCard extends Card {
                     this.setupVimeoIframe(slide);
                 } else {
                     // Handle MP4 file
-                    slide.innerHTML = `<video controls autoplay muted loop><source src="${videoContent}" type="video/mp4">Your browser does not support the video tag.</video>`;
+                    slide.innerHTML = `<video controls autoplay loop controlsList="nodownload"><source src="${videoContent}" type="video/mp4">Your browser does not support the video tag.</video>`;
                 }
             } else if (gifs.length > 0) {
                 slide.innerHTML = `<img src="${gifs[i - images.length - videos.length]}" alt="" />`;

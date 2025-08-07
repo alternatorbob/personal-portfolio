@@ -239,6 +239,26 @@ html {
     padding: 0;
 }
 
+.project-description a {
+    color: var(--text-color);
+    text-decoration: underline;
+    transition: opacity 0.2s ease;
+}
+
+.project-description a:hover {
+    opacity: 0.7;
+}
+
+.project-description a.external-link {
+    color: var(--text-color);
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.project-description a.external-link:hover {
+    opacity: 0.7;
+}
+
 .project-gallery {
     display: flex;
     justify-content: space-between;

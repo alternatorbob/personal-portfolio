@@ -18,13 +18,17 @@
 
     /* Project card specific mobile adjustments */
     .project-card {
-        /* inset: 8px !important; */
-        inset: 20px;
+        inset: 0 !important;
         padding: 20px;
+        position: relative;
+        height: 100vh;
+        width: 100vw;
+        overflow-y: auto;
+        box-sizing: border-box;
     }
 
     .project-title {
-        transform: translateY(0px);
+        transform: translateY(-4px);
         width: 100%;
     }
 
@@ -45,27 +49,58 @@
         display: flex !important;
         flex-direction: column !important;
         width: 100%;
+        /* margin-top: 16px; */
+        flex-shrink: 0;
     }
 
-    .project-info-below .project-year,
+    .project-info-below,
     .project-info-below .project-description {
         width: 100% !important;
         flex-basis: auto !important;
         margin: 0;
     }
 
+    .project-client-year {
+        margin-bottom: 16px;
+    }
+
+    /* Link styling for project descriptions on mobile */
+    .project-description a,
+    .project-info-below .project-description a {
+        color: var(--text-color) !important;
+        text-decoration: underline !important;
+        transition: opacity 0.2s ease !important;
+    }
+
+    .project-description a:hover,
+    .project-info-below .project-description a:hover {
+        opacity: 0.7 !important;
+    }
+
+    .project-description a.external-link,
+    .project-info-below .project-description a.external-link {
+        color: var(--text-color) !important;
+        text-decoration: underline !important;
+        font-weight: 500 !important;
+    }
+
+    .project-description a.external-link:hover,
+    .project-info-below .project-description a.external-link:hover {
+        opacity: 0.7 !important;
+    }
+
     /* Buttons positioning for mobile */
     .button-close {
         position: absolute;
-        top: 20px;
-        right: 20px;
+        top: 16px;
+        right: 16px;
         margin-left: 0 !important;
     }
 
     .button-next {
-        margin-top: 10px;
         position: absolute;
-        right: 0px;
+        bottom: 16px;
+        right: 16px;
         z-index: 100;
     }
 
@@ -173,6 +208,11 @@
         display: none !important;
     }
 
+    .title-group {
+        width: 100vw !important;
+        margin-bottom: -4px;
+    }
+
     .index-view-item .grid-year {
         text-align: right !important;
         padding: 10px 0 10px 5px !important;
@@ -202,16 +242,44 @@
         height: auto !important;
     }
 
+    /* Gallery images need to maintain their height for proper display */
+    .project-gallery {
+        flex: none;
+        min-height: 0;
+        gap: 20px;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    .slideshow-container {
+        position: relative;
+        height: auto;
+        min-height: 0;
+    }
+    
+    .slideshow-container .slide {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+    
+    .project-gallery .slide img {
+        width: 100% !important;
+        height: auto !important;
+        object-fit: contain !important;
+    }
+
     /* Fix for embedded iframes */
     .slide iframe {
         width: 100% !important;
-        height: 50vh !important;
+        height: auto !important;
+        min-height: 300px;
     }
 
     /* Fix for embedded videos */
     .slide video {
         width: 100% !important;
-        height: 50vh !important;
+        height: auto !important;
         object-fit: contain !important;
         object-position: left top !important;
     }

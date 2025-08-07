@@ -10,6 +10,12 @@
             "images": ["/projects/Agora_Installation/Agora_Cover.webp"],
             "videos": [
                 "<iframe src=\"https://player.vimeo.com/video/817961154?h=f82903df49&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen  title=\"Agora_Installation\"></iframe><script src=\"https://player.vimeo.com/api/player.js\"></script>"
+            ],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>Interactive installation for L'Atelier Magazine, the annual publication of the EPFL Masters in Architecture. The installation generates a video stream procedurally using Touchdesigner. A QR code next to the work creates a remote on your phone browser.</p>"
+                }
             ]
         }
     },
@@ -22,8 +28,16 @@
         "client": "Random Studio",
         "content": {
             "images": ["/projects/Random_Studio/Digital_Twin/Digital Twin Cover Photo.webp"],
-            "videos": [
-                "<iframe src=\"https://player.vimeo.com/video/1107864065?title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479\" allow=\"autoplay; fullscreen; picture-in-picture\" frameborder=\"0\"></iframe>"
+            "videos": ["/projects/Random_Studio/Digital_Twin/V7.3  Montage (Final Content).mp4"],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>Done at Random Studio, Digital Twin is a research project for a product discovery interface. I explored ways in which the digital layer would allow for deeper insight into product features. The oloid shape was chosen as an abstract object that aimed to make the explorations universal and agnostic of product. So that the interactions / digital environments created could be adapted to any product.</p>"
+                },
+                {
+                    "type": "paragraph",
+                    "html": "<p>The video features some highlights of the process. I did the 3D explorations, shooting and editing of the video as well as the sound design.    </p>"
+                }
             ]
         }
     },
@@ -32,7 +46,7 @@
         "id": "ELPE",
         "description": "ELPE is a visual identity project completed at ECAL under the supervision of the head of the Graphic Design department, Angelo Benedetto. The brief was to develop a dynamic visual identity for an iamginary art space. The concept takes the glass lens and utilises its refractive property as an optical typographical effect.",
         "year": "2020",
-        "categories": ["Graphic Design", "Art Direction"],
+        "categories": ["Graphic Design", "Creative Coding", "Art Direction"],
         "client": "ECAL",
         "content": {
             "images": [
@@ -45,13 +59,51 @@
             "videos": [
                 "<iframe src=\"https://player.vimeo.com/video/817958514?h=f6ecc372e3&badge=0&autopause=0&player_id=0&app_id=58479/embed\" allow=\"autoplay; fullscreen; picture-in-picture\" frameborder=\"0\"></iframe>",
                 "<iframe src=\"https://player.vimeo.com/video/817963150?h=678fa60a83&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" title=\"ELPE Logo Generator Demo\"></iframe><script src=\"https://player.vimeo.com/api/player.js\"></script>"
+            ],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>ELPE is a visual identity project completed at ECAL under the supervision of the head of the Graphic Design department, Angelo Benedetto. The brief was to develop a dynamic visual identity for an iamginary art space. The concept takes the glass lens and utilises its refractive property as an optical typographical effect.</p>"
+                }
+            ]
+        }
+    },
+    {
+        "title": "Glossier",
+        "id": "Glossier",
+        "description": [
+            {
+                "type": "paragraph",
+                "html": "<p>I led the sound design for Glossier’s Le Fleur fragrance launch in Paris, collaborating closely with their spatial designers and creative team to craft a multi-sensory experience aligned with the campaign's tone. Each of the four perfumes had its own pavilion, and I composed a unique soundscape for each—translating fragrance notes and personality into immersive audio. A unifying ambient layer connected the entire space.</p>"
+            },
+            {
+                "type": "paragraph",
+                "html": "<p>At the heart of the experience was Le Fleur’s interactive AI installation, where I designed responsive sound to accompany real-time, personalized poetry. This was my first sound project at this scale—an exciting opportunity to explore how sound can transform and elevate spatial storytelling.</p>"
+            },
+            {
+                "type": "paragraph",
+                "html": "<p>For the full case study and more details, please visit <a href='https://random.studio/projects/an-ai-powered-perfume-launch-for-glossier' class='external-link'>this link</a>.</p>"
+            }
+        ],
+        "year": "2025",
+        "categories": ["Interaction", "Experience Design", "Sound Design"],
+        "client": "Random Studio",
+        "content": {
+            "images": ["/projects/Random_Studio/Glossier/Glossier_Cover.webp"],
+            "videos": ["/projects/Random_Studio/Glossier/Glossier Edit.mp4"
+            ],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>ELPE is a visual identity project completed at ECAL under the supervision of the head of the Graphic Design department, Angelo Benedetto. The brief was to develop a dynamic visual identity for an iamginary art space. The concept takes the glass lens and utilises its refractive property as an optical typographical effect.</p>"
+                }
             ]
         }
     },
     {
         "title": "SELF DE / CON / RE STRUCT",
         "id": "KimWinder",
-        "description": "ELPE is a visual identity project completed at ECAL under the supervision of the head of the Graphic Design department, Angelo Benedetto. The brief was to develop a dynamic visual identity for an iamginary art space. The concept takes the glass lens and utilises its refractive property as an optical typographical effect.",
+        "description": "I programmed SELF DE / CON / RE STRUCT, a kinetic installation conceived by LQ, which was exhibited at BIG ART Amsterdam and MIA Photo Fair. The work explores the tension between fragmentation and transformation—breaking and reassembling self-portraits in real time.",
         "year": "2024",
         "categories": ["Programming", "Installation"],
         "client": "Kim Winder",
@@ -61,13 +113,36 @@
                 "/projects/Freelance/Kim Winder SELFRECONDESTRUCT/1_BIG ART 2024_Photo Almicheal Fraay (@maikeljay)-49.webp",
                 "/projects/Freelance/Kim Winder SELFRECONDESTRUCT/KIMWINDER_SELF(108)_2024 COPY.webp"
             ],
-            "videos": ["/projects/Freelance/Kim Winder SELFRECONDESTRUCT/SELF DE CON RE STRUCT Kim Winder.mp4"]
+            "videos": ["/projects/Freelance/Kim Winder SELFRECONDESTRUCT/SELF DE CON RE STRUCT Kim Winder.mp4"],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>I programmed <em>SELF DE / CON / RE STRUCT</em>, a kinetic installation conceived by <a href='https://www.kimwinder.com/' class='external-link'>Kim Winder</a>, which was exhibited at BIG ART, Amsterdam and MIA Photo Fair, Milano. The work explores the tension between fragmentation and transformation—breaking and reassembling self-portraits in real time. Through generative code and physical movement, the installation invites viewers to engage with shifting identities and the beauty found in imperfection.</p>"
+                },
+                {
+                    "type": "paragraph",
+                    "html": "<p>My role focused on developing the interactive system that deconstructs and reconstructs the visuals, enabling the piece to respond dynamically to its own internal rhythms</p>"
+                },
+                {
+                    "type": "paragraph",
+                    "html": "Photos by Kim Winder, Maikel Jay, Jan Willem Kaldenbach."
+                }
+            ]
         }
     },
     {
         "title": "MIDI Clock",
         "id": "MIDI",
-        "description": "Made in collaboration with Industrial Designer Alex Sinh Nguyen, I worked on the MIDI Clock. Tasked to reimagine, the now considered obsolete object, we created an alarm clock that generates tomorrow's alarm sound based on geographical data you record during the day. Map direction are translated into MIDI notes and different neighbourhoods unlock different sounds and instruments.",
+        "description": [
+            {
+                "type": "paragraph",
+                "html": "In collaboration with Industrial Designer Alex Sinh Nguyen, we made the MIDI Clock. The brief was to reimagine, the alarm clock, an object now considered obsolete by many. "
+            },
+            {
+                "type": "paragraph",
+                "html": "We created an alarm clock that generates tomorrow's alarm sound based on geographical data you record during the day. Map direction are translated into MIDI notes and different neighbourhoods unlock different sounds and instruments."
+            }
+        ],
         "year": "2022",
         "categories": ["Interaction", "Electronics,  Code"],
         "client": "ECAL",
@@ -81,6 +156,12 @@
             ],
             "videos": [
                 "<iframe src=\"https://player.vimeo.com/video/817949858?h=319cb0189d&badge=0&autopause=0&player_id=0&app_id=58479/embed\" allow=\"autoplay; fullscreen; picture-in-picture\" frameborder=\"0\" ></iframe>"
+            ],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>Made in collaboration with Industrial Designer Alex Sinh Nguyen, I worked on the MIDI Clock. Tasked to reimagine, the now considered obsolete object, we created an alarm clock that generates tomorrow's alarm sound based on geographical data you record during the day. Map direction are translated into MIDI notes and different neighbourhoods unlock different sounds and instruments.</p>"
+                }
             ]
         }
     },
@@ -93,13 +174,19 @@
         "client": "ECAL",
         "content": {
             "images": ["/projects/Mindmaze/Mindmaze_Cover.webp"],
-            "gifs": ["/projects/Mindmaze/mindmaze.gif"]
+            "gifs": ["/projects/Mindmaze/mindmaze.gif"],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>Made in collaboration with Interaction Designer Nathanael Vianin, during a one week workshop with engineers from Mindmaze. We created a visualiser for EEG waves captured with a Unicorn headset.</p>"
+                }
+            ]
         }
     },
     {
         "title": "Physical Sequencer",
         "id": "Sequencer",
-        "description": "Made in collaboration with Interaction Designer Tickie Bindner, we created the Physical Sequencer. A device that generates sound based on the distance at which various objects are placed around it. Using a LiDar sensor for data, the device is a Teensy based synth with an onboard battery and speaker which freedom in exploring the sounds one can create with their environment",
+        "description": "Made in collaboration with Interaction Designer Tickie Bindner, we created the Physical Sequencer. A device that generates sound based on the distance at which various objects are placed around it. Using a LiDar sensor for data, the device is a Teensy based synth with an onboard battery and speaker which freedom in exploring the sounds one can create with their environment.",
         "year": "2022",
         "categories": ["Interaction", "CAD", "Electronics, Code"],
         "client": "ECAL",
@@ -113,13 +200,19 @@
             ],
             "videos": [
                 "<iframe src=\"https://player.vimeo.com/video/816276332?h=3301081abb&badge=0&autopause=0&player_id=0&app_id=58479/embed\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen frameborder=\"0\"></iframe>"
+            ],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>Made in collaboration with Interaction Designer Tickie Bindner, we created the Physical Sequencer. A device that generates sound based on the distance at which various objects are placed around it. Using a LiDar sensor for data, the device is a Teensy based synth with an onboard battery and speaker which freedom in exploring the sounds one can create with their environment</p>"
+                }
             ]
         }
     },
     {
         "title": "FULCRUM",
         "id": "FULCRUM",
-        "description": "Targeted at the world of photojournalism, FULCRUM addresses privacy concerns surrounding the publication of photographs. \n\nWhilst many photo-journalists would agree that blurring or censoring faces tampers with important historical documents, protecting sources is ultimately a core journalistic principle.\n\nGiven today's ubiquitous data scraping and face detection algorithms, legislation aimed at mitigating potential abuse, remains outpaced by the swift progress of technology. FULCRUM offers a contemporary solution to the ethical debate between photojournalists and the public.\n\nBy masking subjects' faces with AI generated ones, FULCRUM ensures non-destructive anonymisation, that simultaneously safeguards the identity of the individuals depicted, as well as the photographic quality of the image.",
+        "description": "Targeted at the world of photojournalism, FULCRUM addresses privacy concerns surrounding the publication of photographs. Whilst many photo-journalists would agree that blurring or censoring faces tampers with important historical documents, protecting sources is ultimately a core journalistic principle.",
         "year": "2023",
         "categories": ["Interaction", "Web Development", "Machine Learning"],
         "client": "ECAL",
@@ -129,6 +222,24 @@
                 "/projects/FULCRUM/FULCRUM_2.webp",
                 "/projects/FULCRUM/FULCRUM_3.webp",
                 "/projects/FULCRUM/FULCRUM_4.webp"
+            ],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>Targeted at the world of photojournalism, FULCRUM addresses privacy concerns surrounding the publication of photographs.</p>"
+                },
+                {
+                    "type": "paragraph",
+                    "html": "<p>Whilst many photo-journalists would agree that blurring or censoring faces tampers with important historical documents, protecting sources is ultimately a core journalistic principle.</p>"
+                },
+                {
+                    "type": "paragraph",
+                    "html": "<p>Given today's ubiquitous data scraping and face detection algorithms, legislation aimed at mitigating potential abuse, remains outpaced by the swift progress of technology. FULCRUM offers a contemporary solution to the ethical debate between photojournalists and the public.</p>"
+                },
+                {
+                    "type": "paragraph",
+                    "html": "<p>By masking subjects' faces with AI generated ones, FULCRUM ensures non-destructive anonymisation, that simultaneously safeguards the identity of the individuals depicted, as well as the photographic quality of the image.</p>"
+                }
             ]
         }
     },
@@ -143,6 +254,12 @@
             "images": ["projects/Scroll/Scroll_Cover.webp"],
             "videos": [
                 "<iframe src=\"https://player.vimeo.com/video/817874024?h=a8e58f4072&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen title=\"Physical Scrollbar\"></iframe>"
+            ],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>Made in collaboration with Interaction Designer Tickie Bindner during a one week workshop with Yehwan Song. Tasked to create a project that explores the website and the mobile experiences' relationship with the space, we made the connection between the scrollbar of a webpage and the handrail of a set of stairs. We made a phone case that attached to the handrail and transmitted data from a rotary encoder, via wifi, to the web page which would scroll in increments as the user went up the steps. Each step had its own section of the website thus creating a relationship between the physical and the digital.</p>"
+                }
             ]
         }
     },
@@ -157,6 +274,12 @@
             "images": ["projects/Self_Tracking/Self_Tracking_Cover.webp"],
             "videos": [
                 "<iframe src=\"https://player.vimeo.com/video/396568264?h=a80c8cab1a&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\"title=\"Self Tracking Click Through\"></iframe><script src=\"https://player.vimeo.com/api/player.js\"></script>"
+            ],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>My first ever website yay! Tasked to develop a website around data collected from my daily life as part of a semester project, being an avid cyclists, it quickly became evident what my source of data was going to be. I recorded rides through Strava, representing the GPS data in 3D alongside photographs I took on each outing.</p>"
+                }
             ]
         }
     },
@@ -182,13 +305,19 @@
                 "/projects/Small_World/Small_11.webp",
                 "/projects/Small_World/Small_12.webp",
                 "/projects/Small_World/Small_13.webp"
+            ],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>For a semester course with Gilliane Cachin, I made a publication about microscopes and microphotography. I created a visual language which interprets graphical elements around the theme, in an attempt to explore their aesthetic potential. The \"pseudo-scientific\" visual research is laid out in this edition alongside spec sheets of cutting edge microscopes.</p>"
+                }
             ]
         }
     },
     {
         "title": "Stretching Time",
         "id": "Stretching_Time",
-        "description": "Made in collaboration with Industrial Designers Denise Merlette, Giulia Burrus and Léa Omez, during a one week workshop on \"Soft Electronics\" with Claire Eliot. We created three timers that invoke the human perception of time. Each has an approximate interval, between 3-5 minutes, 10-15 or 30-45. \nThe objects leverage the elastic properties of the chosen materials. By sewing a pattern of conductive wire into the fabric, stretching the material varies the resistance the circuit can pick up, which in turn sets the timer.",
+        "description": "Made in collaboration with Industrial Designers Denise Merlette, Giulia Burrus and Léa Omez, during a one week workshop on \"Soft Electronics\" with Claire Eliot. We created three timers that invoke the human perception of time. Each has an approximate interval, between 3-5 minutes, 10-15 or 30-45. The objects leverage the elastic properties of the chosen materials. By sewing a pattern of conductive wire into the fabric, stretching the material varies the resistance the circuit can pick up, which in turn sets the timer.",
         "year": "2022",
         "categories": ["Interaction", "Electronics, Code"],
         "client": "ECAL",
@@ -203,6 +332,16 @@
             ],
             "videos": [
                 "<iframe src=\"https://player.vimeo.com/video/817990658?h=1ad877a25b&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\"title=\"Stretch_WIP_Short\"></iframe><script src=\"https://player.vimeo.com/api/player.js\"></script>"
+            ],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>Made in collaboration with Industrial Designers Denise Merlette, Giulia Burrus and Léa Omez, during a one week workshop on \"Soft Electronics\" with Claire Eliot. We created three timers that invoke the human perception of time. Each has an approximate interval, between 3-5 minutes, 10-15 or 30-45.</p>"
+                },
+                {
+                    "type": "paragraph",
+                    "html": "<p>The objects leverage the elastic properties of the chosen materials. By sewing a pattern of conductive wire into the fabric, stretching the material varies the resistance the circuit can pick up, which in turn sets the timer.</p>"
+                }
             ]
         }
     },
@@ -215,7 +354,13 @@
         "client": "ECAL",
         "content": {
             "images": ["/projects/XYScope/XYScope_Cover.webp"],
-            "gifs": ["/projects/XYScope/XYScope.gif"]
+            "gifs": ["/projects/XYScope/XYScope.gif"],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>Made in collaboration with Interaction Designer Antoine Contreras during a one week workshop with Ted Davis. Using a p5.js library that enables vintage oscilloscope to reproduce digital canvases, we wanted to create a game, as a sort of hommage to the early days of computing powered by CRT displays. The inherent limited size at which images can be displayed, was leveraged by structuring the game around a small patch of the map. Furthermore we reward the user for trying to break the rules, this is a maze game which allows you to pass through the walls of the maze, however decreasing the frequency of the display at each pass, thus making it harder to see the map.</p>"
+                }
+            ]
         }
     },
     {
@@ -229,6 +374,12 @@
             "images": ["/projects/Zach_Workshop/Zach_Cover.webp"],
             "videos": [
                 "<iframe src=\"https://player.vimeo.com/video/817987018?h=e42bfa3ddf&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen title=\"zach_lieberman_of_workshop_compilation\"></iframe><script src=\"https://player.vimeo.com/api/player.js\"></script>"
+            ],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>During a one week workshop with Zach Lieberman I got to learn how to use OpenFrameworks. Having long wanted to explore GLSL and shaders, I concentrated by week's efforts on adding interaction to these realtime sketches themed around the circle.</p>"
+                }
             ]
         }
     }
