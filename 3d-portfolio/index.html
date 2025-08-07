@@ -69,7 +69,9 @@
                 animation: l1 1s infinite;
             }
             @keyframes l1 {
-                100% {box-shadow: 0 0 0 30px rgba(255, 255, 255, 0)}
+                100% {
+                    box-shadow: 0 0 0 30px rgba(255, 255, 255, 0);
+                }
             }
         </style>
 
@@ -89,12 +91,13 @@
                 </div>
                 <div class="navbar-center">
                     <div class="button button-invert">
-                        <img src="/assets/UI/ball-button.png" alt="Invert colors" />
+                        <div class="button bottom-button"></div>
+                        <!-- <img src="/assets/UI/ball-button.png" alt="Invert colors" /> -->
                     </div>
                 </div>
                 <div class="navbar-right">
                     <div class="navbar-button button text-sm font-bold" id="about-button">About</div>
-                    <div class="view-toggle text-sm font-bold">Index</div>
+                    <div class="view-toggle text-sm font-bold" style="padding-right: 5px">Index</div>
                 </div>
             </div>
             <div id="blur" class="hide"></div>
@@ -106,6 +109,16 @@
                 </div>
                 <div class="index-view-preview">
                     <img src="" alt="Project Preview" />
+                </div>
+            </div>
+
+            <!-- Bottom Navbar -->
+            <div class="navbar navbar-bottom">
+                <div class="navbar-center-bottom">
+                    <div class="button-material-toggle">
+                        <div class="button bottom-button"></div>
+                        <!-- <img src="/assets/UI/ball-button.png" alt="Toggle material" /> -->
+                    </div>
                 </div>
             </div>
         </div>

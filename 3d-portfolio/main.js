@@ -5,8 +5,7 @@ import * as THREE from "three";
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 import { dragInit, updateCubesForSphereRotation } from "./js/dragControl";
 import { addProjects, cubes } from "./js/addProjects";
-import { projects } from "./js/projects";
-import { createEnvironment, isRendering, pauseRenderer, resumeRenderer, easeInOutCubic } from "./js/utils";
+import { createEnvironment, isRendering, pauseRenderer, resumeRenderer, easeInOutCubic, loadProjects } from "./js/utils";
 import { uiInit } from "./js/ui";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
@@ -26,14 +25,13 @@ let camera, scene, renderer;
 let composer, renderPass, bloomPass, afterimagePass;
 let sphere;
 
-const camFar = 1500;
+const camFar = 750;
 export const sphereRadius = window.innerWidth < 768 ? 4.5 : 3.75;
 export const numCubes = 10;
-export const backgroundRotationFactor = 0.3; // How much the background follows the sphere rotation
 
 // Add original scale reference for spring effect
 export let originalSphereScale = 1.0;
-let envMesh; // Make environment mesh accessible globally
+export let envMesh; // Make environment mesh accessible globally
 
 // Add material state tracking
 let isGlassMaterial = false;
@@ -50,6 +48,15 @@ let click = new THREE.Vector2();
 
 const raycaster = new THREE.Raycaster();
 let cubeCamera, cubeRenderTarget;
+
+// Function to toggle sphere material (used by spacebar and bottom navbar)
+export function toggleSphereMaterial() {
+    if (!transitionInProgress) {
+        isGlassMaterial = !isGlassMaterial;
+        transitionInProgress = true;
+        transitionStartTime = performance.now();
+    }
+}
 
 // TEXTURES / Post Processing
 // Define gradient shader in global scope
@@ -102,15 +109,20 @@ function checkLoadingComplete() {
 }
 
 // Initialize Three.js
-try {
-    threeInit();
-} catch (error) {
-    console.error("Error during initialization:", error);
-    // If initialization fails, switch to fallback mode
-    enableFallbackMode();
+async function init() {
+    try {
+        await threeInit();
+    } catch (error) {
+        console.error("Error during initialization:", error);
+        // If initialization fails, switch to fallback mode
+        enableFallbackMode();
+    }
 }
 
-function threeInit() {
+// Start the application
+init();
+
+async function threeInit() {
     // Only initialize once to prevent context loss
     if (isInitialized) return;
 
@@ -150,7 +162,7 @@ function threeInit() {
     window.addEventListener("resize", onWindowResized);
 
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, camFar);
-    camera.position.z = window.innerWidth < 768 ? 20 : 14;
+    camera.position.z = window.innerWidth < 768 ? 20 : 15;
     camera.position.y = window.innerWidth < 768 ? 12 : 3.5;
 
     scene = new THREE.Scene();
@@ -193,6 +205,7 @@ function threeInit() {
     // Option 1: Subdivided Cube (current geometry with more faces)
     // Alternative geometries to try (comment/uncomment to test):
     envMesh = new THREE.Mesh(
+        
         // Option 1: Subdivided Cube (current - more faces than original)
         // new THREE.BoxGeometry(1000, 1000, 1000, 20, 20, 20), // 20x20x20 subdivision
         
@@ -284,9 +297,7 @@ function threeInit() {
     document.addEventListener("keydown", (e) => {
         if (e.code === "Space" && !transitionInProgress) {
             e.preventDefault();
-            isGlassMaterial = !isGlassMaterial;
-            transitionInProgress = true;
-            transitionStartTime = performance.now();
+            toggleSphereMaterial();
         }
     });
 
@@ -294,9 +305,11 @@ function threeInit() {
     cubeCamera.position.copy(sphere.position);
     cubeCamera.update(renderer, scene);
 
+    // Load projects from JSON and initialize
+    const projects = await loadProjects();
     addProjects(projects);
     dragInit();
-    uiInit();
+    uiInit(projects);
 
     // // Setup post-processing
     // composer = new EffectComposer(
@@ -365,16 +378,7 @@ function animate(msTime) {
         gradientShader.uniforms.time.value = msTime * 0.001;
     }
 
-    // Update environment mesh rotation based on sphere rotation
-    if (envMesh && sphere && sphere.quaternion) {
-        // Get the sphere's current rotation as euler angles
-        const sphereRotation = new THREE.Euler().setFromQuaternion(sphere.quaternion);
 
-        // Only rotate around Y axis for horizontal movement
-        // envMesh.rotation.y = -sphereRotation.y * backgroundRotationFactor * 3; // Reduced factor for more subtle movement
-        // envMesh.rotation.x = 0; // No X rotation
-        // envMesh.rotation.z = 0; // No Z rotation
-    }
 
     // Hide sphere and update cubemap
     if (sphere && cubeCamera && renderer && scene) {
@@ -485,7 +489,12 @@ function enableFallbackMode() {
 
         // Make sure the UI is initialized for viewing projects
         if (typeof uiInit === "function") {
-            uiInit();
+            loadProjects().then(projects => {
+                uiInit(projects);
+            }).catch(error => {
+                console.error('Error loading projects in fallback mode:', error);
+                uiInit([]); // Initialize with empty array if loading fails
+            });
         }
     }
 }

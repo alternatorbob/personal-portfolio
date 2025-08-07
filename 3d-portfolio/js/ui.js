@@ -1,7 +1,6 @@
 import * as THREE from "three";
-import { projects } from "./projects";
 import { findObjectById, isMobileDevice, pauseRenderer, resumeRenderer } from "./utils";
-import { wasSelected, reverseSelected } from "../main";
+import { wasSelected, reverseSelected, toggleSphereMaterial } from "../main";
 import { AboutCard, ProjectCard } from "./Components";
 
 // Global variables
@@ -18,13 +17,14 @@ export function setIndexStateForProjectOpening() {
 
 
 
-export function uiInit() {
+export function uiInit(projects) {
     // Initialize sortedProjects with projects array
     sortedProjects = [...projects];
 
     // Initialize UI components
     initNavbar();
     initInvertButton();
+    initBottomNavbar();
     initIndexViewToggle();
     initIndexView();
 
@@ -79,6 +79,7 @@ export function uiInit() {
     // Single event handler for intercepting mouse clicks in UI areas
     const interceptUIEvents = (e) => {
         const navbar = document.querySelector(".navbar");
+        const navbarBottom = document.querySelector(".navbar-bottom");
         const indexView = document.querySelector(".index-view");
         const aboutButton = document.getElementById("about-button");
 
@@ -92,6 +93,15 @@ export function uiInit() {
             const navbarRect = navbar.getBoundingClientRect();
             // Check if interaction is within navbar bounds
             if (clientY <= navbarRect.bottom) {
+                e.stopPropagation();
+                return;
+            }
+        }
+
+        if (navbarBottom) {
+            const navbarBottomRect = navbarBottom.getBoundingClientRect();
+            // Check if interaction is within bottom navbar bounds
+            if (clientY >= navbarBottomRect.top) {
                 e.stopPropagation();
                 return;
             }
@@ -149,6 +159,16 @@ function initInvertButton() {
     if (invertButton && invert) {
         invertButton.addEventListener("click", () => {
             invert.classList.toggle("show");
+        });
+    }
+}
+
+function initBottomNavbar() {
+    const materialToggleButton = document.querySelector(".button-material-toggle");
+
+    if (materialToggleButton) {
+        materialToggleButton.addEventListener("click", () => {
+            toggleSphereMaterial();
         });
     }
 }
@@ -261,7 +281,7 @@ export function addProjectCardToPage(projectId, container) {
         return null; // Don't create another card if one exists already
     }
 
-    const project = findObjectById(projects, projectId);
+    const project = findObjectById(sortedProjects, projectId);
     if (!project) return;
 
     // Create and render the project card using the ProjectCard component
@@ -282,29 +302,7 @@ export function addProjectCardToPage(projectId, container) {
     return projectCard.render();
 }
 
-export function addCursorStyles(camera, cubes) {
-    console.log(camera, cubes);
 
-    const raycaster = new THREE.Raycaster();
-    window.addEventListener("mousemove", (e) => {
-        raycaster.setFromCamera(
-            new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, (-e.clientY / window.innerHeight) * 2 + 1),
-            camera
-        );
-
-        for (const cube of cubes) {
-            const intersections = raycaster.intersectObject(cube);
-
-            if (intersections.length > 0) {
-                console.log(cube);
-
-                document.body.style.cursor = "pointer";
-            } else {
-                document.body.style.cursor = "auto";
-            }
-        }
-    });
-}
 
 function populateIndexView() {
     const gridContainer = document.querySelector(".index-view-grid");
@@ -323,6 +321,10 @@ function populateIndexView() {
         gridItem.className = "index-view-item";
         gridItem.id = project.id;
 
+        // Create title group
+        const titleGroupElement = document.createElement("div");
+        titleGroupElement.className = "grid-title-group";
+
         // Create title element
         const titleElement = document.createElement("div");
         titleElement.className = "grid-title";
@@ -333,14 +335,23 @@ function populateIndexView() {
         categoryElement.className = "grid-category";
         categoryElement.textContent = project.categories.join(", ");
 
+        // Create client element
+        const clientElement = document.createElement("div");
+        clientElement.className = "grid-client";
+        clientElement.textContent = project.client || "N/A";
+
         // Create year element
         const yearElement = document.createElement("div");
         yearElement.className = "grid-year";
         yearElement.textContent = project.year;
 
-        // Append all elements to grid item
-        gridItem.appendChild(titleElement);
+        // Append title to title group
+        titleGroupElement.appendChild(titleElement);
+
+        // Append title group, category, client, and year to grid item
+        gridItem.appendChild(titleGroupElement);
         gridItem.appendChild(categoryElement);
+        gridItem.appendChild(clientElement);
         gridItem.appendChild(yearElement);
 
         // Add hover events for preview (skip on mobile devices)
@@ -411,10 +422,12 @@ function initIndexViewToggle() {
 }
 
 function initIndexView() {
-    // Set default sort by year descending
-    sortedProjects = [...projects].sort((a, b) => {
-        return parseInt(b.year) - parseInt(a.year);
-    });
+    // Set default sort by year descending - sortedProjects should already be initialized
+    if (sortedProjects.length > 0) {
+        sortedProjects = [...sortedProjects].sort((a, b) => {
+            return parseInt(b.year) - parseInt(a.year);
+        });
+    }
     populateIndexView();
 }
 

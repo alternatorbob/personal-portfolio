@@ -30,7 +30,7 @@ export class Card {
         const card = document.createElement("div");
         card.className = "project-card";
         card.id = this.id;
-        
+
         return card;
     }
 
@@ -42,9 +42,9 @@ export class Card {
         const closeBtn = document.createElement("div");
         closeBtn.className = "button-close";
         closeBtn.innerHTML = '<img src="/assets/UI/close-button.png" class="button" alt="close project button"/>';
-        
+
         closeBtn.addEventListener("click", () => this.close());
-        
+
         parent.appendChild(closeBtn);
         this.closeButton = closeBtn;
     }
@@ -59,7 +59,7 @@ export class Card {
                 this.removeEscKeyHandler();
             }
         };
-        
+
         document.addEventListener("keydown", this.escKeyHandler);
     }
 
@@ -87,8 +87,16 @@ export class Card {
         this.container.appendChild(this.element);
         this.addEscKeyHandler();
         this.open();
-        
+
         return this.element;
+    }
+
+    /**
+     * Generate a random rotation between -1.5 and 1.5 degrees
+     * @returns {number} Random rotation value
+     */
+    generateRandomRotation() {
+        return (Math.random() * 3 - 1.5);
     }
 
     /**
@@ -105,14 +113,28 @@ export class Card {
             blur.classList.remove("hide");
         }
 
-        // Initial state - positioned below
-        this.element.style.transform = "translateY(100%)";
-        this.element.style.opacity = "0";
-        this.element.style.visibility = "hidden";
+        // Handle different card types for animation
+        const isAboutCard = this.element.classList.contains("about-card");
+        
+        if (isAboutCard) {
+            // About card uses CSS transforms for centering, so we clear inline styles
+            this.element.style.transform = "";
+            this.element.style.visibility = "hidden";
+        } else {
+            // Project card uses inline transforms
+            this.element.style.transform = "translateY(110%)";
+            this.element.style.opacity = "0";
+            this.element.style.visibility = "hidden";
+        }
 
-        // Hide navbar when card is open - add class first to trigger transition
+        // Hide navbars when card is open - add class first to trigger transition
         if (navbar) {
-            navbar.classList.add("project-card-open");
+            navbar.classList.add("navbar-hide");
+        }
+        
+        const navbarBottom = document.querySelector(".navbar-bottom");
+        if (navbarBottom) {
+            navbarBottom.classList.add("navbar-hide");
         }
 
         // Force a reflow to ensure the initial state is applied
@@ -120,9 +142,18 @@ export class Card {
 
         // Animate in
         requestAnimationFrame(() => {
-            this.element.style.transform = "translateY(0)";
-            this.element.style.opacity = "1";
-            this.element.style.visibility = "visible";
+            if (isAboutCard) {
+                // About card: generate random rotation
+                const randomRotation = this.generateRandomRotation();
+                this.element.style.transform = `translate(-50%, -50%) rotate(${randomRotation}deg)`;
+                this.element.style.opacity = "1";
+                this.element.style.visibility = "visible";
+            } else {
+                // Project card uses inline transforms
+                this.element.style.transform = "translateY(0)";
+                this.element.style.opacity = "1";
+                this.element.style.visibility = "visible";
+            }
             this.element.classList.add("show");
         });
     }
@@ -140,28 +171,43 @@ export class Card {
         if (blur) {
             blur.classList.add("hide");
         }
-        
-        // Remove project-card-open class from navbar to trigger fade-in transition
+
+        // Remove navbar-hide class from both navbars to trigger fade-in transition
         if (navbar) {
-            navbar.classList.remove("project-card-open");
+            navbar.classList.remove("navbar-hide");
+        }
+        
+        const navbarBottom = document.querySelector(".navbar-bottom");
+        if (navbarBottom) {
+            navbarBottom.classList.remove("navbar-hide");
         }
 
-        // Animate out
-        this.element.style.transform = "translateY(110%)";
-        this.element.classList.remove("show");
+        // Handle different card types for closing animation
+        const isAboutCard = this.element.classList.contains("about-card");
+        
+        if (isAboutCard) {
+            // About card: fade out and slide down
+            this.element.style.transform = "translate(-50%, 110%) rotate(0deg)";
+            this.element.style.opacity = "0";
+            this.element.classList.remove("show");
+        } else {
+            // Project card uses inline transforms
+            this.element.style.transform = "translateY(110%)";
+            this.element.classList.remove("show");
+        }
 
         // Wait for animation to complete before removing
         setTimeout(() => {
             this.removeEscKeyHandler();
-            
+
             // Reset wasSelected state if needed
             if (typeof reverseSelected === "function") {
                 reverseSelected();
             }
-            
+
             // Execute the onClose callback
             this.onClose();
-            
+
             // Remove the element if it's still in the DOM
             if (this.element && this.element.parentNode) {
                 this.element.parentNode.removeChild(this.element);
@@ -184,12 +230,12 @@ export class AboutCard extends Card {
     constructor(options = {}) {
         super({
             id: "about-card",
-            ...options
+            ...options,
         });
-        
+
         this.content = options.content || {
             title: "About",
-            description: ""
+            description: "",
         };
     }
 
@@ -197,28 +243,39 @@ export class AboutCard extends Card {
      * Create the about card element with content
      */
     createCardElement() {
-        const card = super.createCardElement();
-        
-        // Create info div like in project card for consistent layout
+        const card = document.createElement("div");
+        card.id = this.id;
+        card.classList.add("about-card"); // Only add about-card class
+
+        // Create info div
         const info = document.createElement("div");
-        info.className = "project-info";
+        info.className = "about-card-info";
         card.appendChild(info);
 
-        const title = document.createElement("h2");
-        title.className = "project-card-title text-lg column";
+        // Create title 
+        const title = document.createElement("div");
+        title.className = "about-card-title text-lg";
         title.textContent = this.content.title;
-        title.style.textAlign = "center";
-        info.appendChild(title);
+        title.style.textAlign = "left"; // Left-aligned as requested
+        title.style.fontSize = "var(--text-title)"; // Match project title font size
+        title.style.color = "var(--text-color)"; // Match project title color
+        title.style.fontWeight = "600"; // Match project title font weight
+        title.style.margin = "0"; // Reset margin
+        title.style.transform = "translateY(-7px)"; // Match project title vertical positioning
 
+        // Create description
         const description = document.createElement("div");
-        description.className = "column text-sm";
+        description.className = "about-card-description text-sm";
         description.innerHTML = this.content.description;
-        description.style.textAlign = "center";
+        description.style.textAlign = "left"; // Left-aligned as requested
+
+        // Append elements
+        info.appendChild(title);
         info.appendChild(description);
 
-        // Add close button
+        // Add close button to the info div
         this.addCloseButton(info);
-        
+
         return card;
     }
 }
@@ -237,9 +294,9 @@ export class ProjectCard extends Card {
     constructor(options = {}) {
         super({
             id: options.project?.id || `project-${Date.now()}`,
-            ...options
+            ...options,
         });
-        
+
         this.project = options.project || {};
         this.currentSlideIndex = 0;
         this.slides = [];
@@ -250,23 +307,36 @@ export class ProjectCard extends Card {
      */
     createCardElement() {
         const card = super.createCardElement();
-        
+
         // Create info section
         const info = document.createElement("div");
         info.className = "project-info";
         card.appendChild(info);
 
+        // Create title-group
+        const titleGroup = document.createElement("div");
+        titleGroup.className = "title-group column";
+
         // Add title
         const title = document.createElement("div");
-        title.className = "project-title text-lg column";
+        title.className = "project-title text-lg";
         title.textContent = this.project.title;
-        info.appendChild(title);
+        titleGroup.appendChild(title);
 
         // Add categories
         const categories = document.createElement("div");
-        categories.className = "project-categories column text-sm";
+        categories.className = "project-categories text-sm";
         categories.textContent = this.project.categories.join(", ");
-        info.appendChild(categories);
+        titleGroup.appendChild(categories);
+
+        // Add title-group to info
+        info.appendChild(titleGroup);
+
+        // Add client column
+        const clientColumn = document.createElement("div");
+        clientColumn.className = "project-client column text-sm";
+        clientColumn.textContent = this.project.client || "N/A";
+        info.appendChild(clientColumn);
 
         // Add year
         const year = document.createElement("div");
@@ -285,13 +355,13 @@ export class ProjectCard extends Card {
 
         // Create gallery section
         this.createGallery(card);
-        
+
         // Handle mobile layout restructuring
         this.handleMobileLayout(card, year, description);
-        
+
         // Add keyboard navigation
         this.setupKeyboardNavigation();
-        
+
         return card;
     }
 
@@ -304,24 +374,24 @@ export class ProjectCard extends Card {
     handleMobileLayout(card, year, description) {
         // Check if we're on mobile (viewport width <= 768px)
         const isMobile = window.innerWidth <= 768;
-        
+
         if (isMobile) {
             // Create a container for year and description below gallery
             const infoBelowContainer = document.createElement("div");
             infoBelowContainer.className = "project-info-below";
-            
+
             // Clone the year and description elements
             const yearClone = year.cloneNode(true);
             const descriptionClone = description.cloneNode(true);
-            
+
             // Add cloned elements to the below container
             infoBelowContainer.appendChild(yearClone);
             infoBelowContainer.appendChild(descriptionClone);
-            
+
             // Hide the original year and description in project-info
-            year.style.display = 'none';
-            description.style.display = 'none';
-            
+            year.style.display = "none";
+            description.style.display = "none";
+
             // Append the below container to the card (after gallery)
             card.appendChild(infoBelowContainer);
         }
@@ -334,7 +404,7 @@ export class ProjectCard extends Card {
     createGallery(card) {
         // Skip if no content available
         if (!this.project.content) return;
-        
+
         const gallery = document.createElement("div");
         gallery.className = "project-gallery";
         card.appendChild(gallery);
@@ -344,23 +414,24 @@ export class ProjectCard extends Card {
         gallery.appendChild(slideshowContainer);
 
         // Add next button if there are multiple items to display
-        const hasMultipleItems = 
+        const hasMultipleItems =
             (this.project.content.images?.length || 0) +
-            (this.project.content.videos?.length || 0) +
-            (this.project.content.gifs?.length || 0) > 1;
-            
+                (this.project.content.videos?.length || 0) +
+                (this.project.content.gifs?.length || 0) >
+            1;
+
         if (hasMultipleItems) {
             const nextBtn = document.createElement("div");
             nextBtn.className = "button-next button";
             nextBtn.innerHTML = '<img src="/assets/UI/next-button.png" alt="" />';
             gallery.appendChild(nextBtn);
-            
+
             nextBtn.addEventListener("click", () => this.showNextSlide());
         }
 
         // Create slides
         this.createSlides(slideshowContainer);
-        
+
         // Preload images for smoother transitions
         this.preloadImages();
     }
@@ -371,9 +442,9 @@ export class ProjectCard extends Card {
      */
     createSlides(container) {
         const { images = [], videos = [], gifs = [] } = this.project.content || {};
-        
+
         const numSlides = images.length + videos.length + gifs.length;
-        
+
         for (let i = 0; i < numSlides; i++) {
             const slide = document.createElement("div");
             slide.className = "slide";
@@ -381,9 +452,17 @@ export class ProjectCard extends Card {
             if (i < images.length) {
                 slide.innerHTML = `<img src="${images[i]}" alt="" />`;
             } else if (videos.length > 0) {
-                slide.innerHTML = `${videos[i - images.length]}`;
-                // Handle Vimeo iframe to remove vp-center class
-                this.setupVimeoIframe(slide);
+                const videoContent = videos[i - images.length];
+                
+                // Check if it's a file path (MP4) or iframe (Vimeo)
+                if (videoContent.startsWith('<iframe')) {
+                    // Handle Vimeo iframe
+                    slide.innerHTML = videoContent;
+                    this.setupVimeoIframe(slide);
+                } else {
+                    // Handle MP4 file
+                    slide.innerHTML = `<video controls autoplay muted loop><source src="${videoContent}" type="video/mp4">Your browser does not support the video tag.</video>`;
+                }
             } else if (gifs.length > 0) {
                 slide.innerHTML = `<img src="${gifs[i - images.length - videos.length]}" alt="" />`;
             }
@@ -410,8 +489,8 @@ export class ProjectCard extends Card {
             if (!iframe) return;
 
             // Only process if Vimeo Player API is available
-            if (typeof Vimeo === 'undefined') {
-                console.warn('Vimeo Player API not available');
+            if (typeof Vimeo === "undefined") {
+                console.warn("Vimeo Player API not available");
                 return;
             }
 
@@ -420,20 +499,22 @@ export class ProjectCard extends Card {
                 const player = new Vimeo.Player(iframe);
 
                 // Listen for when the player is ready
-                player.ready().then(() => {
-                    // Inject CSS to override vp-center styles
-                    this.injectVimeoStyles(iframe);
-                }).catch((error) => {
-                    console.warn('Vimeo player setup failed:', error);
-                });
+                player
+                    .ready()
+                    .then(() => {
+                        // Inject CSS to override vp-center styles
+                        this.injectVimeoStyles(iframe);
+                    })
+                    .catch((error) => {
+                        console.warn("Vimeo player setup failed:", error);
+                    });
 
                 // Also try to inject styles on play event as a fallback
-                player.on('play', () => {
+                player.on("play", () => {
                     this.injectVimeoStyles(iframe);
                 });
-
             } catch (error) {
-                console.warn('Error setting up Vimeo player:', error);
+                console.warn("Error setting up Vimeo player:", error);
             }
         }, 100);
     }
@@ -446,7 +527,7 @@ export class ProjectCard extends Card {
         try {
             // Since we can't directly access cross-origin iframe content,
             // we'll add CSS that affects the iframe container behavior
-            const style = document.createElement('style');
+            const style = document.createElement("style");
             style.textContent = `
                 /* Override Vimeo's centering for project videos */
                 .project-card .slide iframe[src*="player.vimeo.com"] {
@@ -465,21 +546,20 @@ export class ProjectCard extends Card {
                     border: none !important;
                 }
             `;
-            
+
             // Add unique identifier to avoid duplicate styles
             style.id = `vimeo-override-${this.id}`;
-            
+
             // Remove any existing override for this card
             const existingStyle = document.getElementById(style.id);
             if (existingStyle) {
                 existingStyle.remove();
             }
-            
+
             // Add the new style to the document head
             document.head.appendChild(style);
-            
         } catch (error) {
-            console.warn('Error injecting Vimeo styles:', error);
+            console.warn("Error injecting Vimeo styles:", error);
         }
     }
 
@@ -488,8 +568,8 @@ export class ProjectCard extends Card {
      */
     preloadImages() {
         const { images = [], gifs = [] } = this.project.content || {};
-        
-        [...images, ...gifs].forEach(src => {
+
+        [...images, ...gifs].forEach((src) => {
             const img = new Image();
             img.src = src;
         });
@@ -500,7 +580,7 @@ export class ProjectCard extends Card {
      */
     showNextSlide() {
         if (this.slides.length <= 1) return;
-        
+
         // Calculate the index of the next slide
         const nextIndex = (this.currentSlideIndex + 1) % this.slides.length;
 
@@ -542,12 +622,12 @@ export class ProjectCard extends Card {
                 this.showNextSlide();
             }
         };
-        
+
         document.addEventListener("keydown", keyHandler);
-        
+
         // Store the handler for cleanup
         this._keyboardHandler = keyHandler;
-        
+
         // Make sure to clean up when the card is closed
         const originalOnClose = this.onClose;
         this.onClose = () => {
@@ -557,4 +637,4 @@ export class ProjectCard extends Card {
             if (originalOnClose) originalOnClose();
         };
     }
-} 
+}

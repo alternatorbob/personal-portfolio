@@ -240,4 +240,19 @@ export function easeInOutCubic(t) {
         : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+// Load projects from JSON file
+export async function loadProjects() {
+    try {
+        const response = await fetch('/projects/projects.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const projects = await response.json();
+        return projects;
+    } catch (error) {
+        console.error('Error loading projects:', error);
+        return [];
+    }
+}
+
 export { getRandomInt, createEnvironment };

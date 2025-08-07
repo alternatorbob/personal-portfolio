@@ -96,7 +96,7 @@
 
     .index-view-grid {
         display: grid !important;
-        grid-template-columns: 3fr 1fr !important; /* Title, Year only */
+        grid-template-columns: 3fr 1fr !important; /* Title+Category, Year */
         gap: 0;
         width: 100% !important;
         color: var(--text-color);
@@ -132,9 +132,51 @@
         opacity: 1 !important;
     }
 
-    /* Hide category column on mobile */
+    /* Show category column on mobile */
     .index-view-item .grid-category {
+        display: block !important;
+        opacity: 1 !important;
+        transition: opacity 0.2s ease !important;
+        padding: 10px 5px !important;
+        font-size: var(--text-sm) !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .index-view-item .grid-title {
         display: none !important;
+    }
+
+    .index-view-item .grid-title-group {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        padding: 10px 5px 0 0 !important;
+        width: 100% !important;
+        overflow: hidden;
+    }
+
+    .index-view-item .grid-title-group .grid-title {
+        font-size: var(--text-sm) !important;
+        color: var(--text-color) !important;
+        opacity: 1 !important;
+        transition: opacity 0.2s ease !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+    }
+
+    .index-view-item .grid-title-group .grid-category {
+        display: none !important;
+    }
+
+    .index-view-item .grid-year {
+        text-align: right !important;
+        padding: 10px 0 10px 5px !important;
+        font-size: var(--text-sm) !important;
         opacity: 1 !important;
         transition: opacity 0.2s ease !important;
     }
@@ -164,6 +206,14 @@
     .slide iframe {
         width: 100% !important;
         height: 50vh !important;
+    }
+
+    /* Fix for embedded videos */
+    .slide video {
+        width: 100% !important;
+        height: 50vh !important;
+        object-fit: contain !important;
+        object-position: left top !important;
     }
 
     .navbar {

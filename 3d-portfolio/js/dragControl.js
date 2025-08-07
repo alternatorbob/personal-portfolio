@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { camera, renderer, sphere, originalSphereScale } from "../main";
+import { sphere, envMesh, originalSphereScale, camera, renderer } from "../main.js";
 import { cubes, cubeOriginalDimensions } from "./addProjects";
 import { uiSwitchState, addProjectCardToPage, setIndexStateForProjectOpening } from "./ui";
 import { createEnvironment, isMobileDevice, pauseRenderer } from "./utils";
@@ -9,6 +9,8 @@ let wasDragged = false;
 let lastMousePosition = new THREE.Vector2();
 export let mousePosition = new THREE.Vector2();
 let lastTime = 0; // Track time for velocity calculations
+
+
 
 // Spring effect parameters
 const springCompression = 0.93; // How much the sphere shrinks when pressed
@@ -151,7 +153,7 @@ const onTouchMove = function (e) {
     e.preventDefault();
     if (!isDragging) return;
 
-    renderer.domElement.style.cursor = "grabbing";
+    document.body.style.cursor = "grabbing";
     const touch = e.touches[0];
     mousePosition.set(touch.clientX, touch.clientY);
 
@@ -183,7 +185,7 @@ const onTouchMove = function (e) {
 const onTouchEnd = function () {
     if (isDragging) {
         isDragging = false;
-        renderer.domElement.style.cursor = "auto";
+        document.body.style.cursor = "auto";
 
         // Reset camera rotation to prevent sticking on mobile
         if (isMobile && cameraControl) {
@@ -233,9 +235,11 @@ export function dragInit() {
 
     // Add mouse event listeners
     renderer.domElement.addEventListener("mousemove", onMouseMove);
-    renderer.domElement.addEventListener("mousemove", onMouseHover);
     renderer.domElement.addEventListener("mousedown", onMouseDown);
     renderer.domElement.addEventListener("mouseup", onMouseUp);
+    
+    // Add document-level mouse leave listener to handle cursor leaving browser window
+    document.addEventListener("mouseleave", onMouseLeave);
 
     // Add wheel event listener for trackpad scrolling
     renderer.domElement.addEventListener("wheel", onWheel, { passive: false });
@@ -340,54 +344,6 @@ function updateCubeScales() {
     }
 }
 
-function onMouseHover(e) {
-    // Skip hover effects on mobile devices
-    if (isMobile) return;
-
-    raycaster.setFromCamera(new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, (-e.clientY / window.innerHeight) * 2 + 1), camera);
-
-    const intersections = raycaster.intersectObject(sphere);
-
-    // Previous hover state - store for detecting when we leave the sphere
-    const wasHovering = isHoveringOverSphere;
-
-    if (!isDragging) {
-        if (intersections.length > 0) {
-            renderer.domElement.style.cursor = "grab";
-
-            // If we weren't hovering before and haven't played the animation yet
-            if (!isHoveringOverSphere && !hoverAnimationPlayed) {
-                // Trigger a gentle spring effect
-                springVelocity = -0.004; // Small negative impulse for shrinking
-                targetScale = originalSphereScale * 0.98; // Shrink slightly
-
-                // After a short delay, return to normal size
-                setTimeout(() => {
-                    targetScale = originalSphereScale;
-                    hoverAnimationPlayed = true; // Mark animation as played
-
-                    // Reset the animation played flag after leaving the sphere
-                    setTimeout(() => {
-                        hoverAnimationPlayed = false;
-                    }, 1000);
-                }, 150);
-            }
-
-            isHoveringOverSphere = true;
-        } else {
-            renderer.domElement.style.cursor = "auto";
-
-            // If we just left the sphere (was hovering, now not)
-            if (wasHovering) {
-                // Add a small spring effect when leaving
-                springVelocity = 0.005; // Small positive impulse when leaving
-            }
-
-            isHoveringOverSphere = false;
-        }
-    }
-}
-
 function onMouseDown(e) {
     // Check if a project card is already open
     const existingProjectCards = document.querySelectorAll(".project-card");
@@ -405,6 +361,7 @@ function onMouseDown(e) {
     // If sphere is hit, prioritize sphere interaction over cubes
     if (sphereIntersections.length > 0) {
         // Sphere interaction takes priority - continue to sphere dragging logic below
+        document.body.style.cursor = "grabbing";
     } else if (cubeIntersections.length > 0) {
         // Only open project if sphere is not hit
         const intersectedObject = cubeIntersections[0].object;
@@ -444,7 +401,26 @@ function onMouseDown(e) {
 function onMouseUp() {
     if (isDragging) {
         isDragging = false;
-        renderer.domElement.style.cursor = "auto";
+        document.body.style.cursor = "auto";
+
+        // Start inertia animation if there's velocity
+        if (rotationVelocity.length() > 0.0001) {
+            animateInertia();
+        }
+
+        // Release spring compression with a slight expansion effect
+        springVelocity = 0.01; // Add a small positive impulse
+        targetScale = originalSphereScale;
+    }
+}
+
+function onMouseLeave(e) {
+    // Check if the mouse has actually left the window
+    if (e.clientX <= 0 || e.clientX >= window.innerWidth || 
+        e.clientY <= 0 || e.clientY >= window.innerHeight) {
+        // Always release the ball when cursor definitively leaves the browser window
+        isDragging = false;
+        document.body.style.cursor = "auto";
 
         // Start inertia animation if there's velocity
         if (rotationVelocity.length() > 0.0001) {
@@ -557,12 +533,29 @@ function returnCubesToOriginalPositions() {
 }
 
 function onMouseMove(e) {
+    // Cursor styling logic
+    if (!isDragging) {
+        raycaster.setFromCamera(new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, (-e.clientY / window.innerHeight) * 2 + 1), camera);
+
+        const sphereIntersections = raycaster.intersectObject(sphere);
+        const cubeIntersections = raycaster.intersectObjects(cubes);
+
+        if (sphereIntersections.length > 0) {
+            document.body.style.cursor = "grab";
+        } else if (cubeIntersections.length > 0) {
+            document.body.style.cursor = "pointer";
+        } else {
+            document.body.style.cursor = "auto";
+        }
+    }
+
+    // Existing drag logic
     if (!isDragging) return;
 
     // Check if cursor has left the screen
     if (hasCursorLeftScreen(e)) {
         isDragging = false;
-        renderer.domElement.style.cursor = "auto";
+        document.body.style.cursor = "auto";
 
         // Start inertia animation if there's velocity
         if (rotationVelocity.length() > 0.0001) {
@@ -575,7 +568,7 @@ function onMouseMove(e) {
         return;
     }
 
-    renderer.domElement.style.cursor = "grabbing";
+    document.body.style.cursor = "grabbing";
     mousePosition.set(e.clientX, e.clientY);
 
     // Calculate mouse movement delta
