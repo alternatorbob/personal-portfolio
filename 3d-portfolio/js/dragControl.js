@@ -221,19 +221,42 @@ export function dragInit() {
     // Ensure sphere starts at the correct size and neutral rotation
     sphere.scale.set(originalSphereScale, originalSphereScale, originalSphereScale);
 
-    // Add random initial world rotation for more variation at startup
-    const randomRotationX = (Math.random() - 0.5) * Math.PI * 2; // Random rotation around X axis
-    const randomRotationY = (Math.random() - 0.5) * Math.PI * 2; // Random rotation around Y axis
-    const randomRotationZ = (Math.random() - 0.5) * Math.PI * 0.5; // Smaller random rotation around Z axis
+    // Select a random cube to be the "front" cube
+    const randomCubeIndex = Math.floor(Math.random() * cubes.length);
+    const targetCube = cubes[randomCubeIndex];
     
-    const initialRotationX = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), randomRotationX);
-    const initialRotationY = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), randomRotationY);
-    const initialRotationZ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), randomRotationZ);
-    
-    // Combine rotations
-    worldRotation.multiplyQuaternions(initialRotationX, worldRotation);
-    worldRotation.multiplyQuaternions(initialRotationY, worldRotation);
-    worldRotation.multiplyQuaternions(initialRotationZ, worldRotation);
+    // Get the cube's original position
+    const cubeOriginalPosition = cubeOriginalPositions.get(targetCube.uuid);
+    if (cubeOriginalPosition) {
+        // Calculate the direction from sphere center to the cube
+        const cubeDirection = cubeOriginalPosition.clone().normalize();
+        
+        // We want the cube to be in front of the camera, slightly up and centered
+        // So we need to rotate the world so that the cube's direction becomes (0, 0.3, -1)
+        const targetDirection = new THREE.Vector3(10, 30, -40).normalize();
+        
+        // Calculate the rotation needed to align the cube direction with the target direction
+        const rotationAxis = new THREE.Vector3().crossVectors(cubeDirection, targetDirection).normalize();
+        const rotationAngle = Math.acos(cubeDirection.dot(targetDirection));
+        
+        if (rotationAxis.length() > 0.001) { // Avoid division by zero
+            const targetRotation = new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAngle);
+            worldRotation.multiplyQuaternions(targetRotation, worldRotation);
+        }
+        
+        // Add a small random offset to make it not perfectly centered
+        // const smallRandomX = (Math.random() - 0.5) * 0.3; // Small random X offset
+        // const smallRandomY = (Math.random() - 0.5) * 0.2; // Small random Y offset
+        // const smallRandomZ = (Math.random() - 0.5) * 0.1; // Small random Z offset
+        
+        const smallRotationX = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0));
+        const smallRotationY = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0));
+        const smallRotationZ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1));
+        
+        worldRotation.multiplyQuaternions(smallRotationX, worldRotation);
+        worldRotation.multiplyQuaternions(smallRotationY, worldRotation);
+        worldRotation.multiplyQuaternions(smallRotationZ, worldRotation);
+    }
 
     // Initialize cube positions and randomized properties
     for (let cube of cubes) {
