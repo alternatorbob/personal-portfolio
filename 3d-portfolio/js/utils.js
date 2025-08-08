@@ -256,3 +256,94 @@ export async function loadProjects() {
 }
 
 export { getRandomInt, createEnvironment };
+
+/**
+ * Detect when Apfel Grotesk fonts are loaded and apply larger typography
+ */
+export function detectFontLoading() {
+    // Create a test element to check if Apfel Grotesk is loaded
+    const testElement = document.createElement('span');
+    testElement.style.fontFamily = 'Apfel Grotesk, monospace';
+    testElement.style.fontSize = '72px';
+    testElement.style.position = 'absolute';
+    testElement.style.visibility = 'hidden';
+    testElement.style.whiteSpace = 'nowrap';
+    testElement.textContent = 'abcdefghijklmnopqrstuvwxyz';
+    
+    document.body.appendChild(testElement);
+    
+    // Get the initial width
+    const initialWidth = testElement.offsetWidth;
+    
+    // Flag to prevent double removal
+    let elementRemoved = false;
+    
+    // Function to safely remove the test element
+    const removeTestElement = () => {
+        if (!elementRemoved && document.body.contains(testElement)) {
+            document.body.removeChild(testElement);
+            elementRemoved = true;
+        }
+    };
+    
+    // Function to check if font is loaded
+    const checkFontLoaded = () => {
+        // If element was already removed, stop checking
+        if (elementRemoved) return;
+        
+        const currentWidth = testElement.offsetWidth;
+        
+        // If width changed, font is loaded
+        if (currentWidth !== initialWidth) {
+            // Font loaded successfully - keep default (larger) scale
+            removeTestElement();
+            console.log('Apfel Grotesk fonts loaded - using default (larger) typography scale');
+        } else {
+            // Check again in 100ms
+            setTimeout(checkFontLoaded, 100);
+        }
+    };
+    
+    // Start checking
+    checkFontLoaded();
+    
+    // Fallback: if font doesn't load within 3 seconds, apply fallback scale
+    setTimeout(() => {
+        removeTestElement();
+        if (!elementRemoved) {
+            document.documentElement.classList.add('fonts-fallback');
+            console.log('Apfel Grotesk fonts not loaded - applying fallback typography scale');
+        }
+    }, 3000);
+}
+
+/**
+ * Detect media type from file path or URL
+ * @param {string} mediaPath - The file path or URL to analyze
+ * @returns {string} - The detected media type: 'image', 'video', 'iframe', or 'gif'
+ */
+export function detectMediaType(mediaPath) {
+    if (!mediaPath) return 'image';
+    
+    // Check for iframe (Vimeo embeds)
+    if (mediaPath.startsWith('<iframe')) {
+        return 'iframe';
+    }
+    
+    // Check for video file extensions
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi'];
+    const hasVideoExtension = videoExtensions.some(ext => 
+        mediaPath.toLowerCase().includes(ext)
+    );
+    if (hasVideoExtension) {
+        return 'video';
+    }
+    
+    // Check for GIF
+    if (mediaPath.toLowerCase().includes('.gif')) {
+        return 'gif';
+    }
+    
+    // Default to image for all other cases
+    return 'image';
+}

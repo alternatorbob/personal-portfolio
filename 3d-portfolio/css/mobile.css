@@ -1,7 +1,7 @@
-/* CSS variables inherited from global_styles.css and style.css */
+/* Mobile-specific styles - extends global_styles.css and style.css */
 
 @media screen and (max-width: 768px) {
-    /* Add overflow control to prevent horizontal scrolling */
+    /* ===== BASIC MOBILE OVERRIDES ===== */
     html,
     body {
         overflow-x: hidden;
@@ -9,22 +9,17 @@
         position: relative;
     }
 
-    /* Main container should respect viewport width */
     .main-container {
         width: 100vw;
         max-width: 100%;
         overflow-x: hidden;
     }
 
-    /* Project card specific mobile adjustments */
+    /* ===== PROJECT CARD MOBILE ADJUSTMENTS ===== */
+
     .project-card {
-        inset: 0 !important;
+        inset: 20px;
         padding: 20px;
-        position: relative;
-        height: 100vh;
-        width: 100vw;
-        overflow-y: auto;
-        box-sizing: border-box;
     }
 
     .project-title {
@@ -32,8 +27,8 @@
         width: 100%;
     }
 
-    /* Project info section needs to be stacked on mobile */
     .project-info {
+        display: flex !important;
         flex-direction: column !important;
         gap: 8px;
     }
@@ -41,7 +36,11 @@
     .project-categories {
         width: 100% !important;
         flex-basis: auto;
-        margin-top: -6px;
+        margin-top: -2px;
+    }
+
+    .title-group {
+        border-top: -2px;
     }
 
     /* Mobile-specific container for year and description below slideshow */
@@ -49,7 +48,6 @@
         display: flex !important;
         flex-direction: column !important;
         width: 100%;
-        /* margin-top: 16px; */
         flex-shrink: 0;
     }
 
@@ -64,32 +62,11 @@
         margin-bottom: 16px;
     }
 
-    /* Link styling for project descriptions on mobile */
-    .project-description a,
-    .project-info-below .project-description a {
-        color: var(--text-color) !important;
-        text-decoration: underline !important;
-        transition: opacity 0.2s ease !important;
+    .about-card {
+        width: 380px;
     }
 
-    .project-description a:hover,
-    .project-info-below .project-description a:hover {
-        opacity: 0.7 !important;
-    }
-
-    .project-description a.external-link,
-    .project-info-below .project-description a.external-link {
-        color: var(--text-color) !important;
-        text-decoration: underline !important;
-        font-weight: 500 !important;
-    }
-
-    .project-description a.external-link:hover,
-    .project-info-below .project-description a.external-link:hover {
-        opacity: 0.7 !important;
-    }
-
-    /* Buttons positioning for mobile */
+    /* ===== BUTTONS POSITIONING FOR MOBILE ===== */
     .button-close {
         position: absolute;
         top: 16px;
@@ -104,7 +81,7 @@
         z-index: 100;
     }
 
-    /* Ensure blur div works properly on mobile */
+    /* ===== BLUR EFFECT MOBILE ===== */
     #blur {
         position: fixed !important;
         top: 0 !important;
@@ -122,16 +99,16 @@
         visibility: hidden !important;
     }
 
-    /* Index view mobile adjustments */
+    /* ===== INDEX VIEW MOBILE ADJUSTMENTS ===== */
     .index-view {
         width: 100% !important;
-        padding: 16vh 20px 10px 20px; /* Remove side padding */
+        padding: 16vh 20px 10px 20px;
         box-sizing: border-box;
     }
 
     .index-view-grid {
         display: grid !important;
-        grid-template-columns: 3fr 1fr !important; /* Title+Category, Year */
+        grid-template-columns: 1fr auto !important;
         gap: 0;
         width: 100% !important;
         color: var(--text-color);
@@ -142,75 +119,34 @@
     .index-view-item {
         display: grid !important;
         grid-column: 1 / -1;
-        grid-template-columns: subgrid;
+        grid-template-columns: 1fr auto !important;
         cursor: pointer;
-        border-bottom: 0.25px solid rgba(242, 242, 242, 0.4) !important;
+        border-bottom: var(--border-stroke) solid var(--border-color) !important;
         min-height: 30px !important;
         height: 30px !important;
+        margin-top: -4px;
         align-items: center;
         position: relative;
     }
 
-    .index-view-item:first-child {
-        border-top: 0.25px solid rgba(242, 242, 242, 0.4) !important;
+    /* Hide category and client columns on mobile - only show title and year */
+    .index-view-item .grid-category,
+    .index-view-item .grid-client,
+    .index-view-item .grid-title-group {
+        display: none !important;
     }
 
-    /* Disable hover effects on mobile */
-    .index-view-item:hover .grid-title,
-    .index-view-item:hover .grid-year,
-    .index-view-item:hover .grid-category {
-        opacity: 1 !important; /* Keep full opacity on mobile */
-    }
-
-    /* Disable view-toggle button hover on mobile */
-    .view-toggle:hover {
-        opacity: 1 !important;
-    }
-
-    /* Show category column on mobile */
-    .index-view-item .grid-category {
+    /* Show title directly (not in title-group) */
+    .index-view-item .grid-title {
         display: block !important;
         opacity: 1 !important;
-        transition: opacity 0.2s ease !important;
-        padding: 10px 5px !important;
+        padding: 10px 5px 10px 0 !important;
         font-size: var(--text-sm) !important;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-    }
-
-    .index-view-item .grid-title {
-        display: none !important;
-    }
-
-    .index-view-item .grid-title-group {
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: center !important;
-        padding: 10px 5px 0 0 !important;
-        width: 100% !important;
-        overflow: hidden;
-    }
-
-    .index-view-item .grid-title-group .grid-title {
-        font-size: var(--text-sm) !important;
         color: var(--text-color) !important;
-        opacity: 1 !important;
-        transition: opacity 0.2s ease !important;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        margin: 0 !important;
         line-height: 1.2 !important;
-    }
-
-    .index-view-item .grid-title-group .grid-category {
-        display: none !important;
-    }
-
-    .title-group {
-        width: 100vw !important;
-        margin-bottom: -4px;
     }
 
     .index-view-item .grid-year {
@@ -218,22 +154,26 @@
         padding: 10px 0 10px 5px !important;
         font-size: var(--text-sm) !important;
         opacity: 1 !important;
-        transition: opacity 0.2s ease !important;
+        color: var(--text-color) !important;
     }
 
+    /* Disable hover effects on mobile */
+    .index-view-item:hover .grid-title,
+    .index-view-item:hover .grid-year,
+    .index-view-item:hover .grid-category {
+        opacity: 1 !important;
+    }
+
+    .view-toggle:hover {
+        opacity: 1 !important;
+    }
+
+    /* Hide preview on mobile */
     .index-view-preview {
-        width: 25vw !important;
-        max-width: 25vw !important;
-        border-radius: 16px !important;
-        transition: opacity 0.2s ease, visibility 0.2s ease !important;
+        display: none !important;
     }
 
-    .index-view-preview img {
-        border-radius: 14px !important;
-        object-fit: cover !important;
-    }
-
-    /* Media content should fit within boundaries */
+    /* ===== MEDIA CONTENT MOBILE ===== */
     img,
     iframe,
     video,
@@ -242,29 +182,28 @@
         height: auto !important;
     }
 
-    /* Gallery images need to maintain their height for proper display */
     .project-gallery {
         flex: none;
         min-height: 0;
-        gap: 20px;
+        gap: 18px;
         display: flex !important;
         flex-direction: column !important;
     }
-    
+
     .slideshow-container {
         position: relative;
         width: 100%;
         height: auto;
         min-height: 200px;
     }
-    
+
     .slideshow-container .slide {
         position: relative;
         width: 100%;
         height: auto;
         display: block;
     }
-    
+
     .project-gallery .slide img {
         width: 100% !important;
         height: auto !important;
@@ -273,7 +212,6 @@
         max-height: 70vh;
     }
 
-    /* Fix for embedded iframes */
     .slide iframe {
         width: 100% !important;
         height: 50vh !important;
@@ -281,7 +219,6 @@
         border: none;
     }
 
-    /* Fix for embedded videos */
     .slide video {
         width: 100% !important;
         height: auto !important;
@@ -290,6 +227,7 @@
         object-position: left top !important;
     }
 
+    /* ===== NAVBAR MOBILE ADJUSTMENTS ===== */
     .navbar {
         margin-top: 8px;
         margin: 0px;
@@ -306,12 +244,11 @@
         height: 20px !important;
     }
 
-    /* Fix for invert functionality on mobile */
+    /* ===== MOBILE INVERT FUNCTIONALITY ===== */
     .invert {
         background-color: white !important;
         mix-blend-mode: difference !important;
         z-index: 9999 !important;
-        /* Ensure it's above everything else */
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
@@ -348,20 +285,14 @@
         -webkit-filter: invert(1) hue-rotate(180deg) !important;
     }
 
-    /* Show mobile-only elements */
-    .mobile-only {
-        display: block;
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 9999;
-        background-color: #333;
-        color: white;
-        padding: 10px 15px;
-        border-radius: 5px;
-        border: none;
-        font-size: var(--text-sm);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    /* ===== MOBILE UTILITIES ===== */
+    .mobile-break {
+        display: inline;
+    }
+
+    .mobile-break::after {
+        content: "\A";
+        white-space: pre;
     }
 }
 
@@ -377,23 +308,4 @@ body.mobile-inverted canvas,
 body.mobile-inverted .three-canvas {
     filter: invert(1) hue-rotate(180deg);
     -webkit-filter: invert(1) hue-rotate(180deg);
-}
-
-/* Mobile-specific invert button */
-.mobile-only {
-    display: none;
-}
-
-/* Remove these styles since they're now inside the media query */
-.mobile-break {
-    display: none;
-}
-@media (max-width: 768px) {
-    .mobile-break {
-        display: inline;
-    }
-    .mobile-break::after {
-        content: "\A";
-        white-space: pre;
-    }
 }

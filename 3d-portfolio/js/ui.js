@@ -181,14 +181,14 @@ function initBottomNavbar() {
 
 // About page content
 const aboutContent = {
-    title: "About Me",
+    title: "About",
     description: `
-       <p> Bogdan Nastase is an experience designer based in Amsterdam working across 
+       <p>I am an experience designer based in Amsterdam working across 
        interaction, digital, and sound design. Currently working as an Interaction Designer at 
-       Random Studio, he develops concept-driven work for clients in culture, fashion, and sports, 
-       and collaborates with architects on spatial projects involving contemporary technology. 
-       Parallel to this, he supports artists as a creative technologist and works as a designer 
-       and creative director for electronic music labels. </p>
+       Random Studio, I develops concept-driven work for clients in culture, fashion, and sports, 
+       and collaborate with architects on spatial projects involving contemporary technology. 
+       Parallel to this, I have also supported artists to develope interactive installations and I work as a designer 
+       and creative director for electronic music labels.</p>
     `,
 };
 
@@ -320,6 +320,9 @@ function populateIndexView() {
     // Clear existing items
     gridContainer.innerHTML = "";
 
+    // Check if we're on mobile
+    const isMobile = window.innerWidth <= 768;
+
     // Add grid items for each project
     sortedProjects.forEach((project) => {
         // Create main grid item container
@@ -327,56 +330,71 @@ function populateIndexView() {
         gridItem.className = "index-view-item";
         gridItem.id = project.id;
 
-        // Create title group
-        const titleGroupElement = document.createElement("div");
-        titleGroupElement.className = "grid-title-group";
+        if (isMobile) {
+            // Mobile layout: only title and year
+            const titleElement = document.createElement("div");
+            titleElement.className = "grid-title";
+            titleElement.textContent = project.title;
 
-        // Create title element
-        const titleElement = document.createElement("div");
-        titleElement.className = "grid-title";
-        titleElement.textContent = project.title;
+            const yearElement = document.createElement("div");
+            yearElement.className = "grid-year";
+            yearElement.textContent = project.year;
 
-        // Create category element
-        const categoryElement = document.createElement("div");
-        categoryElement.className = "grid-category";
-        categoryElement.textContent = project.categories.join(", ");
+            gridItem.appendChild(titleElement);
+            gridItem.appendChild(yearElement);
+        } else {
+            // Desktop layout: title group, category, client, and year
+            const titleGroupElement = document.createElement("div");
+            titleGroupElement.className = "grid-title-group";
 
-        // Create client element
-        const clientElement = document.createElement("div");
-        clientElement.className = "grid-client";
-        clientElement.textContent = project.client || "N/A";
+            const titleElement = document.createElement("div");
+            titleElement.className = "grid-title";
+            titleElement.textContent = project.title;
 
-        // Create year element
-        const yearElement = document.createElement("div");
-        yearElement.className = "grid-year";
-        yearElement.textContent = project.year;
+            const categoryElement = document.createElement("div");
+            categoryElement.className = "grid-category";
+            categoryElement.textContent = project.categories.join(", ");
 
-        // Append title to title group
-        titleGroupElement.appendChild(titleElement);
+            const clientElement = document.createElement("div");
+            clientElement.className = "grid-client";
+            clientElement.textContent = project.client || "N/A";
 
-        // Append title group, category, client, and year to grid item
-        gridItem.appendChild(titleGroupElement);
-        gridItem.appendChild(categoryElement);
-        gridItem.appendChild(clientElement);
-        gridItem.appendChild(yearElement);
+            const yearElement = document.createElement("div");
+            yearElement.className = "grid-year";
+            yearElement.textContent = project.year;
+
+            titleGroupElement.appendChild(titleElement);
+            gridItem.appendChild(titleGroupElement);
+            gridItem.appendChild(categoryElement);
+            gridItem.appendChild(clientElement);
+            gridItem.appendChild(yearElement);
+        }
 
         // Add hover events for preview (skip on mobile devices)
-        if (previewContainer && previewImage && project.content.images && project.content.images.length > 0 && !isMobileDevice()) {
-            gridItem.addEventListener("mouseenter", (e) => {
-                previewImage.src = project.content.images[0];
-                previewContainer.style.left = `${e.clientX}px`;
-                previewContainer.style.top = `${e.clientY}px`;
-                previewContainer.classList.add("show");
-            });
+        if (previewContainer && previewImage && project.content.media && project.content.media.length > 0) {
+            // Find the first image in the media array (skip iframes/videos)
+            const firstImage = project.content.media.find(item => 
+                typeof item === 'string' && 
+                (item.endsWith('.webp') || item.endsWith('.jpg') || item.endsWith('.jpeg') || item.endsWith('.png'))
+            );
+            
+            if (firstImage) {
+                gridItem.addEventListener("mouseenter", (e) => {
+                    previewImage.src = firstImage;
+                    previewContainer.style.left = `${e.clientX}px`;
+                    previewContainer.style.top = `${e.clientY}px`;
+                    previewContainer.classList.add("show");
+                });
 
-            gridItem.addEventListener("mousemove", (e) => {
-                previewContainer.style.left = `${e.clientX}px`;
-                previewContainer.style.top = `${e.clientY}px`;
-            });
+                gridItem.addEventListener("mousemove", (e) => {
+                    previewContainer.style.left = `${e.clientX}px`;
+                    previewContainer.style.top = `${e.clientY}px`;
+                });
 
-            gridItem.addEventListener("mouseleave", () => {
-                previewContainer.classList.remove("show");
-            });
+                gridItem.addEventListener("mouseleave", () => {
+                    previewContainer.classList.remove("show");
+                });
+            }
         }
 
         // Add click event to grid item to open project
@@ -421,8 +439,10 @@ function initIndexViewToggle() {
         console.log("viewToggle clicked");
         if (indexView.classList.contains("active")) {
             uiSwitchState("3d");
+            viewToggle.textContent = "Index";
         } else {
             uiSwitchState("2d");
+            viewToggle.textContent = "Close";
         }
     });
 }
@@ -435,6 +455,16 @@ function initIndexView() {
         });
     }
     populateIndexView();
+
+    // Add resize listener to update index view when switching between mobile and desktop
+    let currentIsMobile = window.innerWidth <= 768;
+    window.addEventListener('resize', () => {
+        const newIsMobile = window.innerWidth <= 768;
+        if (newIsMobile !== currentIsMobile) {
+            currentIsMobile = newIsMobile;
+            populateIndexView();
+        }
+    });
 }
 
 // Add event listener for the custom 'open-project' event

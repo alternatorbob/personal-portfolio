@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 import { dragInit, updateCubesForSphereRotation } from "./js/dragControl";
 import { addProjects, cubes } from "./js/addProjects";
-import { createEnvironment, isRendering, pauseRenderer, resumeRenderer, easeInOutCubic, loadProjects } from "./js/utils";
+import { createEnvironment, isRendering, pauseRenderer, resumeRenderer, easeInOutCubic, loadProjects, detectFontLoading } from "./js/utils";
 import { uiInit } from "./js/ui";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
@@ -60,7 +60,7 @@ export function toggleSphereMaterial() {
 
 // TEXTURES / Post Processing
 // Define gradient shader in global scope
-let gradientShader;
+let bgShader;
 const shaderVignette = VignetteShader;
 const effectVignette = new ShaderPass(shaderVignette);
 effectVignette.uniforms["offset"].value = 0.8;
@@ -111,6 +111,9 @@ function checkLoadingComplete() {
 // Initialize Three.js
 async function init() {
     try {
+        // Start font loading detection
+        detectFontLoading();
+        
         await threeInit();
     } catch (error) {
         console.error("Error during initialization:", error);
@@ -167,7 +170,7 @@ async function threeInit() {
 
     scene = new THREE.Scene();
 
-    gradientShader = {
+    bgShader = {
         uniforms: {
             time: { value: 0 },
         },
@@ -222,9 +225,9 @@ async function threeInit() {
         new THREE.DodecahedronGeometry(700, 2), // radius, subdivision_level (0-3)
         
         new THREE.ShaderMaterial({
-            uniforms: gradientShader.uniforms,
-            vertexShader: gradientShader.vertexShader,
-            fragmentShader: gradientShader.fragmentShader,
+            uniforms: bgShader.uniforms,
+            vertexShader: bgShader.vertexShader,
+            fragmentShader: bgShader.fragmentShader,
             side: THREE.BackSide,
         })
     );
@@ -374,11 +377,9 @@ function animate(msTime) {
     }
 
     // Update gradient shader time uniform if needed
-    if (gradientShader && gradientShader.uniforms) {
-        gradientShader.uniforms.time.value = msTime * 0.001;
+    if (bgShader && bgShader.uniforms) {
+        bgShader.uniforms.time.value = msTime * 0.001;
     }
-
-
 
     // Hide sphere and update cubemap
     if (sphere && cubeCamera && renderer && scene) {

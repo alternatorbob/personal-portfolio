@@ -92,7 +92,11 @@ const onTouchStart = function (e) {
     // Skip hover animation on touch devices
     hoverAnimationPlayed = true;
 
-    // Check if a project card is already open
+    // Check if interactions are disabled or if a project card is already open
+    if (interactionsDisabled) {
+        return; // Don't process if interactions are disabled
+    }
+
     const existingProjectCards = document.querySelectorAll(".project-card");
     if (existingProjectCards.length > 0) {
         return; // Don't process further if a card is already open
@@ -112,7 +116,15 @@ const onTouchStart = function (e) {
     
     // If sphere is hit, prioritize sphere interaction over cubes
     if (sphereIntersections.length > 0) {
-        // Sphere interaction takes priority - continue to sphere dragging logic below
+        // Sphere interaction takes priority - start dragging
+        isDragging = true;
+        wasDragged = true;
+
+        // Apply appropriate spring compression effect based on device type
+        targetScale = isMobile ? mobileSpringCompression * originalSphereScale : springCompression * originalSphereScale;
+
+        lastMousePosition.set(touch.clientX, touch.clientY);
+        lastTime = performance.now();
     } else if (cubeIntersections.length > 0) {
         // Only open project if sphere is not hit
         const intersectedObject = cubeIntersections[0].object;
@@ -136,22 +148,12 @@ const onTouchStart = function (e) {
             return;
         }
     }
-
-    // For sphere interaction, use pure 2D screen coordinates
-    // No 3D raycasting, no position dependency
-    isDragging = true;
-    wasDragged = true;
-
-    // Apply appropriate spring compression effect based on device type
-    targetScale = isMobile ? mobileSpringCompression * originalSphereScale : springCompression * originalSphereScale;
-
-    lastMousePosition.set(touch.clientX, touch.clientY);
-    lastTime = performance.now();
+    // If neither sphere nor cube is touched, do nothing - don't start dragging
 };
 
 const onTouchMove = function (e) {
     e.preventDefault();
-    if (!isDragging) return;
+    if (!isDragging || interactionsDisabled) return;
 
     document.body.style.cursor = "grabbing";
     const touch = e.touches[0];
@@ -183,7 +185,7 @@ const onTouchMove = function (e) {
 };
 
 const onTouchEnd = function () {
-    if (isDragging) {
+    if (isDragging && !interactionsDisabled) {
         isDragging = false;
         document.body.style.cursor = "auto";
 
@@ -203,6 +205,9 @@ const onTouchEnd = function () {
     }
 };
 
+// Global flag to track if interactions are disabled
+let interactionsDisabled = false;
+
 export function dragInit() {
     // isMobile is already initialized at the top of the file
     
@@ -215,6 +220,20 @@ export function dragInit() {
 
     // Ensure sphere starts at the correct size and neutral rotation
     sphere.scale.set(originalSphereScale, originalSphereScale, originalSphereScale);
+
+    // Add random initial world rotation for more variation at startup
+    const randomRotationX = (Math.random() - 0.5) * Math.PI * 2; // Random rotation around X axis
+    const randomRotationY = (Math.random() - 0.5) * Math.PI * 2; // Random rotation around Y axis
+    const randomRotationZ = (Math.random() - 0.5) * Math.PI * 0.5; // Smaller random rotation around Z axis
+    
+    const initialRotationX = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), randomRotationX);
+    const initialRotationY = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), randomRotationY);
+    const initialRotationZ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), randomRotationZ);
+    
+    // Combine rotations
+    worldRotation.multiplyQuaternions(initialRotationX, worldRotation);
+    worldRotation.multiplyQuaternions(initialRotationY, worldRotation);
+    worldRotation.multiplyQuaternions(initialRotationZ, worldRotation);
 
     // Initialize cube positions and randomized properties
     for (let cube of cubes) {
@@ -265,6 +284,19 @@ export function dragInit() {
     // Add keyboard event listeners
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('keyup', onKeyUp);
+}
+
+// Function to disable canvas interactions
+export function disableCanvasInteractions() {
+    interactionsDisabled = true;
+    document.body.style.cursor = "auto";
+    isDragging = false;
+    wasDragged = false;
+}
+
+// Function to enable canvas interactions
+export function enableCanvasInteractions() {
+    interactionsDisabled = false;
 }
 
 // CORE ROTARY ENCODER FUNCTION
@@ -345,7 +377,11 @@ function updateCubeScales() {
 }
 
 function onMouseDown(e) {
-    // Check if a project card is already open
+    // Check if interactions are disabled or if a project card is already open
+    if (interactionsDisabled) {
+        return; // Don't process if interactions are disabled
+    }
+
     const existingProjectCards = document.querySelectorAll(".project-card");
     if (existingProjectCards.length > 0) {
         return; // Don't process further if a card is already open
@@ -360,8 +396,16 @@ function onMouseDown(e) {
     
     // If sphere is hit, prioritize sphere interaction over cubes
     if (sphereIntersections.length > 0) {
-        // Sphere interaction takes priority - continue to sphere dragging logic below
+        // Sphere interaction takes priority - start dragging
         document.body.style.cursor = "grabbing";
+        isDragging = true;
+        wasDragged = true;
+
+        // Apply appropriate spring compression effect based on device type
+        targetScale = isMobile ? mobileSpringCompression * originalSphereScale : springCompression * originalSphereScale;
+
+        lastMousePosition.set(e.clientX, e.clientY);
+        lastTime = performance.now();
     } else if (cubeIntersections.length > 0) {
         // Only open project if sphere is not hit
         const intersectedObject = cubeIntersections[0].object;
@@ -385,21 +429,11 @@ function onMouseDown(e) {
             return;
         }
     }
-
-    // For sphere interaction, use pure 2D screen coordinates
-    // No 3D raycasting, no position dependency - any click starts dragging
-    isDragging = true;
-    wasDragged = true;
-
-    // Apply appropriate spring compression effect based on device type
-    targetScale = isMobile ? mobileSpringCompression * originalSphereScale : springCompression * originalSphereScale;
-
-    lastMousePosition.set(e.clientX, e.clientY);
-    lastTime = performance.now();
+    // If neither sphere nor cube is clicked, do nothing - don't start dragging
 }
 
 function onMouseUp() {
-    if (isDragging) {
+    if (isDragging && !interactionsDisabled) {
         isDragging = false;
         document.body.style.cursor = "auto";
 
@@ -534,7 +568,7 @@ function returnCubesToOriginalPositions() {
 
 function onMouseMove(e) {
     // Cursor styling logic
-    if (!isDragging) {
+    if (!isDragging || interactionsDisabled) {
         raycaster.setFromCamera(new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, (-e.clientY / window.innerHeight) * 2 + 1), camera);
 
         const sphereIntersections = raycaster.intersectObject(sphere);
@@ -550,7 +584,7 @@ function onMouseMove(e) {
     }
 
     // Existing drag logic
-    if (!isDragging) return;
+    if (!isDragging || interactionsDisabled) return;
 
     // Check if cursor has left the screen
     if (hasCursorLeftScreen(e)) {
@@ -601,6 +635,10 @@ function hasCursorLeftScreen(event) {
 // Handle wheel events (trackpad scrolling)
 function onWheel(e) {
     e.preventDefault();
+    
+    if (interactionsDisabled) {
+        return; // Don't process if interactions are disabled
+    }
 
     // Get normalized scroll deltas for x and y directions
     const scrollDeltaX = e.deltaX * 0.07;
@@ -648,6 +686,10 @@ function darkenProjectCube(cube) {
 }
 
 function onKeyDown(e) {
+    if (interactionsDisabled) {
+        return; // Don't process if interactions are disabled
+    }
+    
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault();
         keyState[e.key] = true;

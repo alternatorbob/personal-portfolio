@@ -1,3 +1,32 @@
+/* ===== FONT FACE DECLARATIONS ===== */
+@font-face {
+    font-family: 'NonBureau';
+    src: url('/assets/fonts/NonBureau-Regular.woff2') format('woff2');
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'NonBureau';
+    src: url('/assets/fonts/NonBureau-Bold.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ===== FONT LOADING DETECTION ===== */
+/* This will be applied when NonBureau fails to load */
+.fonts-fallback {
+    /* Use smaller typography scale for fallback fonts */
+    --text-xs: var(--text-xs-fallback);
+    --text-sm: var(--text-sm-fallback);
+    --text-md: var(--text-md-fallback);
+    --text-lg: var(--text-lg-fallback);
+    --text-title: var(--text-title-fallback);
+    --base-size: var(--base-size-fallback);
+}
+
 /* ===== CSS VARIABLES ===== */
 :root {
     font-synthesis: none;
@@ -6,28 +35,49 @@
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
 
-    /* Typography Scale */
-    --text-xs: 0.563rem;
-    --text-sm: 1.2rem;
-    --text-md: 1.333rem;
-    --text-lg: 1.777rem;
-    --text-title: 2.369rem;
-    --base-size: 10px;
+    /* Typography Scale - NonBureau (default, larger for better readability) */
+    --text-xs: 0.6rem;
+    --text-sm: 1.1rem;
+    --text-md: 1.3rem;
+    --text-lg: 1.6rem;
+    --text-title: 2.2rem;
+    --base-size: 12px;
+    
+    /* Typography Scale - Fallback fonts (smaller for system fonts) */
+    --text-xs-fallback: 0.563rem;
+    --text-sm-fallback: 1.2rem;
+    --text-md-fallback: 1.333rem;
+    --text-lg-fallback: 1.777rem;
+    --text-title-fallback: 2.369rem;
+    --base-size-fallback: 10px;
     
     /* Font Weights */
-    --font-normal: 400;
+    --font-normal: 100;
     --font-medium: 500;
-    --font-semibold: 600;
-    --font-bold: 700;
+    --font-semibold: 500;
+    --font-bold: 500;
     
     /* Colors */
     --text-color: #f2f2f2;
     --bg-color: #000000;
+    --border-color: rgba(242, 242, 242, 0.4);
+    --border-stroke: 0.35px;
+    
+    /* Transitions */
+    --transition-opacity: opacity 0.2s ease;
+    
+    /* Inverted mode variables */
+    --invert-filter: none;
 }
+
+
 
 /* ===== BASE STYLES ===== */
 * {
-    font-family: Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'NonBureau', Helvetica, sans-serif;
 }
 
 html,
@@ -37,15 +87,72 @@ body {
     margin: 0;
     padding: 0;
     font-size: var(--base-size);
+    overflow: hidden;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    user-select: none;
+    overscroll-behavior: none;
 }
 
 body {
     display: flex;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== GLOBAL LINK STYLES ===== */
+a {
     color: var(--text-color);
+    text-decoration: underline;
+    transition: opacity 0.2s ease;
+}
+
+a:hover {
+    opacity: 0.75;
+}
+
+a.external-link {
+    color: var(--text-color);
+    text-decoration: underline;
+    font-weight: 100;
+}
+
+a.external-link:hover {
+    opacity: 0.75;
+}
+
+/* ===== INVERTED MODE ===== */
+.color-inverted {
+    --bg-color: #f2f2f2;
+    --text-color: #000000;
+    --invert-filter: invert(1);
+}
+
+.color-inverted .three-canvas {
+    filter: var(--invert-filter);
+}
+
+.invert {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    mix-blend-mode: difference;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 999999;
+    pointer-events: none;
+}
+
+.invert.show {
+    opacity: 1;
 }
 
 /* ===== TYPOGRAPHY UTILITIES ===== */
-/* Only apply to elements that explicitly need these classes */
 .text-xs {
     font-size: var(--text-xs);
 }
@@ -62,12 +169,19 @@ body {
     font-size: var(--text-lg);
 }
 
-/* text-up utility removed - was unused */
-
-/* Weight utilities - only keep what's used */
+.text-title {
+    font-size: var(--text-title);
+}
 
 .font-bold {
     font-weight: 700;
+}
+
+/* ===== UTILITY CLASSES ===== */
+.hide {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: opacity 0.5s ease-in-out;
 }
 
 /* ===== BUTTON STYLES ===== */
@@ -87,13 +201,51 @@ body {
     align-self: center;
 }
 
-/* button-mail removed - element doesn't exist */
+.button {
+    cursor: pointer;
+    transition: opacity 0.22s ease-in;
+    opacity: 1;
+}
 
-/* ===== UTILITY CLASSES ===== */
-/* hidden class removed - unused, .hide is used instead */
+.button:hover {
+    opacity: 0.65;
+}
 
-.hide {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    transition: opacity 0.5s ease-in-out;
+.button-invert img {
+    width: 20px;
+    object-fit: contain;
+    display: block;
+    align-self: center;
+}
+
+/* ===== SCROLLBAR HIDING ===== */
+::-webkit-scrollbar {
+    display: none;
+}
+
+html {
+    scrollbar-width: none;
+}
+
+/* ===== TYPOGRAPHY STYLES ===== */
+.project-title {
+    font-family: 'NonBureau', Helvetica, sans-serif;
+    font-weight: 500;
+    font-size: var(--text-title);
+    line-height: 0.9;
+}
+
+.about-title {
+    font-family: 'NonBureau', Helvetica, sans-serif;
+    font-weight: 500;
+    font-size: var(--text-title);
+    line-height: 1.2;
+}
+
+/* Ensure all text uses NonBureau Thin by default */
+body, p, div, span, h1, h2, h3, h4, h5, h6 {
+    font-family: 'NonBureau', Helvetica, sans-serif;
+    font-weight: 100;
+    letter-spacing: 0.3px;
+    line-height: 15px;
 }
