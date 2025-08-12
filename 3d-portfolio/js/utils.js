@@ -130,104 +130,13 @@ function createEnvironment(scene) {
         returnToCenter: false,
     };
 
-    // Update camera position to orbit around sphere
+    // Update camera position - camera stays static, no connection to sphere rotation
     function updateCameraRotation(camera, sphereRotationVelocity, isMouseDown) {
-        // Record initial position and target on first update
-        if (!cameraOrbit.initialPosition) {
-            cameraOrbit.initialPosition = camera.position.clone();
-            const target = new THREE.Vector3(0, 0, 0);
-            camera.getWorldDirection(target);
-            target.multiplyScalar(14);
-            target.add(camera.position);
-            cameraOrbit.initialTarget = target;
-        }
-
-        // Update mouse down state
-        const wasMouseDown = cameraOrbit.isMouseDown;
-        cameraOrbit.isMouseDown = isMouseDown;
-
-        // If mouse was just released, start return to center
-        if (wasMouseDown && !isMouseDown) {
-            cameraOrbit.returnToCenter = true;
-            cameraOrbit.lastRotationVelocity.copy(sphereRotationVelocity);
-        }
-
-        // Use either current rotation velocity or last stored velocity
-        const effectiveRotationVelocity = isMouseDown ? sphereRotationVelocity : cameraOrbit.lastRotationVelocity;
-
-        // Scale the velocities for movement and rotation
-        const scaledRotationX = -effectiveRotationVelocity.y * 1.5;
-        const scaledPositionX = effectiveRotationVelocity.x * 3.0;
-        const scaledPositionY = effectiveRotationVelocity.y * 3.0;
-
-        // Update velocities with smooth follow only when dragging
-        if (isMouseDown) {
-            cameraOrbit.velocity.x += (scaledRotationX - cameraOrbit.velocity.x) * cameraOrbit.followStrength;
-            cameraOrbit.positionVelocity.x += (scaledPositionX - cameraOrbit.positionVelocity.x) * cameraOrbit.positionFollowStrength;
-            cameraOrbit.positionVelocity.y += (scaledPositionY - cameraOrbit.positionVelocity.y) * cameraOrbit.positionFollowStrength;
-            cameraOrbit.returnToCenter = false;
-        }
-
-        // Apply damping
-        cameraOrbit.velocity.multiplyScalar(cameraOrbit.dampingFactor);
-        cameraOrbit.positionVelocity.multiplyScalar(cameraOrbit.dampingFactor);
-
-        // Apply return force when returning to center
-        if (cameraOrbit.returnToCenter) {
-            const returnForce = cameraOrbit.returnStrength;
-            cameraOrbit.currentOffset.x *= 1 - returnForce;
-            cameraOrbit.positionOffset.multiplyScalar(1 - returnForce);
-
-            // Apply stronger return force to velocities
-            cameraOrbit.velocity.multiplyScalar(1 - returnForce);
-            cameraOrbit.positionVelocity.multiplyScalar(1 - returnForce);
-            cameraOrbit.lastRotationVelocity.multiplyScalar(1 - returnForce);
-
-            // Check if we're close enough to center to stop returning
-            if (Math.abs(cameraOrbit.currentOffset.x) < 0.001 && cameraOrbit.positionOffset.lengthSq() < 0.001) {
-                cameraOrbit.returnToCenter = false;
-                cameraOrbit.currentOffset.set(0, 0, 0);
-                cameraOrbit.positionOffset.set(0, 0, 0);
-            }
-        }
-
-        // Update offsets
-        cameraOrbit.currentOffset.x += cameraOrbit.velocity.x;
-        cameraOrbit.positionOffset.x += cameraOrbit.positionVelocity.x;
-        cameraOrbit.positionOffset.y += cameraOrbit.positionVelocity.y;
-
-        // Clamp offsets
-        cameraOrbit.currentOffset.x = THREE.MathUtils.clamp(cameraOrbit.currentOffset.x, -cameraOrbit.maxOffset, cameraOrbit.maxOffset);
-        cameraOrbit.positionOffset.x = THREE.MathUtils.clamp(
-            cameraOrbit.positionOffset.x,
-            -cameraOrbit.maxPositionOffset,
-            cameraOrbit.maxPositionOffset
-        );
-        cameraOrbit.positionOffset.y = THREE.MathUtils.clamp(
-            cameraOrbit.positionOffset.y,
-            -cameraOrbit.maxPositionOffset,
-            cameraOrbit.maxPositionOffset
-        );
-
-        // Create rotation matrix around Y axis
-        const rotationMatrix = new THREE.Matrix4();
-        rotationMatrix.makeRotationY(cameraOrbit.currentOffset.x);
-
-        // Apply rotation to both position and target
-        const rotatedPosition = cameraOrbit.initialPosition.clone();
-        const rotatedTarget = cameraOrbit.initialTarget.clone();
-        rotatedPosition.applyMatrix4(rotationMatrix);
-        rotatedTarget.applyMatrix4(rotationMatrix);
-
-        // Add position offset
-        rotatedPosition.x += cameraOrbit.positionOffset.x;
-        rotatedPosition.y += cameraOrbit.positionOffset.y;
-        rotatedTarget.x += cameraOrbit.positionOffset.x;
-        rotatedTarget.y += cameraOrbit.positionOffset.y;
-
-        // Update camera position and look direction
-        camera.position.copy(rotatedPosition);
-        camera.lookAt(rotatedTarget);
+        // Camera remains in its initial position - no movement based on sphere rotation
+        // The camera will stay fixed while the sphere and world rotate independently
+        
+        // If you want to add independent camera controls later, they can be added here
+        // without any connection to sphereRotationVelocity
     }
 
     return { updateCameraRotation };
@@ -258,12 +167,12 @@ export async function loadProjects() {
 export { getRandomInt, createEnvironment };
 
 /**
- * Detect when Apfel Grotesk fonts are loaded and apply larger typography
+ * Detect when Scto Grotesk fonts are loaded and apply larger typography
  */
 export function detectFontLoading() {
-    // Create a test element to check if Apfel Grotesk is loaded
+    // Create a test element to check if Scto Grotesk is loaded
     const testElement = document.createElement('span');
-    testElement.style.fontFamily = 'Apfel Grotesk, monospace';
+    testElement.style.fontFamily = 'Scto Grotesk A, monospace';
     testElement.style.fontSize = '72px';
     testElement.style.position = 'absolute';
     testElement.style.visibility = 'hidden';
@@ -297,7 +206,7 @@ export function detectFontLoading() {
         if (currentWidth !== initialWidth) {
             // Font loaded successfully - keep default (larger) scale
             removeTestElement();
-            console.log('Apfel Grotesk fonts loaded - using default (larger) typography scale');
+            console.log('Scto Grotesk fonts loaded - using default (larger) typography scale');
         } else {
             // Check again in 100ms
             setTimeout(checkFontLoaded, 100);
@@ -312,7 +221,7 @@ export function detectFontLoading() {
         removeTestElement();
         if (!elementRemoved) {
             document.documentElement.classList.add('fonts-fallback');
-            console.log('Apfel Grotesk fonts not loaded - applying fallback typography scale');
+            console.log('Scto Grotesk fonts not loaded - applying fallback typography scale');
         }
     }, 3000);
 }

@@ -1,22 +1,24 @@
 /* ===== FONT FACE DECLARATIONS ===== */
 @font-face {
-    font-family: 'NonBureau';
-    src: url('/assets/fonts/NonBureau-Regular.woff2') format('woff2');
-    font-weight: 100;
+    font-family: 'Scto Grotesk A';
+    src: url('../public/assets/fonts/transfonter.org-20230415-172633/SctoGroteskA-Regular.woff2') format('woff2'),
+         url('../public/assets/fonts/transfonter.org-20230415-172633/SctoGroteskA-Regular.woff') format('woff');
+    font-weight: normal;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'NonBureau';
-    src: url('/assets/fonts/NonBureau-Bold.woff2') format('woff2');
-    font-weight: 500;
+    font-family: 'Scto Grotesk A';
+    src: url('../public/assets/fonts/transfonter.org-20230415-172633/SctoGroteskA-Bold.woff2') format('woff2'),
+         url('../public/assets/fonts/transfonter.org-20230415-172633/SctoGroteskA-Bold.woff') format('woff');
+    font-weight: bold;
     font-style: normal;
     font-display: swap;
 }
 
 /* ===== FONT LOADING DETECTION ===== */
-/* This will be applied when NonBureau fails to load */
+/* This will be applied when Scto Grotesk A fails to load */
 .fonts-fallback {
     /* Use smaller typography scale for fallback fonts */
     --text-xs: var(--text-xs-fallback);
@@ -35,10 +37,10 @@
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
 
-    /* Typography Scale - NonBureau (default, larger for better readability) */
+    /* Typography Scale - Scto Grotesk A (default, larger for better readability) */
     --text-xs: 0.6rem;
-    --text-sm: 1.1rem;
-    --text-md: 1.3rem;
+    --text-sm: 1.3rem;
+    --text-md: 1.4rem;
     --text-lg: 1.6rem;
     --text-title: 2.2rem;
     --base-size: 12px;
@@ -52,10 +54,10 @@
     --base-size-fallback: 10px;
     
     /* Font Weights */
-    --font-normal: 100;
-    --font-medium: 500;
-    --font-semibold: 500;
-    --font-bold: 500;
+    --font-normal: normal;
+    --font-medium: normal;
+    --font-semibold: bold;
+    --font-bold: bold;
     
     /* Colors */
     --text-color: #f2f2f2;
@@ -77,7 +79,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'NonBureau', Helvetica, sans-serif;
+    font-family: 'Scto Grotesk A', Helvetica, sans-serif;
 }
 
 html,
@@ -100,6 +102,12 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+p {
+    line-height: 1.0;
+    letter-spacing: 0.2px;
+    font-size:  12px;
+}
+
 /* ===== GLOBAL LINK STYLES ===== */
 a {
     color: var(--text-color);
@@ -114,7 +122,7 @@ a:hover {
 a.external-link {
     color: var(--text-color);
     text-decoration: underline;
-    font-weight: 100;
+    font-weight: normal;
 }
 
 a.external-link:hover {
@@ -174,7 +182,7 @@ a.external-link:hover {
 }
 
 .font-bold {
-    font-weight: 700;
+    font-weight: bold;
 }
 
 /* ===== UTILITY CLASSES ===== */
@@ -229,23 +237,22 @@ html {
 
 /* ===== TYPOGRAPHY STYLES ===== */
 .project-title {
-    font-family: 'NonBureau', Helvetica, sans-serif;
-    font-weight: 500;
+    font-family: 'Scto Grotesk A', Helvetica, sans-serif;
+    font-weight: bold;
     font-size: var(--text-title);
     line-height: 0.9;
 }
 
 .about-title {
-    font-family: 'NonBureau', Helvetica, sans-serif;
-    font-weight: 500;
+    font-family: 'Scto Grotesk A', Helvetica, sans-serif;
+    font-weight: bold;
     font-size: var(--text-title);
     line-height: 1.2;
 }
 
-/* Ensure all text uses NonBureau Thin by default */
+/* Ensure all text uses Scto Grotesk A by default */
 body, p, div, span, h1, h2, h3, h4, h5, h6 {
-    font-family: 'NonBureau', Helvetica, sans-serif;
-    font-weight: 100;
-    letter-spacing: 0.3px;
+    font-family: 'Scto Grotesk A', Helvetica, sans-serif;
+    font-weight: normal;
     line-height: 15px;
 }

@@ -365,7 +365,6 @@ export class AboutCard extends Card {
         title.style.color = "var(--text-color)"; // Match project title color
         title.style.fontWeight = "600"; // Match project title font weight
         title.style.margin = "0"; // Reset margin
-        title.style.transform = "translateY(-7px)"; // Match project title vertical positioning
 
         // Create description with two-column layout
         const description = document.createElement("div");

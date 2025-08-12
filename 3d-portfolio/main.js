@@ -166,7 +166,9 @@ async function threeInit() {
 
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, camFar);
     camera.position.z = window.innerWidth < 768 ? 21.5 : 15;
-    camera.position.y = window.innerWidth < 768 ? 12 : 3.5;
+    
+    // Calculate camera Y position to be above the bottom navbar
+    updateCameraPositionForNavbar();
 
     scene = new THREE.Scene();
 
@@ -389,11 +391,8 @@ function animate(msTime) {
         sphere.visible = true;
     }
 
-    // Update camera position
-    if (camera && typeof mouse !== "undefined") {
-        camera.position.y += (mouse.y * 0.7 - camera.position.y + (window.innerWidth < 768 ? 5.5 : 3.5)) * 0.03;
-        camera.position.x += (-mouse.x * 3.5 - camera.position.x) * 0.05;
-    }
+    // Camera position is now static - no movement based on mouse
+    // The camera stays fixed while the sphere and world rotate independently
 
     // Update cube positions to follow sphere rotation
     updateCubesForSphereRotation();
@@ -410,9 +409,34 @@ export function reverseSelected() {
     wasSelected = !wasSelected;
 }
 
+// Helper function to calculate camera position based on navbar position
+function updateCameraPositionForNavbar() {
+    // Navbar is at bottom: 12px with height: 30px, so it's at viewport height - 42px
+    // We want camera to be above this, so we calculate the percentage
+    const viewportHeight = window.innerHeight;
+    const navbarBottom = 12; // CSS bottom value
+    const navbarHeight = 30; // CSS height value
+    const navbarTop = viewportHeight - navbarBottom - navbarHeight;
+    
+    // Add a small offset above the navbar (in viewport pixels)
+    const offsetAboveNavbar = 20; // Adjust this value to position camera above navbar
+    const cameraTargetY = navbarTop - offsetAboveNavbar;
+    
+    // Convert to a percentage of viewport height (0-1 range)
+    const cameraYPercent = cameraTargetY / viewportHeight;
+    
+    // Convert percentage to world space coordinates
+    // For mobile: use a larger range, for desktop: use a smaller range
+    const worldHeightRange = window.innerWidth < 768 ? 5.75 : 3.75; // Adjust these values as needed
+    camera.position.y = cameraYPercent * worldHeightRange;
+}
+
 function onWindowResized() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
+
+    // Recalculate camera position based on new viewport dimensions
+    updateCameraPositionForNavbar();
 
     const pixelRatio = Math.min(window.devicePixelRatio, 2);
     const width = window.innerWidth;
