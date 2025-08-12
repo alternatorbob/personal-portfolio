@@ -254,7 +254,7 @@ export function dragInit() {
         const smallRotationZ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1));
         
         worldRotation.multiplyQuaternions(smallRotationX, worldRotation);
-        worldRotation.multiplyQuaternions(smallRotationY, worldRotation);
+        worldRotation.multiplyQuaternions(smallRotationY, worldRotation)
         worldRotation.multiplyQuaternions(smallRotationZ, worldRotation);
     }
 

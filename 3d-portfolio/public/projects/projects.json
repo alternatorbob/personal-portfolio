@@ -20,6 +20,29 @@
         }
     },
     {
+        "title": "Apple",
+        "id": "Apple",
+        "description": "Interactive installation for L'Atelier Magazine, the annual publication of the EPFL Masters in Architecture. The installation generates a video stream procedurally using Touchdesigner. A QR code next to the work creates a remote on your phone browser.",
+        "year": "2025",
+        "categories": ["Interaction Design", "Interface Design", "Research"],
+        "client": "Random Studio",
+        "content": {
+            "media": [
+                "/projects/Random_Studio/Apple/Apple_Cover.png"
+            ],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>I worked on an undisclosed research and development project exploring how spatial computing could enhance the in-store product-buying experience. Collaborating with a team of designers and developers, I helped take the concept from observing visitor flows to delivering a functional, interactive prototype.</p>"
+                },
+                {
+                    "type": "paragraph",
+                    "html": "<p>The process included designing and animating the UI, creating motion studies in After Effects, and translating them into code. The experience made use of presence and proximity detection, along with a custom-trained object detection algorithm, allowing customers to explore products on a large screen simply through their position and movement.</p>"
+                }
+            ]
+        }
+    },
+    {
         "title": "Digital Twin",
         "id": "DTOO",
         "description": "Done at Random Studio,",
@@ -75,14 +98,11 @@
         "categories": ["Interaction", "Experience Design", "Sound Design"],
         "client": "Random Studio",
         "content": {
-            "media": [
-                "/projects/Random_Studio/Glossier/Glossier_Cover.webp",
-                "/projects/Random_Studio/Glossier/Glossier Edit.mp4"
-            ],
+            "media": ["/projects/Random_Studio/Glossier/Glossier_Cover.webp", "/projects/Random_Studio/Glossier/Glossier Edit.mp4"],
             "description": [
                 {
                     "type": "paragraph",
-                    "html": "<p>I led the sound design for Glossier’s Le Fleur fragrance launch in Paris, collaborating closely with their spatial designers and creative team to craft a multi-sensory experience aligned with the campaign's tone. Each of the four perfumes had its own pavilion, and I composed a unique soundscape for each—translating fragrance notes and personality into immersive audio. A unifying ambient layer connected the entire space.</p>"
+                    "html": "<p>I led the sound design for Glossier’s Le Fleur fragrance launch in Paris, collaborating closely with their spatial designers and creative team to craft a multi-sensory experience aligned with the campaign's tone. Each of the four perfumes had its own pavilion, and I composed a unique soundscape for each—translating fragrance notes and personality into immersive audio. Random developed an interactive web-tool to preview the sounds which you can find <a href='https://layered-soundmap.netlify.app/'>here</a>. A unifying ambient layer connected the entire space.</p>"
                 },
                 {
                     "type": "paragraph",
@@ -166,10 +186,7 @@
         "categories": ["Creative Direction", "Unity Development"],
         "client": "ECAL",
         "content": {
-            "media": [
-                "/projects/Mindmaze/Mindmaze_Cover.webp",
-                "/projects/Mindmaze/mindmaze.gif"
-            ],
+            "media": ["/projects/Mindmaze/Mindmaze_Cover.webp", "/projects/Mindmaze/mindmaze.gif"],
             "description": [
                 {
                     "type": "paragraph",
@@ -345,10 +362,7 @@
         "categories": ["Interaction", "Code"],
         "client": "ECAL",
         "content": {
-            "media": [
-                "/projects/XYScope/XYScope_Cover.webp",
-                "/projects/XYScope/XYScope.gif"
-            ],
+            "media": ["/projects/XYScope/XYScope_Cover.webp", "/projects/XYScope/XYScope.gif"],
             "description": [
                 {
                     "type": "paragraph",
@@ -378,4 +392,3 @@
         }
     }
 ]
-    
