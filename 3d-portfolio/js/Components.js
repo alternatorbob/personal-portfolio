@@ -360,19 +360,10 @@ export class AboutCard extends Card {
         const title = document.createElement("div");
         title.className = "about-card-title text-lg";
         title.textContent = this.content.title;
-        title.style.textAlign = "left"; // Left-aligned as requested
-        title.style.fontSize = "var(--text-title)"; // Match project title font size
-        title.style.color = "var(--text-color)"; // Match project title color
-        title.style.fontWeight = "600"; // Match project title font weight
-        title.style.margin = "0"; // Reset margin
 
         // Create description with two-column layout
         const description = document.createElement("div");
         description.className = "about-card-description text-sm";
-        description.style.textAlign = "left"; // Left-aligned as requested
-        description.style.display = "flex";
-        description.style.flexDirection = "column";
-        description.style.gap = "2rem";
 
         // Add the main description content first (full width)
         const descriptionContent = document.createElement("div");
@@ -381,20 +372,14 @@ export class AboutCard extends Card {
 
         // Create the two-column links section
         const linksGrid = document.createElement("div");
-        linksGrid.className = "text-sm";
+        linksGrid.className = "text-sm about-card-links-grid";
         linksGrid.id = "links-grid";
-        linksGrid.style.display = "flex";
-        linksGrid.style.gap = "2rem";
-        linksGrid.style.marginTop = "auto"; // Push to bottom of flex container
         description.appendChild(linksGrid);
 
-        // Column 1: Email and CV
+        // Column 1: Email and Phone
         const column1 = document.createElement("div");
         column1.id = "column-1";
-        column1.style.flex = "1";
-        column1.style.display = "flex";
-        column1.style.flexDirection = "column";
-        column1.style.gap = "0.2rem";
+        column1.className = "about-card-column";
 
         // Add email
         const email = document.createElement("div");
@@ -406,24 +391,16 @@ export class AboutCard extends Card {
         phone.innerHTML = ' <a href="tel:+31615184195" class="external-link">+31 (0) 615 184 195</a>';
         column1.appendChild(phone);
 
-        // Column 2: External links
+        // Column 2: Social links and CV
         const column2 = document.createElement("div");
         column2.id = "column-2";
-        column2.style.flex = "1";
-        column2.style.display = "flex";
-        column2.style.flexDirection = "column";
-        column2.style.gap = "0.2rem";
+        column2.className = "about-card-column";
 
-        // Add social media links as comma-separated
+        // Add social media links and CV as comma-separated
         const socialLinks = document.createElement("div");
         socialLinks.innerHTML =
-            '<a href="https://www.instagram.com/__bogdan__n/" class="external-link">Instagram</a>, <a href="https://vimeo.com/user94524059" class="external-link">Vimeo</a>, <a href="https://www.linkedin.com/in/cbogdann/" class="external-link">LinkedIn</a>';
+            '<a href="https://www.instagram.com/__bogdan__n/" class="external-link">Instagram</a>, <a href="https://vimeo.com/user94524059" class="external-link">Vimeo</a>, <a href="https://www.linkedin.com/in/cbogdann/" class="external-link">LinkedIn</a>, <a href="/assets/files/08.08.2025_CV_Bogdan-Nastase.pdf" class="external-link">CV</a>';
         column2.appendChild(socialLinks);
-
-        // Add CV link
-        const cvLink = document.createElement("div");
-        cvLink.innerHTML = '<a href="/assets/files/08.08.2025_CV_Bogdan-Nastase.pdf" class="external-link">CV</a>';
-        column2.appendChild(cvLink);
 
         // Add columns to links grid
         linksGrid.appendChild(column1);
@@ -462,9 +439,19 @@ export class ProjectCard extends Card {
 
         this.project = options.project || {};
         this.currentSlideIndex = 0;
+        this.currentPosition = 0; // Track actual position in infinite carousel
+        this.totalSlides = 0; // Number of original slides (not including duplicates)
         this.slides = [];
         this.intersectionObserver = null;
         this.vimeoPlayers = new Map(); // Store Vimeo player instances
+        
+        // Touch/swipe handling for mobile
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.touchEndX = 0;
+        this.touchEndY = 0;
+        this.minSwipeDistance = 50; // Minimum distance for a swipe
+        this.isSwiping = false;
     }
 
     /**
@@ -591,26 +578,13 @@ export class ProjectCard extends Card {
                 gallery.appendChild(infoBelowContainer);
             }
 
-            // Modify slide positioning for mobile - use display toggle instead of transforms
-            const slides = card.querySelectorAll(".slide");
-            slides.forEach((slide, index) => {
-                slide.style.position = "relative";
-                slide.style.top = "auto";
-                slide.style.left = "auto";
-                slide.style.width = "100%";
-                slide.style.height = "auto";
-                slide.style.transform = "none";
-
-                // Show only the current slide (first slide initially)
-                if (index === 0) {
-                    slide.style.display = "block";
-                } else {
-                    slide.style.display = "none";
-                }
-            });
+            // Note: Slide positioning is now handled in createSlides method
+            // The current slide (index 0) will be static for container sizing
+            // Other slides will be absolutely positioned
 
             // Move next button directly to the project card for mobile
             const nextButton = card.querySelector(".button-next");
+            
             if (nextButton) {
                 // Remove from gallery and append to card
                 nextButton.remove();
@@ -656,6 +630,7 @@ export class ProjectCard extends Card {
         }
 
         if (hasMultipleItems) {
+            // Add next button only
             const nextBtn = document.createElement("div");
             nextBtn.className = "button-next button";
             nextBtn.innerHTML = '<img src="/assets/UI/next-button.png" alt="" />';
@@ -672,6 +647,353 @@ export class ProjectCard extends Card {
 
         // Preload images for smoother transitions
         this.preloadImages();
+
+        // Note: Touch handling will be set up after the card is rendered
+    }
+
+
+
+
+
+    /**
+     * Complete the swipe animation to the next or previous slide
+     * @param {boolean} isNext - Whether to go to next slide (true) or previous (false)
+     */
+    completeSwipeAnimation(isNext) {
+        try {
+            if (!this.slides || this.slides.length <= 1) return;
+
+            const isMobile = window.innerWidth <= 768;
+
+            if (isMobile) {
+                // Mobile uses different logic
+                if (isNext) {
+                    this.showNextSlideMobile();
+                } else {
+                    this.showPreviousSlideMobile();
+                }
+            } else {
+                // Desktop uses the infinite carousel
+                if (isNext) {
+                    this.showNextSlideDesktop();
+                } else {
+                    this.showPreviousSlide();
+                }
+            }
+
+        } catch (error) {
+            console.warn("Error completing swipe animation:", error);
+        }
+    }
+
+    /**
+     * Show previous slide on mobile using absolute positioning
+     */
+    showPreviousSlideMobile() {
+        const currentSlide = this.slides[this.currentSlideIndex];
+        const prevIndex = this.currentSlideIndex === 0 ? this.totalSlides - 1 : this.currentSlideIndex - 1;
+        const prevSlide = this.slides[prevIndex];
+
+        if (!currentSlide || !prevSlide) return;
+
+        // Position previous slide off-screen to the left
+        prevSlide.style.position = 'absolute';
+        prevSlide.style.top = '0';
+        prevSlide.style.left = '0';
+        prevSlide.style.width = '100%';
+        prevSlide.style.height = 'auto';
+        prevSlide.style.transform = 'translateX(-100%)';
+        prevSlide.style.zIndex = '2';
+
+        // Force reflow
+        prevSlide.offsetHeight;
+
+        // Animate current slide out to the right and previous slide in
+        currentSlide.style.transform = 'translateX(100%)';
+        currentSlide.style.zIndex = '1';
+        prevSlide.style.transform = 'translateX(0%)';
+
+        // Update current index
+        this.currentSlideIndex = prevIndex;
+
+        // After animation, make previous slide static for container sizing
+        setTimeout(() => {
+            if (prevSlide) {
+                prevSlide.style.position = 'static';
+                prevSlide.style.top = 'auto';
+                prevSlide.style.left = 'auto';
+                prevSlide.style.transform = 'translateX(0%)';
+            }
+            if (currentSlide) {
+                currentSlide.style.position = 'absolute';
+                currentSlide.style.top = '0';
+                currentSlide.style.left = '0';
+                currentSlide.style.transform = 'translateX(100%)';
+            }
+        }, 300);
+
+        // Handle video playback
+        this.handleVideoPlayback();
+    }
+
+    /**
+     * Show the previous slide in the gallery (desktop)
+     */
+    showPreviousSlide() {
+        try {
+            if (!this.slides || this.slides.length <= 1) return;
+
+            const slideGroup = this.element.querySelector('.slide-group');
+            if (!slideGroup) return;
+
+            // Initialize the current position if not set
+            if (this.currentPosition === undefined) {
+                this.currentPosition = 0;
+            }
+
+            // Move to previous position
+            this.currentPosition--;
+            
+            // If we go below 0, jump to the end of duplicates
+            if (this.currentPosition < 0) {
+                slideGroup.style.transition = 'none';
+                this.currentPosition = this.totalSlides - 1;
+                slideGroup.style.transform = `translateX(-${this.currentPosition * 100}%)`;
+                
+                // Re-enable transition
+                setTimeout(() => {
+                    slideGroup.style.transition = 'transform 0.3s ease-in-out';
+                }, 50);
+            } else {
+                // Normal previous slide
+                slideGroup.style.transform = `translateX(-${this.currentPosition * 100}%)`;
+            }
+            
+            // Update the logical slide index for video handling
+            this.currentSlideIndex = this.currentPosition % this.totalSlides;
+
+            // Handle video pause/play
+            this.handleVideoPlayback();
+
+        } catch (error) {
+            console.warn("Error showing previous slide:", error);
+        }
+    }
+
+    /**
+     * Snap back to current slide when swipe is insufficient
+     */
+    snapBackToCurrentSlide() {
+        try {
+            if (!this.slides || this.slides.length <= 1) return;
+
+            const currentSlide = this.slides[this.currentSlideIndex];
+            const nextSlide = this.slides[(this.currentSlideIndex + 1) % this.slides.length];
+            const prevSlide = this.slides[this.currentSlideIndex === 0 
+                ? this.slides.length - 1 
+                : this.currentSlideIndex - 1];
+
+            if (!currentSlide) return;
+
+            // Animate current slide back to center
+            currentSlide.style.transition = "transform 0.3s ease-out";
+            currentSlide.style.transform = "translateX(0)";
+
+            // Reset other slides
+            if (nextSlide) {
+                nextSlide.style.transition = "transform 0.3s ease-out";
+                nextSlide.style.transform = "translateX(100%)";
+            }
+
+            if (prevSlide) {
+                prevSlide.style.transition = "transform 0.3s ease-out";
+                prevSlide.style.transform = "translateX(-100%)";
+            }
+
+        } catch (error) {
+            console.warn("Error snapping back to current slide:", error);
+        }
+    }
+
+    /**
+     * Create animated pull effect during swipe
+     * @param {number} deltaX - Horizontal swipe distance
+     */
+    createPullEffect(deltaX) {
+        try {
+            if (!this.slides || this.slides.length <= 1) return;
+
+            const currentSlide = this.slides[this.currentSlideIndex];
+            const nextSlide = this.slides[(this.currentSlideIndex + 1) % this.slides.length];
+            
+            if (!currentSlide || !nextSlide) return;
+
+            // Calculate swipe progress (0 to 1)
+            const swipeProgress = Math.min(Math.abs(deltaX) / 100, 1);
+            
+            // Apply transform to current slide (slide out)
+            currentSlide.style.transition = "none";
+            currentSlide.style.transform = `translateX(-${deltaX * 0.3}px)`;
+            
+            // Apply transform to next slide (slide in)
+            nextSlide.style.transition = "none";
+            nextSlide.style.transform = `translateX(${100 - (deltaX * 0.3)}%)`;
+            
+            // Remove opacity effects - use only transform for clean slide transition
+            
+        } catch (error) {
+            console.warn("Error creating pull effect:", error);
+        }
+    }
+
+    /**
+     * Set up touch/swipe handling for mobile gallery
+     */
+    setupTouchHandling() {
+        if (!this.element) {
+            console.warn("ProjectCard element not yet created, skipping touch handling setup");
+            return;
+        }
+        
+        const slideshowContainer = this.element.querySelector(".slideshow-container");
+        if (!slideshowContainer) return;
+
+        // Touch start event
+        slideshowContainer.addEventListener("touchstart", (e) => {
+            this.handleTouchStart(e);
+        }, { passive: true });
+
+        // Touch move event
+        slideshowContainer.addEventListener("touchmove", (e) => {
+            this.handleTouchMove(e);
+        }, { passive: false });
+
+        // Touch end event
+        slideshowContainer.addEventListener("touchend", (e) => {
+            this.handleTouchEnd(e);
+        }, { passive: true });
+    }
+
+    /**
+     * Handle touch start event
+     * @param {TouchEvent} e - Touch event
+     */
+    handleTouchStart(e) {
+        try {
+            if (!e.touches || e.touches.length === 0) return;
+            
+            this.touchStartX = e.touches[0].clientX;
+            this.touchStartY = e.touches[0].clientY;
+            this.isSwiping = false;
+        } catch (error) {
+            console.warn("Error handling touch start:", error);
+        }
+    }
+
+    /**
+     * Handle touch move event
+     * @param {TouchEvent} e - Touch event
+     */
+    handleTouchMove(e) {
+        try {
+            if (!this.touchStartX || !this.touchStartY || !e.touches || e.touches.length === 0) return;
+
+            this.touchEndX = e.touches[0].clientX;
+            this.touchEndY = e.touches[0].clientY;
+
+            const deltaX = this.touchStartX - this.touchEndX;
+            const deltaY = this.touchStartY - this.touchEndY;
+
+            // Check if this is a horizontal swipe (more horizontal than vertical movement)
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+                this.isSwiping = true;
+                
+                // Create animated pull effect during swipe
+                this.createPullEffect(deltaX);
+                
+                // Add visual feedback class
+                const slideshowContainer = this.element.querySelector(".slideshow-container");
+                if (slideshowContainer) {
+                    slideshowContainer.classList.add("swiping");
+                }
+                // Prevent default to avoid page scrolling during swipe
+                e.preventDefault();
+            }
+        } catch (error) {
+            console.warn("Error handling touch move:", error);
+        }
+    }
+
+    /**
+     * Handle touch end event
+     * @param {TouchEvent} e - Touch event
+     */
+    handleTouchEnd(e) {
+        try {
+            if (!this.isSwiping) return;
+
+            const deltaX = this.touchStartX - this.touchEndX;
+            const deltaY = this.touchStartY - this.touchEndY;
+
+            // Check if swipe distance is sufficient
+            if (Math.abs(deltaX) > this.minSwipeDistance) {
+                if (deltaX > 0) {
+                    // Swipe left - go to next slide with animation
+                    this.completeSwipeAnimation(true);
+                } else {
+                    // Swipe right - go to previous slide with animation
+                    this.completeSwipeAnimation(false);
+                }
+            } else {
+                // Swipe not sufficient, snap back to current slide
+                this.snapBackToCurrentSlide();
+            }
+
+            // Reset touch state
+            this.touchStartX = 0;
+            this.touchStartY = 0;
+            this.touchEndX = 0;
+            this.touchEndY = 0;
+            this.isSwiping = false;
+
+            // Remove swiping visual feedback
+            const slideshowContainer = this.element.querySelector(".slideshow-container");
+            if (slideshowContainer) {
+                slideshowContainer.classList.remove("swiping");
+            }
+        } catch (error) {
+            console.warn("Error handling touch end:", error);
+            // Reset touch state on error
+            this.touchStartX = 0;
+            this.touchStartY = 0;
+            this.touchEndX = 0;
+            this.touchEndY = 0;
+            this.isSwiping = false;
+        }
+    }
+
+
+
+
+
+
+
+    /**
+     * Override the base render method to set up touch handling after rendering
+     */
+    render() {
+        // Call the parent render method first
+        const result = super.render();
+        
+        // Set up touch handling after the element is created and attached to DOM
+        if (this.element) {
+            // Use a small delay to ensure DOM is fully ready
+            setTimeout(() => {
+                this.setupTouchHandling();
+            }, 50);
+        }
+        
+        return result;
     }
 
     /**
@@ -698,44 +1020,182 @@ export class ProjectCard extends Card {
             mediaItems = [...imageItems, ...videoItems, ...gifItems];
         }
 
+        this.mediaItems = mediaItems;
         const numSlides = mediaItems.length;
+        const isMobile = window.innerWidth <= 768;
 
-        for (let i = 0; i < numSlides; i++) {
-            const slide = document.createElement("div");
-            slide.className = "slide";
-            const mediaItem = mediaItems[i];
+        // Clear existing slides
+        this.slides = [];
+        container.innerHTML = "";
 
-            switch (mediaItem.type) {
-                case "image":
-                case "gif":
-                    slide.innerHTML = `<img src="${mediaItem.path}" alt="" />`;
-                    break;
+        if (isMobile) {
+            // Mobile: Use absolute positioning approach with one static slide for container sizing
+            container.className = "slideshow-container mobile";
+            this.currentSlideIndex = 0;
+            this.totalSlides = numSlides;
+            
+            // Create slides with absolute positioning
+            for (let i = 0; i < numSlides; i++) {
+                const slide = document.createElement("div");
+                slide.className = "slide";
+                slide.dataset.index = i;
+                const mediaItem = mediaItems[i];
 
-                case "video":
-                    slide.innerHTML = `<video controls loop preload="none" playsinline muted controlsList="nodownload"><source src="${mediaItem.path}" type="video/mp4">Your browser does not support the video tag.</video>`;
-                    this.setupVideoOptimization(slide);
-                    break;
+                this.createSlideContent(slide, mediaItem);
+                
+                // First slide is static to provide container dimensions, others are absolute
+                if (i === 0) {
+                    slide.style.position = "static";
+                    slide.style.width = "100%";
+                    slide.style.height = "auto";
+                    slide.style.transform = "translateX(0%)";
+                    slide.style.zIndex = "2";
+                } else {
+                    slide.style.position = "absolute";
+                    slide.style.top = "0";
+                    slide.style.left = "0";
+                    slide.style.width = "100%";
+                    slide.style.height = "auto";
+                    slide.style.transform = "translateX(100%)";
+                    slide.style.zIndex = "1";
+                }
+                slide.style.transition = "transform 0.3s ease-in-out";
+                
+                container.appendChild(slide);
+                this.slides.push(slide);
+            }
+        } else {
+            // Desktop: Use flexbox with infinite scroll
+            container.className = "slideshow-container desktop";
+            this.currentPosition = 0;
+            this.totalSlides = numSlides;
+            
+            const slideGroup = document.createElement("div");
+            slideGroup.className = "slide-group";
+            
+            // Create original slides
+            for (let i = 0; i < numSlides; i++) {
+                const slide = document.createElement("div");
+                slide.className = "slide";
+                const mediaItem = mediaItems[i];
 
-                case "iframe":
-                    slide.innerHTML = mediaItem.path;
-                    this.setupVimeoIframe(slide);
-                    break;
-
-                default:
-                    // Fallback to image for unknown types
-                    slide.innerHTML = `<img src="${mediaItem.path}" alt="" />`;
-                    break;
+                this.createSlideContent(slide, mediaItem);
+                slideGroup.appendChild(slide);
+                this.slides.push(slide);
             }
 
-            // Set initial position
-            slide.style.position = "absolute";
-            slide.style.top = "0";
-            slide.style.left = "0";
-            slide.style.transform = i === 0 ? "translateX(0)" : "translateX(100%)";
+            // Duplicate ALL slides for infinite effect
+            for (let i = 0; i < numSlides; i++) {
+                const slide = document.createElement("div");
+                slide.className = "slide";
+                slide.setAttribute("aria-hidden", "true");
+                const mediaItem = mediaItems[i];
 
-            container.appendChild(slide);
-            this.slides.push(slide);
+                this.createSlideContent(slide, mediaItem);
+                slideGroup.appendChild(slide);
+            }
+
+            container.appendChild(slideGroup);
         }
+    }
+
+    /**
+     * Create content for a slide
+     * @param {HTMLElement} slide - The slide element
+     * @param {Object} mediaItem - Media item data
+     */
+    createSlideContent(slide, mediaItem) {
+        switch (mediaItem.type) {
+            case "image":
+            case "gif":
+                slide.innerHTML = `<img src="${mediaItem.path}" alt="" />`;
+                break;
+
+            case "video":
+                const thumbnailImage = this.findVideoThumbnail(mediaItem.path);
+                if (thumbnailImage) {
+                    // Create initial thumbnail image that will be replaced by video when clicked
+                    slide.innerHTML = `
+                        <div class="video-container" data-video-src="${mediaItem.path}">
+                            <img src="${thumbnailImage}" alt="Video thumbnail" class="video-thumbnail" />
+                            <div class="video-play-button">▶</div>
+                        </div>
+                    `;
+                    this.setupVideoThumbnailClick(slide);
+                } else {
+                    // Fallback to video with poster if no thumbnail found
+                    slide.innerHTML = `<video controls preload="none" playsinline muted controlsList="nodownload"><source src="${mediaItem.path}" type="video/mp4">Your browser does not support the video tag.</video>`;
+                    this.setupVideoOptimization(slide);
+                }
+                break;
+
+            case "iframe":
+                slide.innerHTML = mediaItem.path;
+                this.setupVimeoIframe(slide);
+                break;
+
+            default:
+                // Fallback to image for unknown types
+                slide.innerHTML = `<img src="${mediaItem.path}" alt="" />`;
+                break;
+        }
+    }
+
+    /**
+     * Find a thumbnail image for a video file
+     * @param {string} videoPath - The path to the video file
+     * @returns {string|null} - The path to the thumbnail image or null if not found
+     */
+    findVideoThumbnail(videoPath) {
+        if (!this.project.content.media) return null;
+        
+        // Extract the video filename without extension
+        const videoBaseName = videoPath.split('/').pop().replace(/\.[^/.]+$/, '');
+        const projectFolder = videoPath.substring(0, videoPath.lastIndexOf('/'));
+        
+        // Look for common thumbnail naming patterns in the same project folder
+        const thumbnailPatterns = [
+            `${projectFolder}/${videoBaseName}_Cover.webp`,
+            `${projectFolder}/${videoBaseName}_Cover.jpg`,
+            `${projectFolder}/${videoBaseName}_Cover.png`,
+            `${projectFolder}/${videoBaseName}Cover.webp`,
+            `${projectFolder}/${videoBaseName}Cover.jpg`,
+            `${projectFolder}/${videoBaseName}Cover.png`,
+            `${projectFolder}/${videoBaseName}.webp`,
+            `${projectFolder}/${videoBaseName}.jpg`,
+            `${projectFolder}/${videoBaseName}.png`
+        ];
+        
+        // Check if any of these thumbnail patterns exist in the media array
+        for (const pattern of thumbnailPatterns) {
+            const foundThumbnail = this.project.content.media.find(mediaItem => 
+                typeof mediaItem === 'string' && mediaItem === pattern
+            );
+            if (foundThumbnail) {
+                return foundThumbnail;
+            }
+        }
+        
+        // Fallback: find the first image in the same project folder
+        const projectImages = this.project.content.media.filter(mediaItem => {
+            if (typeof mediaItem !== 'string') return false;
+            const mediaType = detectMediaType(mediaItem);
+            return (mediaType === 'image' || mediaType === 'gif') && 
+                   mediaItem.startsWith(projectFolder);
+        });
+        
+        if (projectImages.length > 0) {
+            return projectImages[0];
+        }
+        
+        // Last fallback: any image in the project
+        const anyProjectImage = this.project.content.media.find(mediaItem => {
+            if (typeof mediaItem !== 'string') return false;
+            const mediaType = detectMediaType(mediaItem);
+            return mediaType === 'image' || mediaType === 'gif';
+        });
+        
+        return anyProjectImage || null;
     }
 
     /**
@@ -851,6 +1311,47 @@ export class ProjectCard extends Card {
     }
 
     /**
+     * Setup click handler for video thumbnails
+     * @param {HTMLElement} slide - The slide element containing the video thumbnail
+     */
+    setupVideoThumbnailClick(slide) {
+        const videoContainer = slide.querySelector('.video-container');
+        const thumbnail = slide.querySelector('.video-thumbnail');
+        const playButton = slide.querySelector('.video-play-button');
+        
+        if (!videoContainer || !thumbnail) return;
+        
+        const clickHandler = (event) => {
+            // Prevent event bubbling to avoid closing the card
+            event.stopPropagation();
+            event.preventDefault();
+            
+            const videoSrc = videoContainer.getAttribute('data-video-src');
+            if (!videoSrc) return;
+            
+            // Replace thumbnail with actual video
+            videoContainer.innerHTML = `<video controls preload="auto" playsinline muted controlsList="nodownload" autoplay><source src="${videoSrc}" type="video/mp4">Your browser does not support the video tag.</video>`;
+            
+            // Setup video optimization for the new video element
+            this.setupVideoOptimization(slide);
+        };
+        
+        // Add click handlers to both thumbnail and play button
+        if (thumbnail) thumbnail.addEventListener('click', clickHandler);
+        if (playButton) playButton.addEventListener('click', clickHandler);
+        
+        // Add touch handlers for mobile with event prevention
+        const touchHandler = (event) => {
+            event.stopPropagation();
+            event.preventDefault();
+            clickHandler(event);
+        };
+        
+        if (thumbnail) thumbnail.addEventListener('touchend', touchHandler);
+        if (playButton) playButton.addEventListener('touchend', touchHandler);
+    }
+
+    /**
      * Setup video optimization for mobile devices
      * @param {HTMLElement} slide - The slide element containing the video
      */
@@ -936,60 +1437,139 @@ export class ProjectCard extends Card {
      * Show the next slide in the gallery
      */
     showNextSlide() {
-        if (this.slides.length <= 1) return;
+        try {
+            if (!this.slides || this.slides.length <= 1) return;
 
-        // Check if we're on mobile
-        const isMobile = window.innerWidth <= 768;
+            const isMobile = window.innerWidth <= 768;
 
-        // Calculate the index of the next slide
-        const nextIndex = (this.currentSlideIndex + 1) % this.slides.length;
+            if (isMobile) {
+                // Mobile: Use absolute positioning with transforms
+                this.showNextSlideMobile();
+            } else {
+                // Desktop: Use flexbox infinite carousel
+                this.showNextSlideDesktop();
+            }
 
-        if (isMobile) {
-            // Mobile: use display toggling for better content adaptation
-            this.slides[this.currentSlideIndex].style.display = "none";
-            this.slides[nextIndex].style.display = "block";
-        } else {
-            // Desktop: use transform animations
-            // Position the next slide off-screen to the right
-            this.slides[nextIndex].style.transition = "none";
-            this.slides[nextIndex].style.transform = "translateX(100%)";
-
-            // Force reflow to ensure the position is set before starting animation
-            this.slides[nextIndex].offsetHeight;
-
-            // Move the current slide out to the left
-            this.slides[this.currentSlideIndex].style.transition = "transform 0.3s ease-in-out";
-            this.slides[this.currentSlideIndex].style.transform = "translateX(-100%)";
-
-            // Animate the next slide in from the right
-            this.slides[nextIndex].style.transition = "transform 0.3s ease-in-out";
-            this.slides[nextIndex].style.transform = "translateX(0)";
+        } catch (error) {
+            console.warn("Error showing next slide:", error);
         }
+    }
 
-        // Pause video in the old slide
-        const oldSlide = this.slides[this.currentSlideIndex];
-        const oldVideo = oldSlide.querySelector("video");
-        const oldIframe = oldSlide.querySelector('iframe[src*="player.vimeo.com"]');
-        this.pauseVideoInSlide(oldSlide, oldVideo, oldIframe);
+    /**
+     * Show next slide on mobile using absolute positioning
+     */
+    showNextSlideMobile() {
+        const currentSlide = this.slides[this.currentSlideIndex];
+        const nextIndex = (this.currentSlideIndex + 1) % this.totalSlides;
+        const nextSlide = this.slides[nextIndex];
 
-        // Update the current index
+        if (!currentSlide || !nextSlide) return;
+
+        // Position next slide off-screen to the right
+        nextSlide.style.position = 'absolute';
+        nextSlide.style.top = '0';
+        nextSlide.style.left = '0';
+        nextSlide.style.width = '100%';
+        nextSlide.style.height = 'auto';
+        nextSlide.style.transform = 'translateX(100%)';
+        nextSlide.style.zIndex = '2';
+
+        // Force reflow
+        nextSlide.offsetHeight;
+
+        // Animate current slide out to the left and next slide in
+        currentSlide.style.transform = 'translateX(-100%)';
+        currentSlide.style.zIndex = '1';
+        nextSlide.style.transform = 'translateX(0%)';
+
+        // Update current index
         this.currentSlideIndex = nextIndex;
 
-        // Play video in the new slide if visible
-        const newSlide = this.slides[this.currentSlideIndex];
-        const newVideo = newSlide.querySelector("video");
-        const newIframe = newSlide.querySelector('iframe[src*="player.vimeo.com"]');
-
-        // Use setTimeout to ensure slide transition has started
+        // After animation, make next slide static for container sizing
         setTimeout(() => {
-            // Check if the new slide is in viewport before playing
-            const rect = newSlide.getBoundingClientRect();
-            const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-
-            if (isVisible) {
-                this.playVideoInSlide(newSlide, newVideo, newIframe);
+            if (nextSlide) {
+                nextSlide.style.position = 'static';
+                nextSlide.style.top = 'auto';
+                nextSlide.style.left = 'auto';
+                nextSlide.style.transform = 'translateX(0%)';
             }
-        }, 100);
+            if (currentSlide) {
+                currentSlide.style.position = 'absolute';
+                currentSlide.style.top = '0';
+                currentSlide.style.left = '0';
+                currentSlide.style.transform = 'translateX(100%)';
+            }
+        }, 300);
+
+        // Handle video playback
+        this.handleVideoPlayback();
+    }
+
+    /**
+     * Show next slide on desktop using infinite carousel
+     */
+    showNextSlideDesktop() {
+        const slideGroup = this.element.querySelector('.slide-group');
+        if (!slideGroup) return;
+
+        // Initialize the current position if not set
+        if (this.currentPosition === undefined) {
+            this.currentPosition = 0;
+        }
+
+        // Move to next position
+        this.currentPosition++;
+        
+        // Apply the transform
+        slideGroup.style.transform = `translateX(-${this.currentPosition * 100}%)`;
+        
+        // Update the logical slide index for video handling
+        this.currentSlideIndex = this.currentPosition % this.totalSlides;
+        
+        // Check if we've reached the end of original slides (need to reset)
+        if (this.currentPosition === this.totalSlides) {
+            // After transition completes, reset to position 0 without animation
+            setTimeout(() => {
+                slideGroup.style.transition = 'none';
+                this.currentPosition = 0;
+                slideGroup.style.transform = 'translateX(0%)';
+                
+                // Re-enable transition
+                setTimeout(() => {
+                    slideGroup.style.transition = 'transform 0.3s ease-in-out';
+                }, 50);
+            }, 300); // Match CSS transition duration
+        }
+
+        // Handle video pause/play
+        this.handleVideoPlayback();
+    }
+
+    /**
+     * Handle video playback for current slide
+     */
+    handleVideoPlayback() {
+        if (!this.slides) return;
+
+        // Pause all videos (both actual video elements and thumbnails)
+        this.slides.forEach((slide, index) => {
+            const video = slide.querySelector("video");
+            const iframe = slide.querySelector('iframe[src*="player.vimeo.com"]');
+            
+            if (index !== this.currentSlideIndex) {
+                this.pauseVideoInSlide(slide, video, iframe);
+            }
+        });
+
+        // For current slide, just ensure it's ready (don't auto-play)
+        const currentSlide = this.slides[this.currentSlideIndex];
+        if (currentSlide) {
+            const video = currentSlide.querySelector("video");
+            const iframe = currentSlide.querySelector('iframe[src*="player.vimeo.com"]');
+            
+            // Note: We don't auto-play videos anymore - user must click to play
+            // This applies to both thumbnail approach and direct video elements
+        }
     }
 
     /**
@@ -1064,9 +1644,17 @@ export class ProjectCard extends Card {
         }, options);
 
         // Observe all slides
-        this.slides.forEach((slide) => {
-            this.intersectionObserver.observe(slide);
-        });
+        if (this.slides) {
+            this.slides.forEach((slide) => {
+                if (slide && this.intersectionObserver) {
+                    try {
+                        this.intersectionObserver.observe(slide);
+                    } catch (error) {
+                        console.warn("Error observing slide:", error);
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -1076,20 +1664,21 @@ export class ProjectCard extends Card {
      * @param {HTMLElement} iframe - The iframe element (if any)
      */
     playVideoInSlide(slide, video, iframe) {
-        if (video && video.paused) {
-            video.play().catch((error) => {
-                console.log("Video play failed:", error);
-            });
-        }
+        // Videos no longer auto-play - user must click to play
+        // if (video && video.paused) {
+        //     video.play().catch((error) => {
+        //         console.log("Video play failed:", error);
+        //     });
+        // }
 
-        if (iframe) {
-            const player = this.vimeoPlayers.get(iframe);
-            if (player) {
-                player.play().catch((error) => {
-                    console.log("Vimeo play failed:", error);
-                });
-            }
-        }
+        // if (iframe) {
+        //     const player = this.vimeoPlayers.get(iframe);
+        //     if (player) {
+        //         player.play().catch((error) => {
+        //             console.log("Vimeo play failed:", error);
+        //         });
+        //     }
+        // }
     }
 
     /**

@@ -1,8 +1,8 @@
 /* ===== FONT FACE DECLARATIONS ===== */
 @font-face {
     font-family: "Scto Grotesk A";
-    src: url("../public/assets/fonts/transfonter.org-20230415-172633/SctoGroteskA-Regular.woff2") format("woff2"),
-        url("../public/assets/fonts/transfonter.org-20230415-172633/SctoGroteskA-Regular.woff") format("woff");
+    src: url("../assets/fonts/transfonter.org-20230415-172633/SctoGroteskA-Regular.woff2") format("woff2"),
+        url("../assets/fonts/transfonter.org-20230415-172633/SctoGroteskA-Regular.woff") format("woff");
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -10,8 +10,8 @@
 
 @font-face {
     font-family: "Scto Grotesk A";
-    src: url("../public/assets/fonts/transfonter.org-20230415-172633/SctoGroteskA-Bold.woff2") format("woff2"),
-        url("../public/assets/fonts/transfonter.org-20230415-172633/SctoGroteskA-Bold.woff") format("woff");
+    src: url("../assets/fonts/transfonter.org-20230415-172633/SctoGroteskA-Bold.woff2") format("woff2"),
+        url("../assets/fonts/transfonter.org-20230415-172633/SctoGroteskA-Bold.woff") format("woff");
     font-weight: bold;
     font-style: normal;
     font-display: swap;
@@ -95,12 +95,12 @@ body {
     color: var(--text-color);
     user-select: none;
     overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
     display: flex;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
 
 /* ===== GLOBAL LINK STYLES ===== */
@@ -203,6 +203,8 @@ a.external-link:hover {
 .button-next {
     align-self: center;
 }
+
+
 
 .button {
     cursor: pointer;

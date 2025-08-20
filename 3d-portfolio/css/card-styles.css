@@ -1,0 +1,136 @@
+/* About Card Styles */
+.about-card-title {
+    text-align: left;
+    font-size: var(--text-title);
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.about-card-description {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.about-card-links-grid {
+    display: flex;
+    gap: 2rem;
+    margin-top: auto;
+}
+
+.about-card-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+/* Project Card Mobile Layout */
+.project-info-mobile {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.project-info-mobile .project-description {
+    width: 100%;
+    flex-basis: auto;
+    margin: 0;
+}
+
+.project-client-year {
+    margin-bottom: 16px;
+}
+
+/* Project Gallery Mobile Styles */
+.project-gallery-mobile {
+    flex: none;
+    min-height: 0;
+    gap: 18px;
+    display: flex;
+    flex-direction: column;
+}
+
+.slideshow-container-mobile {
+    position: relative;
+    width: 100%;
+    height: auto;
+    min-height: 200px;
+    overflow: hidden;
+}
+
+.slide-mobile {
+    position: relative;
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.slide-mobile:not(:first-child) {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.slide-mobile:first-child {
+    position: relative;
+}
+
+/* Next Button Positioning */
+.button-next-mobile {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    top: auto;
+    margin-top: 0;
+}
+
+/* Slide Transitions */
+.slide-transition {
+    transition: transform 0.3s ease-out;
+}
+
+.slide-transform-out {
+    transform: translateX(-100%);
+}
+
+.slide-transform-in {
+    transform: translateX(0);
+}
+
+.slide-transform-next {
+    transform: translateX(100%);
+}
+
+.slide-transform-prev {
+    transform: translateX(-100%);
+}
+
+/* Swipe Effects */
+.swipe-pull-current {
+    transition: none;
+}
+
+.swipe-pull-next {
+    transition: none;
+}
+
+/* Mobile Layout Adjustments */
+.project-info-mobile-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.project-categories-mobile {
+    width: 100%;
+    flex-basis: auto;
+    margin-top: -2px;
+}
+
+.project-title-mobile {
+    transform: translateY(-4px);
+    width: 100%;
+}
