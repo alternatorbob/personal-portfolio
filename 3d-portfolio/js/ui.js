@@ -183,12 +183,11 @@ function initBottomNavbar() {
 const aboutContent = {
     title: "About",
     description: `
-       <p>I am an experience designer based in Amsterdam working across 
+       <p>I am an Interaction Designer based in Amsterdam working across 
        interaction, digital, and sound design. Currently working as an Interaction Designer at 
-       Random Studio, concept-driven work for clients in culture, fashion, and sports, 
-       and collaborate with architects on spatial projects involving contemporary technology. 
-       Parallel to this, I have also supported artists in developing interactive installations, I also work as a designer 
-       and creative director for electronic music labels.</p>
+       Random Studio, I work on concept-driven work for clients in technology, fashion, and sports. 
+       I collaborate with architects on spatial projects that use contemporary technology. 
+       Parallel to this, I have also supported artists in developing interactive installations, I also work with electronic music labels for creative direction, design and promotion.</p>
     `,
 };
 
