@@ -58,13 +58,8 @@ export function toggleSphereMaterial() {
     }
 }
 
-// TEXTURES / Post Processing
 // Define gradient shader in global scope
 let bgShader;
-const shaderVignette = VignetteShader;
-const effectVignette = new ShaderPass(shaderVignette);
-effectVignette.uniforms["offset"].value = 0.8;
-effectVignette.uniforms["darkness"].value = 0.9;
 
 const textureManager = new THREE.LoadingManager();
 textureManager.onStart = function (url, itemsLoaded, itemsTotal) {
@@ -90,15 +85,15 @@ let texturesLoaded = false;
 function checkLoadingComplete() {
     if (isInitialized && texturesLoaded) {
         console.log("Loading complete - starting fade sequence");
-        
+
         // Mark JavaScript as loaded and show content
-        document.body.classList.add('js-loaded');
-        
-        const loadingScreen = document.getElementById('loading-screen');
+        document.body.classList.add("js-loaded");
+
+        const loadingScreen = document.getElementById("loading-screen");
         if (loadingScreen) {
             // Keep blackout for a brief moment, then fade out smoothly
             setTimeout(() => {
-                loadingScreen.classList.add('hide');
+                loadingScreen.classList.add("hide");
                 // Remove the loading screen after fade completes
                 setTimeout(() => {
                     loadingScreen.remove();
@@ -113,7 +108,7 @@ async function init() {
     try {
         // Start font loading detection
         detectFontLoading();
-        
+
         await threeInit();
     } catch (error) {
         console.error("Error during initialization:", error);
@@ -132,11 +127,11 @@ async function threeInit() {
     // Direct initialization without checks
     renderer = new THREE.WebGLRenderer({
         antialias: true,
-        precision: "highp",
-        powerPreference: "high-performance",
-        alpha: true,
+        precision: "mediump",
+        powerPreference: "default",
+        alpha: false,
         stencil: false,
-        depth: true,
+        depth: false,
         preserveDrawingBuffer: true,
         failIfMajorPerformanceCaveat: false,
     });
@@ -166,7 +161,7 @@ async function threeInit() {
 
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, camFar);
     camera.position.z = window.innerWidth < 768 ? 21.5 : 15;
-    
+
     // Calculate camera Y position to be above the bottom navbar
     updateCameraPositionForNavbar();
 
@@ -210,22 +205,21 @@ async function threeInit() {
     // Option 1: Subdivided Cube (current geometry with more faces)
     // Alternative geometries to try (comment/uncomment to test):
     envMesh = new THREE.Mesh(
-        
         // Option 1: Subdivided Cube (current - more faces than original)
         new THREE.BoxGeometry(1000, 1000, 1000, 10, 10, 10), // 20x20x20 subdivision
-        
+
         // Option 2: Sphere (smoothest, most faces)
         // new THREE.SphereGeometry(700, 64, 32), // radius, widthSegments, heightSegments
-        
+
         // Option 3: Icosahedron (organic, spherical but faceted)
         // new THREE.IcosahedronGeometry(700, 4), // radius, subdivision_level (0-5)
-        
+
         // Option 4: Cylinder (good for horizons, infinite feeling)
         // new THREE.CylinderGeometry(1000, 1000, 1000, 32, 20), // topRadius, bottomRadius, height, radialSegments, heightSegments
-        
+
         // Option 5: Dodecahedron (12-sided, unique look)
         // new THREE.DodecahedronGeometry(700, 2), // radius, subdivision_level (0-3)
-        
+
         new THREE.ShaderMaterial({
             uniforms: bgShader.uniforms,
             vertexShader: bgShader.vertexShader,
@@ -417,14 +411,14 @@ function updateCameraPositionForNavbar() {
     const navbarBottom = 12; // CSS bottom value
     const navbarHeight = 30; // CSS height value
     const navbarTop = viewportHeight - navbarBottom - navbarHeight;
-    
+
     // Add a small offset above the navbar (in viewport pixels)
     const offsetAboveNavbar = 20; // Adjust this value to position camera above navbar
     const cameraTargetY = navbarTop - offsetAboveNavbar;
-    
+
     // Convert to a percentage of viewport height (0-1 range)
     const cameraYPercent = cameraTargetY / viewportHeight;
-    
+
     // Convert percentage to world space coordinates
     // For mobile: use a larger range, for desktop: use a smaller range
     const worldHeightRange = window.innerWidth < 768 ? 5.75 : 3.75; // Adjust these values as needed
@@ -467,15 +461,15 @@ export { camera, scene, renderer, sphere };
 // Function to enable fallback mode when WebGL is not available
 function enableFallbackMode() {
     console.log("Fallback mode - starting fade sequence");
-    
+
     // Mark JavaScript as loaded and show content
-    document.body.classList.add('js-loaded');
-    
-    const loadingScreen = document.getElementById('loading-screen');
+    document.body.classList.add("js-loaded");
+
+    const loadingScreen = document.getElementById("loading-screen");
     if (loadingScreen) {
         // Keep blackout for a brief moment, then fade out smoothly
         setTimeout(() => {
-            loadingScreen.classList.add('hide');
+            loadingScreen.classList.add("hide");
             setTimeout(() => {
                 loadingScreen.remove();
             }, 1000);
@@ -514,12 +508,14 @@ function enableFallbackMode() {
 
         // Make sure the UI is initialized for viewing projects
         if (typeof uiInit === "function") {
-            loadProjects().then(projects => {
-                uiInit(projects);
-            }).catch(error => {
-                console.error('Error loading projects in fallback mode:', error);
-                uiInit([]); // Initialize with empty array if loading fails
-            });
+            loadProjects()
+                .then((projects) => {
+                    uiInit(projects);
+                })
+                .catch((error) => {
+                    console.error("Error loading projects in fallback mode:", error);
+                    uiInit([]); // Initialize with empty array if loading fails
+                });
         }
     }
 }

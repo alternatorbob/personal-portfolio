@@ -66,15 +66,35 @@
             /* Animated loader styling */
             .loader {
                 width: 20px;
-                aspect-ratio: 1;
+                height: 20px;
+                border: 3px solid #FFF;
+                background-color: #FFF;
                 border-radius: 50%;
-                background: #fff;
-                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3);
-                animation: l1 1s infinite;
+                display: inline-block;
+                position: relative;
+                box-sizing: border-box;
+                animation: rotation 1s linear infinite;
+            } 
+            .loader::after {
+                content: '';  
+                box-sizing: border-box;
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                border: 3px solid transparent;
+                border-bottom-color: #ffffff;
             }
-            @keyframes l1 {
+
+            @keyframes rotation {
+                0% {
+                    transform: rotate(0deg);
+                }
                 100% {
-                    box-shadow: 0 0 0 30px rgba(255, 255, 255, 0);
+                    transform: rotate(360deg);
                 }
             }
         </style>
@@ -88,7 +108,7 @@
     <body>
         <!-- Blackout Screen -->
         <div id="loading-screen">
-            <div class="loader"></div>
+            <span class="loader"></span>
         </div>
 
         <div class="main-container">
