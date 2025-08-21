@@ -1321,6 +1321,9 @@ export class ProjectCard extends Card {
         
         if (!videoContainer || !thumbnail) return;
         
+        // Position play button relative to thumbnail image content
+        this.positionPlayButtonOnThumbnail(thumbnail, playButton);
+        
         const clickHandler = (event) => {
             // Prevent event bubbling to avoid closing the card
             event.stopPropagation();
@@ -1349,6 +1352,89 @@ export class ProjectCard extends Card {
         
         if (thumbnail) thumbnail.addEventListener('touchend', touchHandler);
         if (playButton) playButton.addEventListener('touchend', touchHandler);
+        
+        // Reposition play button when window is resized or image loads
+        if (thumbnail && playButton) {
+            const repositionHandler = () => this.positionPlayButtonOnThumbnail(thumbnail, playButton);
+            thumbnail.addEventListener('load', repositionHandler);
+            window.addEventListener('resize', repositionHandler);
+        }
+    }
+
+    /**
+     * Position play button relative to the actual thumbnail image content
+     * @param {HTMLElement} thumbnail - The thumbnail image element
+     * @param {HTMLElement} playButton - The play button element
+     */
+    positionPlayButtonOnThumbnail(thumbnail, playButton) {
+        if (!thumbnail || !playButton) return;
+        
+        // Wait for image to load if it hasn't already
+        const positionButton = () => {
+            const containerRect = thumbnail.getBoundingClientRect();
+            const containerStyle = window.getComputedStyle(thumbnail);
+            
+            // Get the natural dimensions of the image
+            const naturalWidth = thumbnail.naturalWidth;
+            const naturalHeight = thumbnail.naturalHeight;
+            
+            if (naturalWidth === 0 || naturalHeight === 0) {
+                // Image hasn't loaded yet, try again after a short delay
+                setTimeout(() => this.positionPlayButtonOnThumbnail(thumbnail, playButton), 100);
+                return;
+            }
+            
+            // Calculate the container dimensions (excluding padding/border)
+            const containerWidth = thumbnail.offsetWidth;
+            const containerHeight = thumbnail.offsetHeight;
+            
+            // Calculate the actual image display dimensions with object-fit: contain
+            const imageAspectRatio = naturalWidth / naturalHeight;
+            const containerAspectRatio = containerWidth / containerHeight;
+            
+            let imageDisplayWidth, imageDisplayHeight;
+            let imageOffsetX, imageOffsetY;
+            
+            if (imageAspectRatio > containerAspectRatio) {
+                // Image is wider than container ratio - limited by width
+                imageDisplayWidth = containerWidth;
+                imageDisplayHeight = containerWidth / imageAspectRatio;
+                imageOffsetX = 0;
+                imageOffsetY = (containerHeight - imageDisplayHeight) / 2;
+            } else {
+                // Image is taller than container ratio - limited by height
+                imageDisplayWidth = containerHeight * imageAspectRatio;
+                imageDisplayHeight = containerHeight;
+                imageOffsetX = (containerWidth - imageDisplayWidth) / 2;
+                imageOffsetY = 0;
+            }
+            
+            // Adjust offset based on object-position: left top
+            if (containerStyle.objectPosition && containerStyle.objectPosition.includes('left')) {
+                imageOffsetX = 0;
+            }
+            if (containerStyle.objectPosition && containerStyle.objectPosition.includes('top')) {
+                imageOffsetY = 0;
+            }
+            
+            // Position the play button at the center of the actual image content
+            const centerX = imageOffsetX + (imageDisplayWidth / 2);
+            const centerY = imageOffsetY + (imageDisplayHeight / 2);
+            
+            // Set the position using percentage for responsive behavior
+            const leftPercent = (centerX / containerWidth) * 100;
+            const topPercent = (centerY / containerHeight) * 100;
+            
+            playButton.style.left = `${leftPercent}%`;
+            playButton.style.top = `${topPercent}%`;
+            playButton.style.transform = 'translate(-50%, -50%)';
+        };
+        
+        if (thumbnail.complete && thumbnail.naturalWidth > 0) {
+            positionButton();
+        } else {
+            thumbnail.addEventListener('load', positionButton, { once: true });
+        }
     }
 
     /**

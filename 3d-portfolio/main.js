@@ -212,7 +212,7 @@ async function threeInit() {
     envMesh = new THREE.Mesh(
         
         // Option 1: Subdivided Cube (current - more faces than original)
-        // new THREE.BoxGeometry(1000, 1000, 1000, 20, 20, 20), // 20x20x20 subdivision
+        new THREE.BoxGeometry(1000, 1000, 1000, 10, 10, 10), // 20x20x20 subdivision
         
         // Option 2: Sphere (smoothest, most faces)
         // new THREE.SphereGeometry(700, 64, 32), // radius, widthSegments, heightSegments
@@ -224,7 +224,7 @@ async function threeInit() {
         // new THREE.CylinderGeometry(1000, 1000, 1000, 32, 20), // topRadius, bottomRadius, height, radialSegments, heightSegments
         
         // Option 5: Dodecahedron (12-sided, unique look)
-        new THREE.DodecahedronGeometry(700, 2), // radius, subdivision_level (0-3)
+        // new THREE.DodecahedronGeometry(700, 2), // radius, subdivision_level (0-3)
         
         new THREE.ShaderMaterial({
             uniforms: bgShader.uniforms,

@@ -6,10 +6,7 @@
         "categories": ["Installation", "Interaction", "Realtime"],
         "client": "ECAL",
         "content": {
-            "media": [
-                "/projects/Agora_Installation/agora_installation (1080p).mp4",
-                "/projects/Agora_Installation/Agora_Cover.webp"
-            ],
+            "media": ["/projects/Agora_Installation/agora_installation (1080p).mp4", "/projects/Agora_Installation/Agora_Cover.webp"],
             "description": [
                 {
                     "type": "paragraph",
@@ -25,9 +22,7 @@
         "categories": ["Interaction Design", "Interface Design", "Research"],
         "client": "Random Studio",
         "content": {
-            "media": [
-                "/projects/Random_Studio/Apple/Apple_Cover.png"
-            ],
+            "media": ["/projects/Random_Studio/Apple/Apple_Cover.png"],
             "description": [
                 {
                     "type": "paragraph",
@@ -58,7 +53,7 @@
                 },
                 {
                     "type": "paragraph",
-                    "html": "<p>The video features some highlights of the process. I did the 3D explorations, shooting and editing of the video as well as the sound design.    </p>"
+                    "html": "<p>This video features highlights of the process. I made the 3D animations featured in the various prototypes, shooting and editing of the video as well as the sound design.</p>"
                 }
             ]
         }
@@ -94,7 +89,7 @@
         "categories": ["Interaction", "Experience Design", "Sound Design"],
         "client": "Random Studio",
         "content": {
-            "media": ["/projects/Random_Studio/Glossier/Glossier_Cover.webp", "/projects/Random_Studio/Glossier/Glossier Edit.mp4"],
+            "media": ["/projects/Random_Studio/Glossier/Glossier Edit.mp4", "/projects/Random_Studio/Glossier/Glossier_Cover.webp"],
             "description": [
                 {
                     "type": "paragraph",
@@ -127,11 +122,11 @@
             "description": [
                 {
                     "type": "paragraph",
-                    "html": "<p>I programmed <em>SELF DE / CON / RE STRUCT</em>, a kinetic installation conceived by <a href='https://www.kimwinder.com/' class='external-link'>Kim Winder</a>, which was exhibited at BIG ART, Amsterdam. The work explores the tension between fragmentation and transformation—breaking and reassembling self-portraits in real time. Through generative code and physical movement, the installation invites viewers to engage with shifting identities and the beauty found in imperfection.</p>"
+                    "html": "<p><em>SELF DE / CON / RE STRUCT</em> is a kinetic installation conceived by <a href='https://www.kimwinder.com/' class='external-link'>Kim Winder</a>, which was exhibited at BIG ART, Amsterdam. The work explores the tension between fragmentation and transformation—breaking and reassembling self-portraits in real time. Through generative code and physical movement, the installation invites viewers to engage with shifting identities and the beauty found in imperfection.</p>"
                 },
                 {
                     "type": "paragraph",
-                    "html": "<p>My role focused on developing the interactive system that deconstructs and reconstructs the visuals, enabling the piece to respond dynamically to its own internal rhythms</p>"
+                    "html": "<p>My role was to program the installation which is powered by an Arduino</p>"
                 },
                 {
                     "type": "paragraph",
@@ -253,10 +248,7 @@
         "categories": ["Interaction", "Electronics, Code", "Graphic Design"],
         "client": "ECAL",
         "content": {
-            "media": [
-                "/project/Scroll/Physical_Scrollbar.mp4",
-                "/projects/Scroll/Scroll_Cover.webp"
-            ],
+            "media": ["/project/Scroll/Physical_Scrollbar.mp4", "/projects/Scroll/Scroll_Cover.webp"],
             "description": [
                 {
                     "type": "paragraph",
@@ -366,9 +358,7 @@
         "categories": ["Creative Coding"],
         "client": "ECAL",
         "content": {
-            "media": [
-                "/projects/Zach_Workshop/zach_lieberman_of_workshop_compilation (720p).mp4"
-            ],
+            "media": ["/projects/Zach_Workshop/zach_lieberman_of_workshop_compilation (720p).mp4", "/projects/Zach_Workshop/Zach_Cover.webp"],
             "description": [
                 {
                     "type": "paragraph",
