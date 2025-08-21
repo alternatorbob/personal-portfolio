@@ -75,10 +75,6 @@ export function isWebGLAvailable() {
     return isAvailable;
 }
 
-function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-}
-
 export // Helper function to detect mobile devices
 function isMobileDevice() {
     const mobileDetect =
@@ -103,33 +99,6 @@ export function findObjectById(objectsArray, id) {
 }
 
 function createEnvironment(scene) {
-    // Load the 2D image as a texture
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load("/assets/textures/hdr/28.03.2023_fade_background.jpg");
-    const fadeBg = loader.load("/assets/textures/hdr/28.03.2023_fade_background_S.jpg", (texture) => {
-        scene.background = texture;
-    });
-
-    // Camera orbit parameters
-    const cameraOrbit = {
-        initialPosition: null,
-        initialTarget: null,
-        currentOffset: new THREE.Vector3(0, 0, 0),
-        positionOffset: new THREE.Vector3(0, 0, 0),
-        velocity: new THREE.Vector3(0, 0, 0),
-        positionVelocity: new THREE.Vector3(0, 0, 0),
-        maxOffset: Math.PI / 4,
-        maxPositionOffset: 50.0,
-        followStrength: 0.025,
-        positionFollowStrength: 0.02,
-        inertia: 0.95,
-        returnStrength: 0.045,
-        dampingFactor: 0.92,
-        isMouseDown: false,
-        lastRotationVelocity: new THREE.Vector3(0, 0, 0),
-        returnToCenter: false,
-    };
-
     // Update camera position - camera stays static, no connection to sphere rotation
     function updateCameraRotation(camera, sphereRotationVelocity, isMouseDown) {
         // Camera remains in its initial position - no movement based on sphere rotation
@@ -164,7 +133,7 @@ export async function loadProjects() {
     }
 }
 
-export { getRandomInt, createEnvironment };
+export { createEnvironment };
 
 /**
  * Detect when Scto Grotesk fonts are loaded and apply larger typography

@@ -2,18 +2,10 @@ import "./css/style.css";
 import "./css/global_styles.css";
 import "./css/mobile.css";
 import * as THREE from "three";
-import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 import { dragInit, updateCubesForSphereRotation } from "./js/dragControl";
-import { addProjects, cubes } from "./js/addProjects";
-import { createEnvironment, isRendering, pauseRenderer, resumeRenderer, easeInOutCubic, loadProjects, detectFontLoading } from "./js/utils";
+import { addProjects } from "./js/addProjects";
+import { isRendering, easeInOutCubic, loadProjects, detectFontLoading } from "./js/utils";
 import { uiInit } from "./js/ui";
-import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
-import { AfterimagePass } from "three/examples/jsm/postprocessing/AfterimagePass.js";
-import { SMAAPass } from "three/examples/jsm/postprocessing/SMAAPass.js";
-import { VignetteShader } from "three/addons/shaders/VignetteShader.js";
-import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 
 // Don't show content immediately - wait for loading to complete
 
@@ -22,13 +14,10 @@ const mainContainer = document.querySelector(".main-container");
 export let wasSelected = false;
 
 let camera, scene, renderer;
-let composer, renderPass, bloomPass, afterimagePass;
 let sphere;
 
 const camFar = 750;
 export const sphereRadius = window.innerWidth < 768 ? 4.5 : 3.75;
-export const numCubes = 10;
-
 // Add original scale reference for spring effect
 export let originalSphereScale = 1.0;
 export let envMesh; // Make environment mesh accessible globally
@@ -40,11 +29,7 @@ let transitionInProgress = false;
 let transitionStartTime = 0;
 const TRANSITION_DURATION = 720; // 1 second transition
 
-const clock = new THREE.Clock();
-export let intersectionTime = 0;
-
 let mouse = new THREE.Vector2();
-let click = new THREE.Vector2();
 
 const raycaster = new THREE.Raycaster();
 let cubeCamera, cubeRenderTarget;
@@ -310,35 +295,7 @@ async function threeInit() {
     dragInit();
     uiInit(projects);
 
-    // // Setup post-processing
-    // composer = new EffectComposer(
-    //     renderer,
-    //     new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
-    //         minFilter: THREE.LinearFilter,
-    //         magFilter: THREE.LinearFilter,
-    //         format: THREE.RGBAFormat,
-    //         encoding: THREE.sRGBEncoding,
-    //         samples: 4,
-    //     })
-    // );
 
-    // renderPass = new RenderPass(scene, camera);
-    // composer.addPass(renderPass);
-
-    // // Add SMAA pass
-    // const smaaPass = new SMAAPass();
-    // composer.addPass(smaaPass);
-
-    // bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.08, 0.85, 0.95);
-    // bloomPass.threshold = 0.85;
-    // bloomPass.radius = 0.85;
-    // bloomPass.strength = 0.08;
-    // composer.addPass(bloomPass);
-
-    // afterimagePass = new AfterimagePass(0.15);
-    // composer.addPass(afterimagePass);
-
-    // composer.addPass(effectVignette);
     // Mark as initialized after successful setup
     isInitialized = true;
     checkLoadingComplete();
@@ -391,11 +348,6 @@ function animate(msTime) {
     // Update cube positions to follow sphere rotation
     updateCubesForSphereRotation();
 
-    // Render with post-processing
-    // if (composer) {
-    //     composer.render();
-    // }
-
     renderer.render(scene, camera);
 }
 
@@ -438,8 +390,6 @@ function onWindowResized() {
 
     renderer.setSize(width, height);
     renderer.setPixelRatio(pixelRatio);
-    // composer.setSize(width, height);
-    // composer.setPixelRatio(pixelRatio);
 }
 
 // Add touch event listeners

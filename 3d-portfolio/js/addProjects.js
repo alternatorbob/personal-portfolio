@@ -1,13 +1,8 @@
 import * as THREE from "three";
-import {
-    CSS3DRenderer,
-    CSS3DObject,
-} from "three/examples/jsm/renderers/CSS3DRenderer.js";
-import { camera, scene, sphere, sphereRadius } from "../main";
+import { camera, scene, sphere } from "../main";
 import { detectMediaType } from "./utils.js";
 
 export let cubes = [];
-export const distanceCoeff = 2000;
 
 // Store original dimensions for each cube
 export const cubeOriginalDimensions = new Map();
