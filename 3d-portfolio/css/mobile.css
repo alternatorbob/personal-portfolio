@@ -311,4 +311,8 @@
     .about-card-description > div:last-child {
         margin-bottom: 0 !important;
     }
+
+    #about-button:hover {
+        opacity: 1 !important;
+    }
 }

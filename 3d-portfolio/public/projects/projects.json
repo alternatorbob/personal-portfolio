@@ -192,7 +192,7 @@
         "client": "ECAL",
         "content": {
             "media": [
-                "/projects/Physical_Sequencer/Physical Sequencer on Vimeo.mp4",
+                "/projects/Physical_Sequencer/physical_sequencer_on_vimeo (720p).mp4",
                 "/projects/Physical_Sequencer/Sequencer_1.webp",
                 "/projects/Physical_Sequencer/Sequencer_2.webp",
                 "/projects/Physical_Sequencer/Sequencer_3.webp",
@@ -216,10 +216,10 @@
         "content": {
             "media": [
                 "/projects/FULCRUM/FULCRUM - Projects - ECAL.mp4",
-                "/projects/FULCRUM/FULCRUM_1.jpg",
                 "/projects/FULCRUM/FULCRUM_2.webp",
                 "/projects/FULCRUM/FULCRUM_3.webp",
-                "/projects/FULCRUM/FULCRUM_4.webp"
+                "/projects/FULCRUM/FULCRUM_4.webp",
+                "/projects/FULCRUM/FULCRUM_1.webp"
             ],
             "description": [
                 {

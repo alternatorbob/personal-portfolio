@@ -15,8 +15,6 @@ export function setIndexStateForProjectOpening() {
     return wasIndexOpenWhenProjectOpened;
 }
 
-
-
 export function uiInit(projects) {
     // Initialize sortedProjects with projects array
     sortedProjects = [...projects];
@@ -62,20 +60,19 @@ export function uiInit(projects) {
             const projectCards = document.querySelectorAll(".project-card");
 
             // Check if any project card is currently open
-            const hasOpenProjectCard = projectCards.length > 0 && 
-                Array.from(projectCards).some(card => card.classList.contains("show"));
+            const hasOpenProjectCard = projectCards.length > 0 && Array.from(projectCards).some((card) => card.classList.contains("show"));
 
             // Only close index mode if no project card is open
             if (viewToggle && viewToggle.classList.contains("active") && !hasOpenProjectCard) {
                 viewToggle.classList.remove("active");
                 if (indexView) indexView.classList.remove("active");
                 if (threeCanvas) threeCanvas.style.pointerEvents = "auto";
-                
+
                 // Make sure to handle the blur div properly
                 if (blur) {
                     blur.classList.add("hide");
                 }
-                
+
                 // Resume rendering
                 resumeRenderer();
             }
@@ -198,9 +195,9 @@ export function createAboutPage(container) {
         content: aboutContent,
         onClose: () => {
             uiSwitchState("3d");
-        }
+        },
     });
-    
+
     return aboutCard.render();
 }
 
@@ -262,9 +259,9 @@ export function uiSwitchState(state) {
         if (blur) {
             blur.classList.add("hide");
         }
-        
+
         // Close any open cards
-        projectCards.forEach(card => {
+        projectCards.forEach((card) => {
             if (card.classList.contains("show")) {
                 // Find the close button and click it
                 const closeButton = card.querySelector(".button-close");
@@ -301,13 +298,11 @@ export function addProjectCardToPage(projectId, container) {
             } else {
                 uiSwitchState("3d");
             }
-        }
+        },
     });
-    
+
     return projectCard.render();
 }
-
-
 
 function populateIndexView() {
     const gridContainer = document.querySelector(".index-view-grid");
@@ -372,11 +367,12 @@ function populateIndexView() {
         // Add hover events for preview (skip on mobile devices)
         if (previewContainer && previewImage && project.content.media && project.content.media.length > 0) {
             // Find the first image in the media array (skip iframes/videos)
-            const firstImage = project.content.media.find(item => 
-                typeof item === 'string' && 
-                (item.endsWith('.webp') || item.endsWith('.jpg') || item.endsWith('.jpeg') || item.endsWith('.png'))
+            const firstImage = project.content.media.find(
+                (item) =>
+                    typeof item === "string" &&
+                    (item.endsWith(".webp") || item.endsWith(".jpg") || item.endsWith(".jpeg") || item.endsWith(".png"))
             );
-            
+
             if (firstImage) {
                 gridItem.addEventListener("mouseenter", (e) => {
                     previewImage.src = firstImage;
@@ -457,7 +453,7 @@ function initIndexView() {
 
     // Add resize listener to update index view when switching between mobile and desktop
     let currentIsMobile = window.innerWidth <= 768;
-    window.addEventListener('resize', () => {
+    window.addEventListener("resize", () => {
         const newIsMobile = window.innerWidth <= 768;
         if (newIsMobile !== currentIsMobile) {
             currentIsMobile = newIsMobile;
@@ -493,3 +489,4 @@ if (isMobileDevice()) {
         navigator.vibrate(200);
     }
 }
+
