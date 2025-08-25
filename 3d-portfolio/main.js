@@ -4,7 +4,7 @@ import "./css/mobile.css";
 import * as THREE from "three";
 import { dragInit, updateCubesForSphereRotation } from "./js/dragControl";
 import { addProjects } from "./js/addProjects";
-import { isRendering, easeInOutCubic, loadProjects, detectFontLoading } from "./js/utils";
+import { isRendering, easeInOutCubic, loadProjects, detectFontLoading, isMobileDevice } from "./js/utils";
 import { uiInit } from "./js/ui";
 
 // Don't show content immediately - wait for loading to complete
@@ -137,10 +137,10 @@ async function threeInit() {
     const blurElement = document.getElementById("blur");
     const mainContainer = document.querySelector(".main-container");
 
-    if (blurElement && mainContainer) {
-        blurElement.parentNode.removeChild(blurElement);
-        mainContainer.parentNode.insertBefore(blurElement, mainContainer);
-    }
+    // if (blurElement && mainContainer) {
+    //     blurElement.parentNode.removeChild(blurElement);
+    //     mainContainer.parentNode.insertBefore(blurElement, mainContainer);
+    // }
 
     window.addEventListener("resize", onWindowResized);
 
@@ -191,10 +191,10 @@ async function threeInit() {
     // Alternative geometries to try (comment/uncomment to test):
     envMesh = new THREE.Mesh(
         // Option 1: Subdivided Cube (current - more faces than original)
-        new THREE.BoxGeometry(1000, 1000, 1000, 10, 10, 10), // 20x20x20 subdivision
+        // new THREE.BoxGeometry(1000, 1000, 1000, 10, 10, 10), // 20x20x20 subdivision
 
         // Option 2: Sphere (smoothest, most faces)
-        // new THREE.SphereGeometry(700, 64, 32), // radius, widthSegments, heightSegments
+        new THREE.SphereGeometry(700, 64, 32), // radius, widthSegments, heightSegments
 
         // Option 3: Icosahedron (organic, spherical but faceted)
         // new THREE.IcosahedronGeometry(700, 4), // radius, subdivision_level (0-5)
@@ -277,13 +277,86 @@ async function threeInit() {
     scene.add(materialGroup);
     sphere = materialGroup;
 
-    // Add spacebar event listener
-    document.addEventListener("keydown", (e) => {
-        if (e.code === "Space" && !transitionInProgress) {
-            e.preventDefault();
-            toggleSphereMaterial();
+    // Helper function to get currently visible video in slideshow
+    function getCurrentVisibleVideo(slideshowContainer) {
+        // Find the slide group and current slide
+        const slideGroup = slideshowContainer.querySelector(".slide-group");
+        if (!slideGroup) return null;
+
+        // Get all slides
+        const slides = slideGroup.querySelectorAll(".slide");
+        if (!slides || slides.length === 0) return null;
+
+        // Calculate which slide is currently visible based on transform
+        const transform = slideGroup.style.transform;
+        let currentIndex = 0;
+
+        if (transform && transform.includes("translateX")) {
+            // Extract translateX value and calculate current slide index
+            const translateX = transform.match(/translateX\(([^)]+)\)/);
+            if (translateX && translateX[1]) {
+                const translateValue = parseFloat(translateX[1]);
+                // Each slide is 100% width, so index = abs(translateValue) / 100
+                currentIndex = Math.round(Math.abs(translateValue) / 100);
+            }
         }
-    });
+
+        // Ensure index is within bounds
+        currentIndex = Math.max(0, Math.min(currentIndex, slides.length - 1));
+
+        // Get the current slide and check for video
+        const currentSlide = slides[currentIndex];
+        if (!currentSlide) return null;
+
+        // Look for video element in current slide
+        const video = currentSlide.querySelector("video");
+
+        // Only return video if it's actually loaded and not hidden
+        if (video && video.readyState >= 2) {
+            // HAVE_CURRENT_DATA or higher
+            return video;
+        }
+
+        return null;
+    }
+
+    // Add spacebar event listener (only for desktop)
+    if (!isMobileDevice()) {
+        document.addEventListener("keydown", (e) => {
+            if (e.code === "Space") {
+                e.preventDefault();
+
+                // Check if a project card is currently open
+                const projectCard = document.querySelector(".project-card.show");
+
+                if (projectCard) {
+                    // Project is open - check for current video in slideshow
+                    const slideshowContainer = projectCard.querySelector(".slideshow-container");
+                    if (slideshowContainer) {
+                        const currentVideo = getCurrentVisibleVideo(slideshowContainer);
+                        if (currentVideo) {
+                            // Video found - toggle play/pause
+                            if (currentVideo.paused) {
+                                currentVideo.play().catch((error) => {
+                                    console.log("Video play failed:", error);
+                                });
+                            } else {
+                                currentVideo.pause();
+                            }
+                            return; // Don't toggle sphere material
+                        }
+                    }
+                    // Project is open but no video playing - don't affect sphere
+                    return;
+                }
+
+                // No project open - toggle sphere material if not in transition
+                if (!transitionInProgress) {
+                    toggleSphereMaterial();
+                }
+            }
+        });
+    }
 
     // Initial cube camera update
     cubeCamera.position.copy(sphere.position);
@@ -294,7 +367,6 @@ async function threeInit() {
     addProjects(projects);
     dragInit();
     uiInit(projects);
-
 
     // Mark as initialized after successful setup
     isInitialized = true;
@@ -392,19 +464,7 @@ function onWindowResized() {
     renderer.setPixelRatio(pixelRatio);
 }
 
-// Add touch event listeners
-document.addEventListener(
-    "touchmove",
-    function (event) {
-        event.preventDefault();
-        const touch = event.touches[0];
-        mouse.x = touch.clientX / window.innerWidth - 0.5;
-        mouse.y = touch.clientY / window.innerHeight - 0.5;
-    },
-    { passive: false }
-);
-
-// Remove the global touchstart event listener and onTouchStart function
+// Touch events are now handled by dragControl.js for better event management
 
 export { camera, scene, renderer, sphere };
 

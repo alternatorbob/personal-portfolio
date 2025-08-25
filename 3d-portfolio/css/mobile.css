@@ -105,6 +105,8 @@
     #blur.hide {
         opacity: 0 !important;
         visibility: hidden !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
 
     /* ===== PROJECT GALLERY MOBILE ===== */
@@ -179,8 +181,6 @@
         pointer-events: none;
         border-radius: 0 !important;
     }
-
-
 
     .slide video {
         width: 100% !important;
@@ -308,5 +308,13 @@
 
     #about-button:hover {
         opacity: 1 !important;
+    }
+
+    .index-view-grid {
+        grid-template-columns: 4fr 1fr;
+    }
+
+    .index-view-preview {
+        display: none;
     }
 }

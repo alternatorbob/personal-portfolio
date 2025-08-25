@@ -1,4 +1,4 @@
-import { pauseRenderer, resumeRenderer, detectMediaType } from "./utils";
+import { pauseRenderer, resumeRenderer, detectMediaType, isMobileDevice } from "./utils";
 import { reverseSelected, wasSelected } from "../main";
 import { disableCanvasInteractions, enableCanvasInteractions } from "./dragControl";
 
@@ -340,6 +340,12 @@ export class AboutCard extends Card {
                 },
             ],
         };
+
+        // Touch/swipe handling for mobile
+        this.cardTouchStartY = 0;
+        this.cardTouchStartX = 0;
+        this.isSwipingDown = false;
+        this.minSwipeDistance = 50;
     }
 
     /**
@@ -417,6 +423,163 @@ export class AboutCard extends Card {
 
         return card;
     }
+
+    /**
+     * Override the base render method to set up touch handling after rendering
+     */
+    render() {
+        // Call the parent render method first
+        const result = super.render();
+        
+        // Set up touch handling only on mobile devices
+        if (this.element && isMobileDevice()) {
+            // Use a small delay to ensure DOM is fully ready
+            setTimeout(() => {
+                this.setupAboutCardTouchHandling();
+            }, 50);
+        }
+        
+        return result;
+    }
+
+    /**
+     * Set up touch/swipe handling for about card closing
+     */
+    setupAboutCardTouchHandling() {
+        if (!this.element) {
+            console.warn("AboutCard element not yet created, skipping touch handling setup");
+            return;
+        }
+
+        // Touch handlers for entire card (vertical swipes for closing)
+        this.element.addEventListener("touchstart", (e) => {
+            this.handleCardTouchStart(e);
+        }, { passive: true });
+
+        this.element.addEventListener("touchmove", (e) => {
+            this.handleCardTouchMove(e);
+        }, { passive: false });
+
+        this.element.addEventListener("touchend", (e) => {
+            this.handleCardTouchEnd(e);
+        }, { passive: true });
+    }
+
+    /**
+     * Handle touch start event for card (vertical swipes for closing)
+     * @param {TouchEvent} e - Touch event
+     */
+    handleCardTouchStart(e) {
+        try {
+            if (!e.touches || e.touches.length === 0) return;
+            
+            // Store touch position for card-level swipe detection
+            this.cardTouchStartY = e.touches[0].clientY;
+            this.cardTouchStartX = e.touches[0].clientX;
+            this.isSwipingDown = false;
+        } catch (error) {
+            console.warn("Error handling about card touch start:", error);
+        }
+    }
+
+    /**
+     * Handle touch move event for card (vertical swipes for closing)
+     * @param {TouchEvent} e - Touch event
+     */
+    handleCardTouchMove(e) {
+        try {
+            if (!this.cardTouchStartY || !this.cardTouchStartX || !e.touches || e.touches.length === 0) return;
+
+            const currentY = e.touches[0].clientY;
+            const currentX = e.touches[0].clientX;
+            
+            const deltaY = currentY - this.cardTouchStartY;
+            const deltaX = Math.abs(currentX - this.cardTouchStartX);
+
+            // Check if this is a vertical swipe down (more vertical than horizontal movement)
+            if (Math.abs(deltaY) > deltaX && deltaY > 20) {
+                this.isSwipingDown = true;
+                
+                // Create visual feedback for swipe down
+                const cardElement = this.element;
+                if (cardElement && deltaY > 0) {
+                    // Only allow downward swipes
+                    const swipeProgress = Math.min(deltaY / 150, 1); // Normalize to 0-1 over 150px
+                    
+                    // Apply transform and opacity changes
+                    cardElement.style.transition = "none";
+                    cardElement.style.transform = `translate(-50%, -50%) translateY(${deltaY * 0.5}px)`;
+                    cardElement.style.opacity = `${1 - (swipeProgress * 0.3)}`; // Fade slightly
+                    
+                    // Prevent default to avoid page scrolling during swipe
+                    e.preventDefault();
+                }
+            }
+        } catch (error) {
+            console.warn("Error handling about card touch move:", error);
+        }
+    }
+
+    /**
+     * Handle touch end event for card (vertical swipes for closing)
+     * @param {TouchEvent} e - Touch event
+     */
+    handleCardTouchEnd(e) {
+        try {
+            if (!this.isSwipingDown) {
+                // Reset card position if no swipe was detected
+                this.resetAboutCardPosition();
+                return;
+            }
+
+            const deltaY = (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : 0) - this.cardTouchStartY;
+
+            // Check if swipe down distance is sufficient to close the card
+            if (deltaY > this.minSwipeDistance) {
+                // Close the card
+                this.close();
+            } else {
+                // Swipe not sufficient, animate back to original position
+                this.resetAboutCardPosition();
+            }
+
+            // Reset touch state
+            this.cardTouchStartY = 0;
+            this.cardTouchStartX = 0;
+            this.isSwipingDown = false;
+
+        } catch (error) {
+            console.warn("Error handling about card touch end:", error);
+            // Reset touch state and card position on error
+            this.cardTouchStartY = 0;
+            this.cardTouchStartX = 0;
+            this.isSwipingDown = false;
+            this.resetAboutCardPosition();
+        }
+    }
+
+    /**
+     * Reset about card position to original state
+     */
+    resetAboutCardPosition() {
+        try {
+            const cardElement = this.element;
+            if (cardElement) {
+                cardElement.style.transition = "transform 0.3s ease-out, opacity 0.3s ease-out";
+                cardElement.style.transform = "translate(-50%, -50%)";
+                cardElement.style.opacity = "1";
+                
+                // Clear transition after animation completes
+                setTimeout(() => {
+                    if (cardElement) {
+                        cardElement.style.transition = "";
+                    }
+                }, 300);
+            }
+        } catch (error) {
+            console.warn("Error resetting about card position:", error);
+        }
+    }
 }
 
 /**
@@ -451,6 +614,9 @@ export class ProjectCard extends Card {
         this.touchEndY = 0;
         this.minSwipeDistance = 50; // Minimum distance for a swipe
         this.isSwiping = false;
+        this.isSwipingDown = false; // Track vertical swipe for card closing
+        this.cardTouchStartY = 0;
+        this.cardTouchStartX = 0;
     }
 
     /**
@@ -846,7 +1012,7 @@ export class ProjectCard extends Card {
     }
 
     /**
-     * Set up touch/swipe handling for mobile gallery
+     * Set up touch/swipe handling for mobile gallery and card closing
      */
     setupTouchHandling() {
         if (!this.element) {
@@ -855,29 +1021,40 @@ export class ProjectCard extends Card {
         }
         
         const slideshowContainer = this.element.querySelector(".slideshow-container");
-        if (!slideshowContainer) return;
+        if (slideshowContainer) {
+            // Touch handlers for slideshow (horizontal swipes)
+            slideshowContainer.addEventListener("touchstart", (e) => {
+                this.handleSlideshowTouchStart(e);
+            }, { passive: true });
 
-        // Touch start event
-        slideshowContainer.addEventListener("touchstart", (e) => {
-            this.handleTouchStart(e);
+            slideshowContainer.addEventListener("touchmove", (e) => {
+                this.handleSlideshowTouchMove(e);
+            }, { passive: false });
+
+            slideshowContainer.addEventListener("touchend", (e) => {
+                this.handleSlideshowTouchEnd(e);
+            }, { passive: true });
+        }
+
+        // Touch handlers for entire card (vertical swipes for closing)
+        this.element.addEventListener("touchstart", (e) => {
+            this.handleCardTouchStart(e);
         }, { passive: true });
 
-        // Touch move event
-        slideshowContainer.addEventListener("touchmove", (e) => {
-            this.handleTouchMove(e);
+        this.element.addEventListener("touchmove", (e) => {
+            this.handleCardTouchMove(e);
         }, { passive: false });
 
-        // Touch end event
-        slideshowContainer.addEventListener("touchend", (e) => {
-            this.handleTouchEnd(e);
+        this.element.addEventListener("touchend", (e) => {
+            this.handleCardTouchEnd(e);
         }, { passive: true });
     }
 
     /**
-     * Handle touch start event
+     * Handle touch start event for slideshow (horizontal swipes)
      * @param {TouchEvent} e - Touch event
      */
-    handleTouchStart(e) {
+    handleSlideshowTouchStart(e) {
         try {
             if (!e.touches || e.touches.length === 0) return;
             
@@ -885,15 +1062,32 @@ export class ProjectCard extends Card {
             this.touchStartY = e.touches[0].clientY;
             this.isSwiping = false;
         } catch (error) {
-            console.warn("Error handling touch start:", error);
+            console.warn("Error handling slideshow touch start:", error);
         }
     }
 
     /**
-     * Handle touch move event
+     * Handle touch start event for card (vertical swipes for closing)
      * @param {TouchEvent} e - Touch event
      */
-    handleTouchMove(e) {
+    handleCardTouchStart(e) {
+        try {
+            if (!e.touches || e.touches.length === 0) return;
+            
+            // Store touch position for card-level swipe detection
+            this.cardTouchStartY = e.touches[0].clientY;
+            this.cardTouchStartX = e.touches[0].clientX;
+            this.isSwipingDown = false;
+        } catch (error) {
+            console.warn("Error handling card touch start:", error);
+        }
+    }
+
+    /**
+     * Handle touch move event for slideshow (horizontal swipes)
+     * @param {TouchEvent} e - Touch event
+     */
+    handleSlideshowTouchMove(e) {
         try {
             if (!this.touchStartX || !this.touchStartY || !e.touches || e.touches.length === 0) return;
 
@@ -919,15 +1113,53 @@ export class ProjectCard extends Card {
                 e.preventDefault();
             }
         } catch (error) {
-            console.warn("Error handling touch move:", error);
+            console.warn("Error handling slideshow touch move:", error);
         }
     }
 
     /**
-     * Handle touch end event
+     * Handle touch move event for card (vertical swipes for closing)
      * @param {TouchEvent} e - Touch event
      */
-    handleTouchEnd(e) {
+    handleCardTouchMove(e) {
+        try {
+            if (!this.cardTouchStartY || !this.cardTouchStartX || !e.touches || e.touches.length === 0) return;
+
+            const currentY = e.touches[0].clientY;
+            const currentX = e.touches[0].clientX;
+            
+            const deltaY = currentY - this.cardTouchStartY;
+            const deltaX = Math.abs(currentX - this.cardTouchStartX);
+
+            // Check if this is a vertical swipe down (more vertical than horizontal movement)
+            if (Math.abs(deltaY) > deltaX && deltaY > 20) {
+                this.isSwipingDown = true;
+                
+                // Create visual feedback for swipe down
+                const cardElement = this.element;
+                if (cardElement && deltaY > 0) {
+                    // Only allow downward swipes
+                    const swipeProgress = Math.min(deltaY / 150, 1); // Normalize to 0-1 over 150px
+                    
+                    // Apply transform and opacity changes
+                    cardElement.style.transition = "none";
+                    cardElement.style.transform = `translateY(${deltaY * 0.5}px)`;
+                    cardElement.style.opacity = `${1 - (swipeProgress * 0.3)}`; // Fade slightly
+                    
+                    // Prevent default to avoid page scrolling during swipe
+                    e.preventDefault();
+                }
+            }
+        } catch (error) {
+            console.warn("Error handling card touch move:", error);
+        }
+    }
+
+    /**
+     * Handle touch end event for slideshow (horizontal swipes)
+     * @param {TouchEvent} e - Touch event
+     */
+    handleSlideshowTouchEnd(e) {
         try {
             if (!this.isSwiping) return;
 
@@ -961,13 +1193,74 @@ export class ProjectCard extends Card {
                 slideshowContainer.classList.remove("swiping");
             }
         } catch (error) {
-            console.warn("Error handling touch end:", error);
+            console.warn("Error handling slideshow touch end:", error);
             // Reset touch state on error
             this.touchStartX = 0;
             this.touchStartY = 0;
             this.touchEndX = 0;
             this.touchEndY = 0;
             this.isSwiping = false;
+        }
+    }
+
+    /**
+     * Handle touch end event for card (vertical swipes for closing)
+     * @param {TouchEvent} e - Touch event
+     */
+    handleCardTouchEnd(e) {
+        try {
+            if (!this.isSwipingDown) {
+                // Reset card position if no swipe was detected
+                this.resetCardPosition();
+                return;
+            }
+
+            const deltaY = (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : 0) - this.cardTouchStartY;
+
+            // Check if swipe down distance is sufficient to close the card
+            if (deltaY > this.minSwipeDistance) {
+                // Close the card
+                this.close();
+            } else {
+                // Swipe not sufficient, animate back to original position
+                this.resetCardPosition();
+            }
+
+            // Reset touch state
+            this.cardTouchStartY = 0;
+            this.cardTouchStartX = 0;
+            this.isSwipingDown = false;
+
+        } catch (error) {
+            console.warn("Error handling card touch end:", error);
+            // Reset touch state and card position on error
+            this.cardTouchStartY = 0;
+            this.cardTouchStartX = 0;
+            this.isSwipingDown = false;
+            this.resetCardPosition();
+        }
+    }
+
+    /**
+     * Reset card position to original state
+     */
+    resetCardPosition() {
+        try {
+            const cardElement = this.element;
+            if (cardElement) {
+                cardElement.style.transition = "transform 0.3s ease-out, opacity 0.3s ease-out";
+                cardElement.style.transform = "translateY(0)";
+                cardElement.style.opacity = "1";
+                
+                // Clear transition after animation completes
+                setTimeout(() => {
+                    if (cardElement) {
+                        cardElement.style.transition = "";
+                    }
+                }, 300);
+            }
+        } catch (error) {
+            console.warn("Error resetting card position:", error);
         }
     }
 
@@ -984,8 +1277,8 @@ export class ProjectCard extends Card {
         // Call the parent render method first
         const result = super.render();
         
-        // Set up touch handling after the element is created and attached to DOM
-        if (this.element) {
+        // Set up touch handling only on mobile devices
+        if (this.element && isMobileDevice()) {
             // Use a small delay to ensure DOM is fully ready
             setTimeout(() => {
                 this.setupTouchHandling();
@@ -1547,31 +1840,47 @@ export class ProjectCard extends Card {
 
 
     /**
-     * Set up keyboard navigation for the card
+     * Set up keyboard navigation for the card (only for desktop)
      */
     setupKeyboardNavigation() {
-        const keyHandler = (e) => {
-            if (e.key === "ArrowRight") {
-                this.showNextSlide();
-            }
-        };
+        // Only enable keyboard navigation on desktop
+        if (window.innerWidth > 768 && !('ontouchstart' in window)) {
+            const keyHandler = (e) => {
+                if (e.key === "ArrowRight") {
+                    this.showNextSlide();
+                }
+            };
 
-        document.addEventListener("keydown", keyHandler);
+            document.addEventListener("keydown", keyHandler);
 
-        // Store the handler for cleanup
-        this._keyboardHandler = keyHandler;
+            // Store the handler for cleanup
+            this._keyboardHandler = keyHandler;
 
-        // Make sure to clean up when the card is closed
-        const originalOnClose = this.onClose;
-        this.onClose = () => {
-            document.removeEventListener("keydown", this._keyboardHandler);
-            // Clean up intersection observer
-            if (this.intersectionObserver) {
-                this.intersectionObserver.disconnect();
-            }
+            // Make sure to clean up when the card is closed
+            const originalOnClose = this.onClose;
+            this.onClose = () => {
+                if (this._keyboardHandler) {
+                    document.removeEventListener("keydown", this._keyboardHandler);
+                }
+                // Clean up intersection observer
+                if (this.intersectionObserver) {
+                    this.intersectionObserver.disconnect();
+                }
 
-            if (originalOnClose) originalOnClose();
-        };
+                if (originalOnClose) originalOnClose();
+            };
+        } else {
+            // For mobile, just set up the cleanup without keyboard handler
+            const originalOnClose = this.onClose;
+            this.onClose = () => {
+                // Clean up intersection observer
+                if (this.intersectionObserver) {
+                    this.intersectionObserver.disconnect();
+                }
+
+                if (originalOnClose) originalOnClose();
+            };
+        }
     }
 
     /**

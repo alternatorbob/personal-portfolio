@@ -7,6 +7,7 @@ import { AboutCard, ProjectCard } from "./Components";
 let sortedProjects = [];
 let invertButton;
 let wasIndexOpenWhenProjectOpened = false; // Track index state when opening projects
+let wasIndexOpenWhenAboutOpened = false; // Track index state when opening about card
 
 // Helper function to check and set index state when opening projects
 export function setIndexStateForProjectOpening() {
@@ -15,9 +16,19 @@ export function setIndexStateForProjectOpening() {
     return wasIndexOpenWhenProjectOpened;
 }
 
+// Helper function to check and set index state when opening about card
+export function setIndexStateForAboutOpening() {
+    const indexView = document.querySelector(".index-view");
+    wasIndexOpenWhenAboutOpened = indexView && indexView.classList.contains("active");
+    return wasIndexOpenWhenAboutOpened;
+}
+
 export function uiInit(projects) {
     // Initialize sortedProjects with projects array
     sortedProjects = [...projects];
+
+    // Initialize blur with 3D view settings
+    initializeBlurProperties();
 
     // Initialize UI components
     initNavbar();
@@ -25,6 +36,7 @@ export function uiInit(projects) {
     initBottomNavbar();
     initIndexViewToggle();
     initIndexView();
+    initIndexViewTouchHandling();
 
     // Add name click handler
     const nameElement = document.getElementById("name");
@@ -46,38 +58,49 @@ export function uiInit(projects) {
         aboutButton.addEventListener("click", () => {
             pauseRenderer(); // Pause renderer when about button is clicked
 
+            // Track if index was open when about is opened
+            setIndexStateForAboutOpening();
+
             uiSwitchState("about");
         });
     }
 
-    // Add escape key handler
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-            const viewToggle = document.querySelector(".view-toggle");
-            const indexView = document.querySelector(".index-view");
-            const threeCanvas = document.querySelector(".three-canvas");
-            const blur = document.getElementById("blur");
-            const projectCards = document.querySelectorAll(".project-card");
+    // Add escape key handler (only for desktop)
+    if (!isMobileDevice()) {
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                const viewToggle = document.querySelector(".view-toggle");
+                const indexView = document.querySelector(".index-view");
+                const threeCanvas = document.querySelector(".three-canvas");
+                const blur = document.getElementById("blur");
+                const projectCards = document.querySelectorAll(".project-card");
+                const aboutCard = document.getElementById("about-card");
 
-            // Check if any project card is currently open
-            const hasOpenProjectCard = projectCards.length > 0 && Array.from(projectCards).some((card) => card.classList.contains("show"));
+                // Check if any project card is currently open
+                const hasOpenProjectCard = projectCards.length > 0 && Array.from(projectCards).some((card) => card.classList.contains("show"));
 
-            // Only close index mode if no project card is open
-            if (viewToggle && viewToggle.classList.contains("active") && !hasOpenProjectCard) {
-                viewToggle.classList.remove("active");
-                if (indexView) indexView.classList.remove("active");
-                if (threeCanvas) threeCanvas.style.pointerEvents = "auto";
+                // Check if about card is currently open
+                const hasOpenAboutCard = aboutCard && aboutCard.classList.contains("show");
 
-                // Make sure to handle the blur div properly
-                if (blur) {
-                    blur.classList.add("hide");
+                // Only close index mode if no project card or about card is open
+                if (viewToggle && viewToggle.classList.contains("active") && !hasOpenProjectCard && !hasOpenAboutCard) {
+                    viewToggle.classList.remove("active");
+                    if (indexView) indexView.classList.remove("active");
+                    if (threeCanvas) threeCanvas.style.pointerEvents = "auto";
+
+                    // Make sure to handle the blur div properly
+                    if (blur) {
+                        // Update blur properties back to full blur before hiding
+                        updateBlurProperties("full");
+                        blur.classList.add("hide");
+                    }
+
+                    // Resume rendering
+                    resumeRenderer();
                 }
-
-                // Resume rendering
-                resumeRenderer();
             }
-        }
-    });
+        });
+    }
 
     // Single event handler for intercepting mouse clicks in UI areas
     const interceptUIEvents = (e) => {
@@ -127,8 +150,8 @@ export function uiInit(projects) {
     };
 
     // Add event listeners for both mouse and touch events
-    document.addEventListener("mousedown", interceptUIEvents, true);
-    document.addEventListener("touchstart", interceptUIEvents, true);
+    document.addEventListener("mousedown", interceptUIEvents);
+    document.addEventListener("touchstart", interceptUIEvents);
 }
 
 function initNavbar() {
@@ -194,7 +217,13 @@ export function createAboutPage(container) {
         container: container,
         content: aboutContent,
         onClose: () => {
-            uiSwitchState("3d");
+            // If index was open when about was opened, return to index view
+            if (wasIndexOpenWhenAboutOpened) {
+                uiSwitchState("2d");
+                wasIndexOpenWhenAboutOpened = false; // Reset the flag
+            } else {
+                uiSwitchState("3d");
+            }
         },
     });
 
@@ -217,6 +246,12 @@ export function uiSwitchState(state) {
         if (!aboutCard) {
             createAboutPage(mainContainer);
         }
+        // Show blur for about card
+        if (blur) {
+            blur.classList.remove("hide");
+            // Update blur properties for about view (use full blur settings)
+            updateBlurProperties("full");
+        }
     } else if (state === "project") {
         pauseRenderer(); // Pause when project card is open
         // Project card view - keep three.js canvas visible and show blur
@@ -225,11 +260,13 @@ export function uiSwitchState(state) {
         }
         if (blur) {
             blur.classList.remove("hide");
+            // Update blur properties for project view (use full blur settings)
+            updateBlurProperties("full");
         }
         // Don't show index view or toggle state for individual projects
     } else if (state === "2d") {
         pauseRenderer(); // Pause when index view is active
-        // Index view - keep three.js canvas visible
+        // Index view - keep three.js canvas visible but NO blur
         if (threeCanvas) {
             threeCanvas.style.visibility = "visible";
         }
@@ -240,8 +277,9 @@ export function uiSwitchState(state) {
         if (viewToggle) {
             viewToggle.classList.add("active");
         }
+        // Keep blur hidden for index view - only show for about and projects
         if (blur) {
-            blur.classList.remove("hide");
+            blur.classList.add("hide");
         }
     } else if (state === "3d") {
         resumeRenderer(); // Resume renderer in 3D view
@@ -257,6 +295,8 @@ export function uiSwitchState(state) {
             viewToggle.classList.remove("active");
         }
         if (blur) {
+            // Update blur properties back to full blur before hiding
+            updateBlurProperties("full");
             blur.classList.add("hide");
         }
 
@@ -272,9 +312,6 @@ export function uiSwitchState(state) {
         });
     }
 }
-
-//dispatch mouseup event to stop sphere drag when project is open
-const event = new MouseEvent("mouseup", {});
 
 export function addProjectCardToPage(projectId, container) {
     // Check if there are already project cards open - prevent multiple cards
@@ -486,7 +523,6 @@ document.addEventListener("open-project", function (e) {
 
         // Similar to what happens when a cube is clicked
         uiSwitchState("project");
-        document.dispatchEvent(event);
         const card = addProjectCardToPage(projectId, mainContainer);
     }
 });
@@ -520,4 +556,190 @@ function preloadCoverImage(imagePath) {
 
 // Set to track preloaded cover images
 const preloadedCoverImages = new Set();
+
+// Touch handling variables for index view
+let indexTouchStartX = 0;
+let indexTouchStartY = 0;
+let isIndexSwiping = false;
+const indexMinSwipeDistance = 50;
+
+/**
+ * Initialize blur properties with 3D view settings
+ */
+function initializeBlurProperties() {
+    const blur = document.getElementById("blur");
+    if (!blur) return;
+
+    // Initialize with full blur settings (24px blur, 0.75 opacity for desktop, 15px blur, 0.65 opacity for mobile)
+    updateBlurProperties("full");
+}
+
+/**
+ * Update blur properties based on view state
+ * @param {string} blurType - Type of blur: "index" for light blur, "full" for full blur
+ */
+function updateBlurProperties(blurType) {
+    const blur = document.getElementById("blur");
+    if (!blur) return;
+
+    const isMobile = isMobileDevice();
+    
+    if (blurType === "index") {
+        // Index view - lighter blur
+        blur.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
+        blur.style.backdropFilter = "blur(3px)";
+        blur.style.webkitBackdropFilter = "blur(3px)"; // Safari support
+    } else if (blurType === "full") {
+        // About/Project cards - full blur (24px desktop, 15px mobile)
+        if (isMobile) {
+            blur.style.backgroundColor = "rgba(0, 0, 0, 0.65)";
+            blur.style.backdropFilter = "blur(15px)";
+            blur.style.webkitBackdropFilter = "blur(15px)";
+        } else {
+            blur.style.backgroundColor = "rgba(0, 0, 0, 0.75)";
+            blur.style.backdropFilter = "blur(24px)";
+            blur.style.webkitBackdropFilter = "blur(24px)";
+        }
+    }
+}
+
+/**
+ * Initialize touch handling for index view to enable swipe left to close
+ * Only initializes on mobile devices
+ */
+function initIndexViewTouchHandling() {
+    // Only set up touch handling on mobile devices
+    if (!isMobileDevice()) return;
+    
+    const indexView = document.querySelector(".index-view");
+    if (!indexView) return;
+
+    // Touch start event
+    indexView.addEventListener("touchstart", handleIndexTouchStart, { passive: true });
+
+    // Touch move event
+    indexView.addEventListener("touchmove", handleIndexTouchMove, { passive: false });
+
+    // Touch end event
+    indexView.addEventListener("touchend", handleIndexTouchEnd, { passive: true });
+}
+
+/**
+ * Handle touch start event for index view
+ * @param {TouchEvent} e - Touch event
+ */
+function handleIndexTouchStart(e) {
+    try {
+        if (!e.touches || e.touches.length === 0) return;
+        
+        indexTouchStartX = e.touches[0].clientX;
+        indexTouchStartY = e.touches[0].clientY;
+        isIndexSwiping = false;
+    } catch (error) {
+        console.warn("Error handling index touch start:", error);
+    }
+}
+
+/**
+ * Handle touch move event for index view
+ * @param {TouchEvent} e - Touch event
+ */
+function handleIndexTouchMove(e) {
+    try {
+        if (!indexTouchStartX || !indexTouchStartY || !e.touches || e.touches.length === 0) return;
+
+        const currentX = e.touches[0].clientX;
+        const currentY = e.touches[0].clientY;
+        
+        const deltaX = indexTouchStartX - currentX; // Positive for left swipe
+        const deltaY = Math.abs(currentY - indexTouchStartY);
+
+        // Check if this is a horizontal swipe left (more horizontal than vertical movement)
+        if (Math.abs(deltaX) > deltaY && deltaX > 20) {
+            isIndexSwiping = true;
+            
+            // Create visual feedback for swipe left
+            const indexView = document.querySelector(".index-view");
+            if (indexView && deltaX > 0) {
+                // Only allow leftward swipes
+                const swipeProgress = Math.min(deltaX / 200, 1); // Normalize to 0-1 over 200px
+                
+                // Apply transform and opacity changes
+                indexView.style.transition = "none";
+                indexView.style.transform = `translateX(-${deltaX * 0.3}px)`;
+                indexView.style.opacity = `${1 - (swipeProgress * 0.2)}`; // Fade slightly
+                
+                // Prevent default to avoid page scrolling during swipe
+                e.preventDefault();
+            }
+        }
+    } catch (error) {
+        console.warn("Error handling index touch move:", error);
+    }
+}
+
+/**
+ * Handle touch end event for index view
+ * @param {TouchEvent} e - Touch event
+ */
+function handleIndexTouchEnd(e) {
+    try {
+        if (!isIndexSwiping) {
+            // Reset index position if no swipe was detected
+            resetIndexPosition();
+            return;
+        }
+
+        const deltaX = indexTouchStartX - (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientX : indexTouchStartX);
+
+        // Check if swipe left distance is sufficient to close the index
+        if (deltaX > indexMinSwipeDistance) {
+            // Close the index view
+            uiSwitchState("3d");
+            const viewToggle = document.querySelector(".view-toggle");
+            if (viewToggle) {
+                viewToggle.textContent = "Index";
+            }
+        } else {
+            // Swipe not sufficient, animate back to original position
+            resetIndexPosition();
+        }
+
+        // Reset touch state
+        indexTouchStartX = 0;
+        indexTouchStartY = 0;
+        isIndexSwiping = false;
+
+    } catch (error) {
+        console.warn("Error handling index touch end:", error);
+        // Reset touch state and index position on error
+        indexTouchStartX = 0;
+        indexTouchStartY = 0;
+        isIndexSwiping = false;
+        resetIndexPosition();
+    }
+}
+
+/**
+ * Reset index view position to original state
+ */
+function resetIndexPosition() {
+    try {
+        const indexView = document.querySelector(".index-view");
+        if (indexView) {
+            indexView.style.transition = "transform 0.3s ease-out, opacity 0.3s ease-out";
+            indexView.style.transform = "translateX(0)";
+            indexView.style.opacity = "1";
+            
+            // Clear transition after animation completes
+            setTimeout(() => {
+                if (indexView) {
+                    indexView.style.transition = "";
+                }
+            }, 300);
+        }
+    } catch (error) {
+        console.warn("Error resetting index position:", error);
+    }
+}
 

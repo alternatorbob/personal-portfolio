@@ -304,9 +304,11 @@ export function dragInit() {
     // Start the spring animation
     animateSpring();
 
-    // Add keyboard event listeners
-    document.addEventListener('keydown', onKeyDown);
-    document.addEventListener('keyup', onKeyUp);
+    // Add keyboard event listeners (only for desktop)
+    if (!isMobile) {
+        document.addEventListener('keydown', onKeyDown);
+        document.addEventListener('keyup', onKeyUp);
+    }
 }
 
 // Function to disable canvas interactions
