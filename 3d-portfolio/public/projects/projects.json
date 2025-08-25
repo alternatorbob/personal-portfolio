@@ -6,7 +6,13 @@
         "categories": ["Installation", "Interaction", "Realtime"],
         "client": "ECAL",
         "content": {
-            "media": ["/projects/Agora_Installation/agora_installation (1080p).mp4", "/projects/Agora_Installation/Agora_Cover.webp"],
+            "cover": "/projects/Agora_Installation/Agora_Cover.webp",
+            "media": [
+                {
+                    "path": "/projects/Agora_Installation/agora_installation (1080p).mp4",
+                    "thumbnail": "/projects/Agora_Installation/Agora_Cover.webp"
+                }
+            ],
             "description": [
                 {
                     "type": "paragraph",
@@ -22,6 +28,7 @@
         "categories": ["Interaction Design", "Interface Design", "Research"],
         "client": "Random Studio",
         "content": {
+            "cover": "/projects/Random_Studio/Apple/Apple_Cover.png",
             "media": ["/projects/Random_Studio/Apple/Apple_Cover.png"],
             "description": [
                 {
@@ -42,9 +49,12 @@
         "categories": ["Interaction Design", "CGI", "Sound Design"],
         "client": "Random Studio",
         "content": {
+            "cover": "/projects/Random_Studio/Digital_Twin/Digital Twin Cover Photo.webp",
             "media": [
-                "/projects/Random_Studio/Digital_Twin/V7.3  Montage (Final Content).mp4",
-                "/projects/Random_Studio/Digital_Twin/Digital Twin Cover Photo.webp"
+                {
+                    "path": "/projects/Random_Studio/Digital_Twin/V7.3  Montage (Final Content).mp4",
+                    "thumbnail": "/projects/Random_Studio/Digital_Twin/Digital Twin Thumbnail.webp"
+                }
             ],
             "description": [
                 {
@@ -65,10 +75,17 @@
         "categories": ["Graphic Design", "Creative Coding", "Art Direction"],
         "client": "ECAL",
         "content": {
+            "cover": "/projects/ELPE/ELPE_1.webp",
             "media": [
-                "/projects/ELPE/elpe_animated_poster_trio (1080p).mp4",
-                "/projects/ELPE/elpe_logo_generator_demo (2160p).mp4",
                 "/projects/ELPE/ELPE_1.webp",
+                {
+                    "path": "/projects/ELPE/elpe_animated_poster_trio (1080p).mp4",
+                    "thumbnail": "/projects/ELPE/ELPE_Animated-Posters_Thumbnail.webp"
+                },
+                {
+                    "path": "/projects/ELPE/elpe_logo_generator_demo (2160p).mp4",
+                    "thumbnail": "/projects/ELPE/elpe_logo_generator_demo_Thumbnail.webp"
+                },
                 "/projects/ELPE/ELPE_2.webp",
                 "/projects/ELPE/ELPE_3.webp",
                 "/projects/ELPE/ELPE_4.webp",
@@ -89,7 +106,13 @@
         "categories": ["Interaction", "Experience Design", "Sound Design"],
         "client": "Random Studio",
         "content": {
-            "media": ["/projects/Random_Studio/Glossier/Glossier Edit.mp4", "/projects/Random_Studio/Glossier/Glossier_Cover.webp"],
+            "cover": "/projects/Random_Studio/Glossier/Glossier_Cover.webp",
+            "media": [
+                {
+                    "path": "/projects/Random_Studio/Glossier/Glossier Edit.mp4",
+                    "thumbnail": "/projects/Random_Studio/Glossier/Glossier_Thumbnail.webp"
+                }
+            ],
             "description": [
                 {
                     "type": "paragraph",
@@ -113,11 +136,14 @@
         "categories": ["Programming", "Installation"],
         "client": "Kim Winder",
         "content": {
+            "cover": "/projects/Freelance/Kim Winder SELFRECONDESTRUCT/Kim Installation Cover.webp",
             "media": [
-                "/projects/Freelance/Kim Winder SELFRECONDESTRUCT/Kim Installation Cover.webp",
+                {
+                    "path": "/projects/Freelance/Kim Winder SELFRECONDESTRUCT/self_de_con_re_struct_kim_winder (720p).mp4",
+                    "thumbnail": "/projects/Freelance/Kim Winder SELFRECONDESTRUCT/Kim-Installation_Thumbnail.webp"
+                },
                 "/projects/Freelance/Kim Winder SELFRECONDESTRUCT/1_BIG ART 2024_Photo Almicheal Fraay (@maikeljay)-49.webp",
-                "/projects/Freelance/Kim Winder SELFRECONDESTRUCT/KIMWINDER_SELF(108)_2024 COPY.webp",
-                "/projects/Freelance/Kim Winder SELFRECONDESTRUCT/SELF DE CON RE STRUCT Kim Winder.mp4"
+                "/projects/Freelance/Kim Winder SELFRECONDESTRUCT/KIMWINDER_SELF(108)_2024 COPY.webp"
             ],
             "description": [
                 {
@@ -152,9 +178,12 @@
         "categories": ["Interaction", "Electronics,  Code"],
         "client": "ECAL",
         "content": {
+            "cover": "/projects/MIDI_Clock/MIDI_Cover.webp",
             "media": [
-                "/projects/MIDI_Clock/midi_clock (1440p).mp4",
-                "/projects/MIDI_Clock/MIDI_Cover.webp",
+                {
+                    "path": "/projects/MIDI_Clock/midi_clock (1440p).mp4",
+                    "thumbnail": "/projects/MIDI_Clock/MIDI_Cover.webp"
+                },
                 "/projects/MIDI_Clock/MIDI_2.webp",
                 "/projects/MIDI_Clock/MIDI_3.webp",
                 "/projects/MIDI_Clock/MIDI_4.webp",
@@ -175,7 +204,8 @@
         "categories": ["Creative Direction", "Unity Development"],
         "client": "ECAL",
         "content": {
-            "media": ["/projects/Mindmaze/mindmaze.gif", "/projects/Mindmaze/Mindmaze_Cover.webp"],
+            "cover": "/projects/Mindmaze/Mindmaze_Cover.webp",
+            "media": ["/projects/Mindmaze/mindmaze.gif"],
             "description": [
                 {
                     "type": "paragraph",
@@ -191,8 +221,12 @@
         "categories": ["Interaction", "CAD", "Electronics, Code"],
         "client": "ECAL",
         "content": {
+            "cover": "/projects/Physical_Sequencer/Sequencer_1.webp",
             "media": [
-                "/projects/Physical_Sequencer/physical_sequencer_on_vimeo (720p).mp4",
+                {
+                    "path": "/projects/Physical_Sequencer/physical_sequencer_on_vimeo (720p).mp4",
+                    "thumbnail": "/projects/Physical_Sequencer/Physical-Sequencer_Thumbnail.webp"
+                },
                 "/projects/Physical_Sequencer/Sequencer_1.webp",
                 "/projects/Physical_Sequencer/Sequencer_2.webp",
                 "/projects/Physical_Sequencer/Sequencer_3.webp",
@@ -214,11 +248,14 @@
         "categories": ["Interaction", "Web Development", "Machine Learning"],
         "client": "ECAL",
         "content": {
+            "cover": "/projects/FULCRUM/FULCRUM_1.webp",
             "media": [
-                "/projects/FULCRUM/FULCRUM - Projects - ECAL.mp4",
-                "/projects/FULCRUM/FULCRUM_2.webp",
+                {
+                    "path": "/projects/FULCRUM/FULCRUM - Projects - ECAL.mp4",
+                    "thumbnail": "/projects/FULCRUM/FULCRUM_Video-Cover.webp"
+                },
                 "/projects/FULCRUM/FULCRUM_3.webp",
-                "/projects/FULCRUM/FULCRUM_4.webp",
+                "/projects/FULCRUM/FULCRUM_2.webp",
                 "/projects/FULCRUM/FULCRUM_1.webp"
             ],
             "description": [
@@ -248,7 +285,13 @@
         "categories": ["Interaction", "Electronics, Code", "Graphic Design"],
         "client": "ECAL",
         "content": {
-            "media": ["/project/Scroll/Physical_Scrollbar.mp4", "/projects/Scroll/Scroll_Cover.webp"],
+            "cover": "/projects/Scroll/Scroll_Cover.webp",
+            "media": [
+                {
+                    "path": "/project/Scroll/Physical_Scrollbar.mp4",
+                    "thumbnail": "/projects/Scroll/Physical-Scrollbar_Thumbnail.webp"
+                }
+            ],
             "description": [
                 {
                     "type": "paragraph",
@@ -264,9 +307,12 @@
         "categories": ["Web Design", "Web Development", "Photography"],
         "client": "ECAL",
         "content": {
+            "cover": "/projects/Self_Tracking/Self_Tracking_Cover.webp",
             "media": [
-                "/projects/Self_Tracking/self_tracking_click_through (1440p).mp4",
-                "/projects/Self_Tracking/Self_Tracking_Cover.webp"
+                {
+                    "path": "/projects/Self_Tracking/self_tracking_click_through (1440p).mp4",
+                    "thumbnail": "/projects/Self_Tracking/Self-Tracking__Thumbnail.webp"
+                }
             ],
             "description": [
                 {
@@ -283,6 +329,7 @@
         "categories": ["Graphic Design", "Visual Research"],
         "client": "ECAL",
         "content": {
+            "cover": "/projects/Small_World/Small_1.webp",
             "media": [
                 "/projects/Small_World/Small_1.webp",
                 "/projects/Small_World/Small_2.webp",
@@ -314,11 +361,15 @@
         "categories": ["Interaction", "Electronics, Code"],
         "client": "ECAL",
         "content": {
+            "cover": "/projects/Stretching_Time/Stretch_1.webp",
             "media": [
-                "/projects/Stretching_Time/stretch_wip_short.mp4",
                 "/projects/Stretching_Time/Stretch_1.webp",
                 "/projects/Stretching_Time/Stretch_2.webp",
                 "/projects/Stretching_Time/Stretch_4.webp",
+                {
+                    "path": "/projects/Stretching_Time/stretch_wip_short.mp4",
+                    "thumbnail": "/projects/Stretching_Time/Streching-Time_Thumbnail.webp"
+                },
                 "/projects/Stretching_Time/Stretch_5.webp",
                 "/projects/Stretching_Time/Stretch_6.webp",
                 "/projects/Stretching_Time/Stretch_7.webp"
@@ -342,7 +393,8 @@
         "categories": ["Interaction", "Code"],
         "client": "ECAL",
         "content": {
-            "media": ["/projects/XYScope/XYScope.gif", "/projects/XYScope/XYScope_Cover.webp"],
+            "cover": "/projects/XYScope/XYScope_Cover.webp",
+            "media": ["/projects/XYScope/XYScope.gif"],
             "description": [
                 {
                     "type": "paragraph",
@@ -358,7 +410,13 @@
         "categories": ["Creative Coding"],
         "client": "ECAL",
         "content": {
-            "media": ["/projects/Zach_Workshop/zach_lieberman_of_workshop_compilation (720p).mp4", "/projects/Zach_Workshop/Zach_Cover.webp"],
+            "cover": "/projects/Zach_Workshop/Zach_Cover.webp",
+            "media": [
+                {
+                    "path": "/projects/Zach_Workshop/zach_lieberman_of_workshop_compilation (720p).mp4",
+                    "thumbnail": "/projects/Zach_Workshop/Zach-Workshop_Thumbnail.webp"
+                }
+            ],
             "description": [
                 {
                     "type": "paragraph",

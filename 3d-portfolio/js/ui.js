@@ -365,17 +365,24 @@ function populateIndexView() {
         }
 
         // Add hover events for preview (skip on mobile devices)
-        if (previewContainer && previewImage && project.content.media && project.content.media.length > 0) {
-            // Find the first image in the media array (skip iframes/videos)
-            const firstImage = project.content.media.find(
-                (item) =>
-                    typeof item === "string" &&
-                    (item.endsWith(".webp") || item.endsWith(".jpg") || item.endsWith(".jpeg") || item.endsWith(".png"))
-            );
+        if (previewContainer && previewImage) {
+            // Use the project's cover image if available, otherwise find first image in media array
+            let previewImagePath = project.content.cover;
+            
+            if (!previewImagePath && project.content.media && project.content.media.length > 0) {
+                // Find the first image in the media array (skip videos) as fallback
+                const firstImage = project.content.media.find((item) => {
+                    const itemPath = typeof item === "string" ? item : item.path;
+                    return itemPath && (itemPath.endsWith(".webp") || itemPath.endsWith(".jpg") || itemPath.endsWith(".jpeg") || itemPath.endsWith(".png"));
+                });
+                previewImagePath = typeof firstImage === "string" ? firstImage : firstImage?.path;
+            }
 
-            if (firstImage) {
+            if (previewImagePath) {
+                // Preload the cover image for smooth hover preview
+                preloadCoverImage(previewImagePath);
                 gridItem.addEventListener("mouseenter", (e) => {
-                    previewImage.src = firstImage;
+                    previewImage.src = previewImagePath;
                     previewContainer.style.left = `${e.clientX}px`;
                     previewContainer.style.top = `${e.clientY}px`;
                     previewContainer.classList.add("show");
@@ -489,4 +496,28 @@ if (isMobileDevice()) {
         navigator.vibrate(200);
     }
 }
+
+/**
+ * Preload a cover image for smooth hover preview
+ * @param {string} imagePath - Path to the cover image
+ */
+function preloadCoverImage(imagePath) {
+    if (!imagePath) return;
+    
+    // Check if image is already preloaded
+    if (preloadedCoverImages.has(imagePath)) return;
+    
+    // Preload the image
+    const img = new Image();
+    img.onload = () => {
+        preloadedCoverImages.add(imagePath);
+    };
+    img.onerror = () => {
+        console.warn(`Failed to preload cover image: ${imagePath}`);
+    };
+    img.src = imagePath;
+}
+
+// Set to track preloaded cover images
+const preloadedCoverImages = new Set();
 

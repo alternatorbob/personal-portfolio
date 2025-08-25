@@ -336,8 +336,7 @@ export class AboutCard extends Card {
                     url: "https://www.linkedin.com/in/your-linkedin",
                 },
                 {
-                    title: "Vimeo",
-                    url: "https://vimeo.com/your-vimeo",
+
                 },
             ],
         };
@@ -399,7 +398,7 @@ export class AboutCard extends Card {
         // Add social media links and CV as comma-separated
         const socialLinks = document.createElement("div");
         socialLinks.innerHTML =
-            '<a href="https://www.instagram.com/__bogdan__n/" class="external-link">Instagram</a>, <a href="https://vimeo.com/user94524059" class="external-link">Vimeo</a>, <a href="https://www.linkedin.com/in/cbogdann/" class="external-link">LinkedIn</a>, <a href="/assets/files/08.08.2025_CV_Bogdan-Nastase.pdf" class="external-link">CV</a>';
+            '<a href="https://www.instagram.com/__bogdan__n/" class="external-link">Instagram</a>, <a href="https://www.linkedin.com/in/cbogdann/" class="external-link">LinkedIn</a>, <a href="/assets/files/08.08.2025_CV_Bogdan-Nastase.pdf" class="external-link">CV</a>';
         column2.appendChild(socialLinks);
 
         // Add columns to links grid
@@ -443,7 +442,7 @@ export class ProjectCard extends Card {
         this.totalSlides = 0; // Number of original slides (not including duplicates)
         this.slides = [];
         this.intersectionObserver = null;
-        this.vimeoPlayers = new Map(); // Store Vimeo player instances
+
         
         // Touch/swipe handling for mobile
         this.touchStartX = 0;
@@ -645,8 +644,8 @@ export class ProjectCard extends Card {
         // Set up intersection observer for video visibility
         this.setupIntersectionObserver();
 
-        // Preload images for smoother transitions
-        this.preloadImages();
+        // Progressive media loading - only load media when project is opened
+        this.preloadProjectMedia();
 
         // Note: Touch handling will be set up after the card is rendered
     }
@@ -1008,10 +1007,22 @@ export class ProjectCard extends Card {
 
         if (media && media.length > 0) {
             // Use the new media array with custom ordering
-            mediaItems = media.map((item) => ({
-                path: item,
-                type: detectMediaType(item),
-            }));
+            mediaItems = media.map((item) => {
+                // Handle both string and object formats
+                if (typeof item === 'string') {
+                    return {
+                        path: item,
+                        type: detectMediaType(item),
+                        thumbnail: null
+                    };
+                } else {
+                    return {
+                        path: item.path,
+                        type: detectMediaType(item.path),
+                        thumbnail: item.thumbnail || null
+                    };
+                }
+            });
         } else {
             // Fall back to old structure: images first, then videos, then gifs
             const imageItems = images.map((img) => ({ path: img, type: "image" }));
@@ -1112,27 +1123,23 @@ export class ProjectCard extends Card {
                 break;
 
             case "video":
-                const thumbnailImage = this.findVideoThumbnail(mediaItem.path);
-                if (thumbnailImage) {
+                if (mediaItem.thumbnail) {
                     // Create initial thumbnail image that will be replaced by video when clicked
                     slide.innerHTML = `
                         <div class="video-container" data-video-src="${mediaItem.path}">
-                            <img src="${thumbnailImage}" alt="Video thumbnail" class="video-thumbnail" />
+                            <img src="${mediaItem.thumbnail}" alt="Video thumbnail" class="video-thumbnail" />
                             <div class="video-play-button">▶</div>
                         </div>
                     `;
                     this.setupVideoThumbnailClick(slide);
                 } else {
-                    // Fallback to video with poster if no thumbnail found
+                    // No thumbnail provided, show video directly
                     slide.innerHTML = `<video controls preload="none" playsinline muted controlsList="nodownload"><source src="${mediaItem.path}" type="video/mp4">Your browser does not support the video tag.</video>`;
                     this.setupVideoOptimization(slide);
                 }
                 break;
 
-            case "iframe":
-                slide.innerHTML = mediaItem.path;
-                this.setupVimeoIframe(slide);
-                break;
+
 
             default:
                 // Fallback to image for unknown types
@@ -1141,174 +1148,11 @@ export class ProjectCard extends Card {
         }
     }
 
-    /**
-     * Find a thumbnail image for a video file
-     * @param {string} videoPath - The path to the video file
-     * @returns {string|null} - The path to the thumbnail image or null if not found
-     */
-    findVideoThumbnail(videoPath) {
-        if (!this.project.content.media) return null;
-        
-        // Extract the video filename without extension
-        const videoBaseName = videoPath.split('/').pop().replace(/\.[^/.]+$/, '');
-        const projectFolder = videoPath.substring(0, videoPath.lastIndexOf('/'));
-        
-        // Look for common thumbnail naming patterns in the same project folder
-        const thumbnailPatterns = [
-            `${projectFolder}/${videoBaseName}_Cover.webp`,
-            `${projectFolder}/${videoBaseName}_Cover.jpg`,
-            `${projectFolder}/${videoBaseName}_Cover.png`,
-            `${projectFolder}/${videoBaseName}Cover.webp`,
-            `${projectFolder}/${videoBaseName}Cover.jpg`,
-            `${projectFolder}/${videoBaseName}Cover.png`,
-            `${projectFolder}/${videoBaseName}.webp`,
-            `${projectFolder}/${videoBaseName}.jpg`,
-            `${projectFolder}/${videoBaseName}.png`
-        ];
-        
-        // Check if any of these thumbnail patterns exist in the media array
-        for (const pattern of thumbnailPatterns) {
-            const foundThumbnail = this.project.content.media.find(mediaItem => 
-                typeof mediaItem === 'string' && mediaItem === pattern
-            );
-            if (foundThumbnail) {
-                return foundThumbnail;
-            }
-        }
-        
-        // Fallback: find the first image in the same project folder
-        const projectImages = this.project.content.media.filter(mediaItem => {
-            if (typeof mediaItem !== 'string') return false;
-            const mediaType = detectMediaType(mediaItem);
-            return (mediaType === 'image' || mediaType === 'gif') && 
-                   mediaItem.startsWith(projectFolder);
-        });
-        
-        if (projectImages.length > 0) {
-            return projectImages[0];
-        }
-        
-        // Last fallback: any image in the project
-        const anyProjectImage = this.project.content.media.find(mediaItem => {
-            if (typeof mediaItem !== 'string') return false;
-            const mediaType = detectMediaType(mediaItem);
-            return mediaType === 'image' || mediaType === 'gif';
-        });
-        
-        return anyProjectImage || null;
-    }
 
-    /**
-     * Setup Vimeo iframe to remove vp-center class from the iframe body
-     * @param {HTMLElement} slide - The slide element containing the Vimeo iframe
-     */
-    setupVimeoIframe(slide) {
-        // Wait for the iframe to be added to the DOM
-        setTimeout(() => {
-            let iframe = slide.querySelector('iframe[src*="player.vimeo.com"]');
-            if (!iframe) return;
 
-            // Modify iframe src to include necessary parameters
-            const currentSrc = new URL(iframe.src);
-            currentSrc.searchParams.set("autoplay", "0");
-            currentSrc.searchParams.set("autopause", "1");
-            currentSrc.searchParams.set("background", "0");
-            currentSrc.searchParams.set("playsinline", "1");
 
-            // Create new iframe with modified attributes
-            const newIframe = document.createElement("iframe");
-            newIframe.src = currentSrc.toString();
-            newIframe.allow = "fullscreen; picture-in-picture";
-            newIframe.setAttribute("loading", "lazy");
-            newIframe.style.cssText = iframe.style.cssText;
-            iframe.parentNode.replaceChild(newIframe, iframe);
-            iframe = newIframe;
 
-            // Only process if Vimeo Player API is available
-            if (typeof Vimeo === "undefined") {
-                console.warn("Vimeo Player API not available");
-                return;
-            }
 
-            try {
-                // Create a Vimeo Player instance with explicit options
-                const player = new Vimeo.Player(iframe, {
-                    autoplay: false,
-                    autopause: true,
-                    background: false,
-                    playsinline: true,
-                    muted: true,
-                });
-
-                // Store the player instance for later control
-                this.vimeoPlayers.set(iframe, player);
-
-                // Listen for when the player is ready
-                player
-                    .ready()
-                    .then(() => {
-                        // Inject CSS to override vp-center styles
-                        this.injectVimeoStyles(iframe);
-                        // Ensure video is paused initially
-                        player.pause();
-                    })
-                    .catch((error) => {
-                        console.warn("Vimeo player setup failed:", error);
-                    });
-
-                // Also try to inject styles on play event as a fallback
-                player.on("play", () => {
-                    this.injectVimeoStyles(iframe);
-                });
-            } catch (error) {
-                console.warn("Error setting up Vimeo player:", error);
-            }
-        }, 100);
-    }
-
-    /**
-     * Inject CSS styles to override Vimeo's vp-center class
-     * @param {HTMLElement} iframe - The Vimeo iframe element
-     */
-    injectVimeoStyles(iframe) {
-        try {
-            // Since we can't directly access cross-origin iframe content,
-            // we'll add CSS that affects the iframe container behavior
-            const style = document.createElement("style");
-            style.textContent = `
-                /* Override Vimeo's centering for project videos */
-                .project-card .slide iframe[src*="player.vimeo.com"] {
-                    object-fit: cover !important;
-                    object-position: top !important;
-                }
-                
-                /* Ensure the iframe takes full slide dimensions */
-                .project-card .slide {
-                    overflow: hidden;
-                }
-                
-                .project-card .slide iframe[src*="player.vimeo.com"] {
-                    width: 100% !important;
-                    height: 100% !important;
-                    border: none !important;
-                }
-            `;
-
-            // Add unique identifier to avoid duplicate styles
-            style.id = `vimeo-override-${this.id}`;
-
-            // Remove any existing override for this card
-            const existingStyle = document.getElementById(style.id);
-            if (existingStyle) {
-                existingStyle.remove();
-            }
-
-            // Add the new style to the document head
-            document.head.appendChild(style);
-        } catch (error) {
-            console.warn("Error injecting Vimeo styles:", error);
-        }
-    }
 
     /**
      * Setup click handler for video thumbnails
@@ -1495,28 +1339,72 @@ export class ProjectCard extends Card {
     }
 
     /**
-     * Preload all images in the gallery
+     * Progressive media loading - loads all project media (images, videos, thumbnails) when project is opened
+     * This improves initial page load performance by only loading covers initially
      */
-    preloadImages() {
-        const { images = [], videos = [], gifs = [], media = [] } = this.project.content || {};
-
-        let imageSources = [];
-
-        if (media && media.length > 0) {
-            // Use new media array - only preload images and gifs
-            imageSources = media.filter((item) => {
-                const type = detectMediaType(item);
-                return type === "image" || type === "gif";
-            });
-        } else {
-            // Fall back to old structure
-            imageSources = [...images, ...gifs];
-        }
-
-        imageSources.forEach((src) => {
-            const img = new Image();
-            img.src = src;
+    preloadProjectMedia() {
+        const { media = [] } = this.project.content || {};
+        
+        if (!media || media.length === 0) return;
+        
+        // Track loading progress
+        let totalMedia = 0;
+        let loadedMedia = 0;
+        
+        // Preload all media items
+        media.forEach((item) => {
+            const mediaPath = typeof item === 'string' ? item : item.path;
+            const mediaType = detectMediaType(mediaPath);
+            
+            if (mediaType === 'image' || mediaType === 'gif') {
+                // Preload images and GIFs
+                totalMedia++;
+                const img = new Image();
+                img.onload = () => {
+                    loadedMedia++;
+                };
+                img.onerror = () => {
+                    console.warn(`Failed to load image: ${mediaPath}`);
+                };
+                img.src = mediaPath;
+                
+            } else if (mediaType === 'video') {
+                // Preload video thumbnails if available
+                if (item.thumbnail) {
+                    totalMedia++;
+                    const thumbnailImg = new Image();
+                    thumbnailImg.onload = () => {
+                        loadedMedia++;
+                    };
+                    thumbnailImg.onerror = () => {
+                        console.warn(`Failed to load video thumbnail: ${item.thumbnail}`);
+                    };
+                    thumbnailImg.src = item.thumbnail;
+                }
+                
+                // Preload video metadata (doesn't download the full video, just gets metadata)
+                totalMedia++;
+                const video = document.createElement('video');
+                video.preload = 'metadata';
+                video.onloadedmetadata = () => {
+                    loadedMedia++;
+                };
+                video.onerror = () => {
+                    console.warn(`Failed to load video metadata: ${mediaPath}`);
+                };
+                video.src = mediaPath;
+                
+            } else if (mediaType === 'iframe') {
+                // For iframes (Vimeo), just count them as loaded
+                totalMedia++;
+                loadedMedia++;
+            }
         });
+        
+        // Log completion
+        if (totalMedia > 0) {
+            console.log(`Preloading ${totalMedia} media items for ${this.project.title}`);
+        }
     }
 
     /**
@@ -1640,10 +1528,9 @@ export class ProjectCard extends Card {
         // Pause all videos (both actual video elements and thumbnails)
         this.slides.forEach((slide, index) => {
             const video = slide.querySelector("video");
-            const iframe = slide.querySelector('iframe[src*="player.vimeo.com"]');
             
             if (index !== this.currentSlideIndex) {
-                this.pauseVideoInSlide(slide, video, iframe);
+                this.pauseVideoInSlide(slide, video);
             }
         });
 
@@ -1651,22 +1538,13 @@ export class ProjectCard extends Card {
         const currentSlide = this.slides[this.currentSlideIndex];
         if (currentSlide) {
             const video = currentSlide.querySelector("video");
-            const iframe = currentSlide.querySelector('iframe[src*="player.vimeo.com"]');
             
             // Note: We don't auto-play videos anymore - user must click to play
             // This applies to both thumbnail approach and direct video elements
         }
     }
 
-    /**
-     * Clean up Vimeo styles when the card is closed
-     */
-    cleanupVimeoStyles() {
-        const styleElement = document.getElementById(`vimeo-override-${this.id}`);
-        if (styleElement) {
-            styleElement.remove();
-        }
-    }
+
 
     /**
      * Set up keyboard navigation for the card
@@ -1691,8 +1569,7 @@ export class ProjectCard extends Card {
             if (this.intersectionObserver) {
                 this.intersectionObserver.disconnect();
             }
-            // Clean up Vimeo styles
-            this.cleanupVimeoStyles();
+
             if (originalOnClose) originalOnClose();
         };
     }
@@ -1715,16 +1592,14 @@ export class ProjectCard extends Card {
             entries.forEach((entry) => {
                 const slide = entry.target;
                 const video = slide.querySelector("video");
-                const iframe = slide.querySelector('iframe[src*="player.vimeo.com"]');
-
                 if (entry.isIntersecting) {
                     // Slide is visible, play video if it's the current slide
                     if (this.slides[this.currentSlideIndex] === slide) {
-                        this.playVideoInSlide(slide, video, iframe);
+                        this.playVideoInSlide(slide, video);
                     }
                 } else {
                     // Slide is not visible, pause video
-                    this.pauseVideoInSlide(slide, video, iframe);
+                    this.pauseVideoInSlide(slide, video);
                 }
             });
         }, options);
@@ -1747,9 +1622,8 @@ export class ProjectCard extends Card {
      * Play video in the given slide
      * @param {HTMLElement} slide - The slide element
      * @param {HTMLElement} video - The video element (if any)
-     * @param {HTMLElement} iframe - The iframe element (if any)
      */
-    playVideoInSlide(slide, video, iframe) {
+    playVideoInSlide(slide, video) {
         // Videos no longer auto-play - user must click to play
         // if (video && video.paused) {
         //     video.play().catch((error) => {
@@ -1757,34 +1631,19 @@ export class ProjectCard extends Card {
         //     });
         // }
 
-        // if (iframe) {
-        //     const player = this.vimeoPlayers.get(iframe);
-        //     if (player) {
-        //         player.play().catch((error) => {
-        //             console.log("Vimeo play failed:", error);
-        //         });
-        //     }
-        // }
+
     }
 
     /**
      * Pause video in the given slide
      * @param {HTMLElement} slide - The slide element
      * @param {HTMLElement} video - The video element (if any)
-     * @param {HTMLElement} iframe - The iframe element (if any)
      */
-    pauseVideoInSlide(slide, video, iframe) {
+    pauseVideoInSlide(slide, video) {
         if (video && !video.paused) {
             video.pause();
         }
 
-        if (iframe) {
-            const player = this.vimeoPlayers.get(iframe);
-            if (player) {
-                player.pause().catch((error) => {
-                    console.log("Vimeo pause failed:", error);
-                });
-            }
-        }
+
     }
 }

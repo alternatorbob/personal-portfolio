@@ -198,10 +198,16 @@ export function detectFontLoading() {
 /**
  * Detect media type from file path or URL
  * @param {string} mediaPath - The file path or URL to analyze
- * @returns {string} - The detected media type: 'image', 'video', 'iframe', or 'gif'
+ * @returns {string} - The detected media type: 'image', 'video', or 'gif'
  */
 export function detectMediaType(mediaPath) {
     if (!mediaPath) return 'image';
+    
+    // Ensure mediaPath is a string
+    if (typeof mediaPath !== 'string') {
+        console.warn('detectMediaType called with non-string value:', mediaPath);
+        return 'image';
+    }
     
     // Check for iframe (Vimeo embeds)
     if (mediaPath.startsWith('<iframe')) {

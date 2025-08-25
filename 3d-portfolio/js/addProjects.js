@@ -11,14 +11,18 @@ export const cubeOriginalDimensions = new Map();
 const targetVisualSize = 18; // Increased from 12 to make images bigger
 
 //used for 3D Cubes Projects
+// Projects are randomized on each page load for a fresh experience
 export function addProjects(projects) {
     const scale = 30; // Scale of the cubes
     const radius = 40; // Distance from center
     
+    // Create a shuffled copy of projects to randomize the layout on each load
+    const shuffledProjects = [...projects].sort(() => Math.random() - 0.5);
+        
     // Calculate positions on a sphere for equal distribution
-    const positions = calculateEvenlySpacedPointsOnSphere(projects.length, radius);
+    const positions = calculateEvenlySpacedPointsOnSphere(shuffledProjects.length, radius);
 
-    for (let i = 0; i < projects.length; i++) {
+    for (let i = 0; i < shuffledProjects.length; i++) {
         const loader = new THREE.TextureLoader();
         
         // Create a placeholder cube with default dimensions
@@ -42,31 +46,34 @@ export function addProjects(projects) {
             materials // Array of materials
         );
         
-        // Get the first image from media array or fall back to images array
-        let coverImage = null;
+        // Get the cover image from the project's cover property, or fall back to finding first image in media array
+        let coverImage = shuffledProjects[i].content.cover;
         
-        if (projects[i].content.media && projects[i].content.media.length > 0) {
-            // Find the first image in the media array
-            for (let j = 0; j < projects[i].content.media.length; j++) {
-                const mediaItem = projects[i].content.media[j];
-                const mediaType = detectMediaType(mediaItem);
+        if (!coverImage && shuffledProjects[i].content.media && shuffledProjects[i].content.media.length > 0) {
+            // Find the first image in the media array as fallback
+            for (let j = 0; j < shuffledProjects[i].content.media.length; j++) {
+                const mediaItem = shuffledProjects[i].content.media[j];
+                const mediaPath = typeof mediaItem === 'string' ? mediaItem : mediaItem.path;
+                const mediaType = detectMediaType(mediaPath);
                 if (mediaType === 'image' || mediaType === 'gif') {
-                    coverImage = mediaItem;
+                    coverImage = mediaPath;
                     break;
                 }
             }
         }
         
         // Fall back to images array if no image found in media array
-        if (!coverImage && projects[i].content.images && projects[i].content.images.length > 0) {
-            coverImage = projects[i].content.images[0];
+        if (!coverImage && shuffledProjects[i].content.images && shuffledProjects[i].content.images.length > 0) {
+            coverImage = shuffledProjects[i].content.images[0];
         }
         
         // If still no cover image, use a placeholder
         if (!coverImage) {
-            console.warn(`No cover image found for project: ${projects[i].title}`);
+            console.warn(`No cover image found for project: ${shuffledProjects[i].title}`);
             return;
         }
+        
+        // Only load the cover image for 3D cubes - this is the only image loaded on initial page load
         
         // Load the texture and adjust dimensions when loaded
         loader.load(coverImage, (texture) => {
@@ -134,7 +141,7 @@ export function addProjects(projects) {
 
         // Position the cube at the calculated position
         cube.position.copy(positions[i]);
-        cube.name = projects[i].id;
+        cube.name = shuffledProjects[i].id;
         cube.lookAt(sphere.position);
         cubes.push(cube);
         scene.add(cube);
@@ -159,19 +166,8 @@ function calculateEvenlySpacedPointsOnSphere(count, radius) {
         points.push(new THREE.Vector3(x * radius, y * radius, z * radius));
     }
     
-    // Shuffle the points array using Fisher-Yates algorithm
-    for (let i = points.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [points[i], points[j]] = [points[j], points[i]];
-    }
-    
-    // Add slight random offset to each position for more variation
-    points.forEach(point => {
-        const offsetRange = radius * 0.1; // 10% of radius for offset
-        point.x += (Math.random() - 0.5) * offsetRange;
-        point.y += (Math.random() - 0.5) * offsetRange;
-        point.z += (Math.random() - 0.5) * offsetRange;
-    });
+    // Remove shuffling and random offsets for perfectly even distribution
+    // The Fibonacci sphere algorithm already provides optimal even spacing
     
     return points;
 }
