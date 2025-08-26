@@ -84,9 +84,7 @@ const maxNudgeVelocity = 0.1; // Maximum velocity from keyboard controls
 let keyState = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
 let keyHoldTime = { ArrowUp: 0, ArrowDown: 0, ArrowLeft: 0, ArrowRight: 0 };
 
-// Add project preloading system
-let hoveredCube = null; // Currently hovered cube
-let hoverTimeout = null; // Timeout for hover detection
+// Store projects data for preloading
 let projectsData = []; // Store projects data for preloading
 
 // Define touch event handlers before they're used
@@ -134,7 +132,7 @@ const onTouchStart = function (e) {
         // Only open project if sphere is not hit
         const intersectedObject = cubeIntersections[0].object;
         if (cubes.includes(intersectedObject)) {
-            // Preload project media on touch for mobile devices
+            // Preload project media on touch for mobile devices (if not already preloaded)
             if (projectsData.length > 0) {
                 const project = projectsData.find(p => p.id === intersectedObject.name);
                 if (project) {
@@ -454,7 +452,7 @@ function onMouseDown(e) {
         // Only open project if sphere is not hit
         const intersectedObject = cubeIntersections[0].object;
         if (cubes.includes(intersectedObject)) {
-            // Preload project media on mouse click
+            // Preload project media on mouse click (if not already preloaded)
             if (projectsData.length > 0) {
                 const project = projectsData.find(p => p.id === intersectedObject.name);
                 if (project) {
@@ -619,7 +617,7 @@ function returnCubesToOriginalPositions() {
 }
 
 function onMouseMove(e) {
-    // Cursor styling logic
+    // Cursor styling logic only
     if (!isDragging || interactionsDisabled) {
         raycaster.setFromCamera(new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, (-e.clientY / window.innerHeight) * 2 + 1), camera);
 

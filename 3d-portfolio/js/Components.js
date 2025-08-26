@@ -1688,20 +1688,34 @@ export class ProjectCard extends Card {
     }
 
     /**
-     * Progressive media loading - loads all project media (images, videos, thumbnails) when project is opened
-     * This improves initial page load performance by only loading covers initially
+     * Progressive media loading - loads remaining project media when project is opened
+     * The first media item is already preloaded during batch preload, so we skip it here
      */
     preloadProjectMedia() {
+        // Check if this project's media has already been preloaded to avoid duplicates
+        const projectId = this.project.id;
+        const cacheKey = `${projectId}_remaining_media`;
+        
+        // Check if remaining media preloading has already been done for this project
+        if (this.constructor.remainingMediaPreloadCache && this.constructor.remainingMediaPreloadCache.has(cacheKey)) {
+            return; // Already preloaded, skip
+        }
+
         const { media = [] } = this.project.content || {};
 
-        if (!media || media.length === 0) return;
+        if (!media || media.length <= 1) return; // Skip if only one or no media items
+
+        // Initialize static cache if it doesn't exist
+        if (!this.constructor.remainingMediaPreloadCache) {
+            this.constructor.remainingMediaPreloadCache = new Set();
+        }
 
         // Track loading progress
         let totalMedia = 0;
         let loadedMedia = 0;
 
-        // Preload all media items
-        media.forEach((item) => {
+        // Skip the first media item (already preloaded) and preload the rest
+        media.slice(1).forEach((item) => {
             const mediaPath = typeof item === "string" ? item : item.path;
             const mediaType = detectMediaType(mediaPath);
 
@@ -1748,9 +1762,12 @@ export class ProjectCard extends Card {
             }
         });
 
+        // Mark this project as having remaining media preloaded
+        this.constructor.remainingMediaPreloadCache.add(cacheKey);
+
         // Log completion
         if (totalMedia > 0) {
-            console.log(`Preloading ${totalMedia} media items for ${this.project.title}`);
+            console.log(`Preloading ${totalMedia} remaining media items for ${this.project.title}`);
         }
     }
 

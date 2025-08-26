@@ -75,15 +75,26 @@ export function isWebGLAvailable() {
     return isAvailable;
 }
 
+// Cache mobile device detection to avoid repeated checks
+let cachedMobileDetection = null;
+
 export // Helper function to detect mobile devices
 function isMobileDevice() {
+    // Return cached result if already determined
+    if (cachedMobileDetection !== null) {
+        return cachedMobileDetection;
+    }
+
     const mobileDetect =
         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
         (window.matchMedia && window.matchMedia("(max-width: 768px)").matches) ||
         "ontouchstart" in window ||
         navigator.maxTouchPoints > 0;
 
-    // Log detection result for debugging
+    // Cache the result
+    cachedMobileDetection = mobileDetect;
+
+    // Log detection result for debugging (only once)
     console.log("Mobile device detected: " + mobileDetect);
 
     return mobileDetect;
@@ -304,11 +315,36 @@ export function preloadProjectMedia(project) {
         const img = new Image();
         img.onload = () => {
             projectPreloadCache.set(projectId, img);
-            console.log(`Preloaded media for project: ${project.title}`);
+            console.log(`Preloaded first media for project: ${project.title}`);
         };
         img.onerror = () => {
-            console.warn(`Failed to preload media for project: ${project.title}`);
+            console.warn(`Failed to preload first media for project: ${project.title}`);
         };
         img.src = mediaToPreload;
     }
+}
+
+/**
+ * Batch preload the first media item for all projects after main load completes
+ * @param {Array} projects - Array of project objects
+ */
+export function batchPreloadFirstMedia(projects) {
+    if (!projects || projects.length === 0) return;
+    
+    console.log(`Starting batch preload of first media items for ${projects.length} projects`);
+    
+    let loadedCount = 0;
+    const totalProjects = projects.length;
+    
+    // Add a small delay between each preload to avoid overwhelming the browser
+    projects.forEach((project, index) => {
+        setTimeout(() => {
+            preloadProjectMedia(project);
+            loadedCount++;
+            
+            if (loadedCount === totalProjects) {
+                console.log(`Completed batch preload of first media items for all projects`);
+            }
+        }, index * 100); // 100ms delay between each project
+    });
 }

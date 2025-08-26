@@ -5,7 +5,7 @@ import "player.style/microvideo";
 import * as THREE from "three";
 import { dragInit, updateCubesForSphereRotation, worldRotation, rotationVelocity, animateInertia } from "./js/dragControl";
 import { addProjects } from "./js/addProjects";
-import { isRendering, easeInOutCubic, loadProjects, detectFontLoading, isMobileDevice } from "./js/utils";
+import { isRendering, easeInOutCubic, loadProjects, detectFontLoading, isMobileDevice, batchPreloadFirstMedia } from "./js/utils";
 import { uiInit } from "./js/ui";
 
 // Don't show content immediately - wait for loading to complete
@@ -94,6 +94,7 @@ const normalMap = textureLoader.load("assets/textures/mat/worn-shiny-metal-bl/wo
 let isInitialized = false;
 let texturesLoaded = false;
 let projectCoversLoaded = false;
+let allProjects = []; // Store projects for batch preloading
 
 // Function to handle loading completion and blackout
 function checkLoadingComplete() {
@@ -127,6 +128,14 @@ function checkLoadingComplete() {
                 introFade.classList.add("fade-out");
             }, totalDelay);
         }
+
+        // Start batch preloading of first media items after a brief delay
+        // This allows the main UI to be fully visible before starting background preloading
+        setTimeout(() => {
+            if (allProjects.length > 0) {
+                batchPreloadFirstMedia(allProjects);
+            }
+        }, 1000); // 1 second delay after fade starts
     }
 }
 
@@ -425,6 +434,7 @@ async function threeInit() {
 
     // Load projects from JSON and initialize
     const projects = await loadProjects();
+    allProjects = projects; // Store projects for batch preloading
     addProjects(projects, () => {
         // Callback when all project covers are loaded
         projectCoversLoaded = true;
