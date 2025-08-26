@@ -111,11 +111,6 @@
     </head>
 
     <body>
-        <!-- Blackout Screen -->
-        <div id="loading-screen">
-            <span class="loader"></span>
-        </div>
-
         <div class="main-container">
             <div class="navbar">
                 <div class="navbar-name text-sm font-bold">
@@ -153,9 +148,13 @@
         <script type="module" src="/main.js"></script>
         <script type="module" src="js/ui.js"></script>
         <script type="module">
-            import 'player.style/microvideo';
+            import "player.style/microvideo";
         </script>
         <div class="invert"></div>
         <div class="intro-fade"></div>
+        <!-- Blackout Screen -->
+        <div id="loading-screen">
+            <span class="loader"></span>
+        </div>
     </body>
 </html>
