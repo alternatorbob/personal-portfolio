@@ -6,7 +6,7 @@
         "categories": ["Installation", "Interaction", "Realtime"],
         "client": "EPFL",
         "content": {
-            "cover": "/projects/Agora_Installation/Agora_Cover.webp",
+            "cover": "/projects/Agora_Installation/Agora_Cover_S.webp",
             "media": [
                 {
                     "path": "/projects/Agora_Installation/agora_installation (1080p).mp4",
@@ -28,7 +28,7 @@
         "categories": ["Interaction", "Interface Design", "Research"],
         "client": "Apple",
         "content": {
-            "cover": "/projects/Random_Studio/Apple/Apple_Cover.png",
+            "cover": "/projects/Random_Studio/Apple/Apple_Cover_S.webp",
             "media": ["/projects/Random_Studio/Apple/Apple_Cover.png"],
             "description": [
                 {
@@ -75,7 +75,7 @@
         "categories": ["Graphic Design", "Creative Coding", "Art Direction"],
         "client": "ECAL",
         "content": {
-            "cover": "/projects/ELPE/ELPE_1.webp",
+            "cover": "/projects/ELPE/ELPE_Cover_S.webp",
             "media": [
                 "/projects/ELPE/ELPE_1.webp",
                 {
@@ -106,7 +106,7 @@
         "categories": ["Interaction", "Experience Design", "Sound Design"],
         "client": "Glossier",
         "content": {
-            "cover": "/projects/Random_Studio/Glossier/Glossier_Cover.webp",
+            "cover": "/projects/Random_Studio/Glossier/Glossier_Cover_S.webp",
             "media": [
                 {
                     "path": "/projects/Random_Studio/Glossier/Glossier Edit.mp4",
@@ -136,7 +136,7 @@
         "categories": ["Programming", "Installation"],
         "client": "Kim Winder",
         "content": {
-            "cover": "/projects/Freelance/Kim Winder SELFRECONDESTRUCT/Kim Installation Cover.webp",
+            "cover": "/projects/Freelance/Kim Winder SELFRECONDESTRUCT/Kim Installation Cover_S.webp",
             "media": [
                 {
                     "path": "/projects/Freelance/Kim Winder SELFRECONDESTRUCT/self_de_con_re_struct_kim_winder (720p).mp4",
@@ -213,7 +213,7 @@
         "categories": ["Interaction", "Electronics,  Code"],
         "client": "ECAL",
         "content": {
-            "cover": "/projects/MIDI_Clock/MIDI_Cover.webp",
+            "cover": "/projects/MIDI_Clock/MIDI_Cover_S.webp",
             "media": [
                 {
                     "path": "/projects/MIDI_Clock/midi_clock (1440p).mp4",
@@ -239,7 +239,7 @@
         "categories": ["Creative Direction", "Unity Development"],
         "client": "ECAL",
         "content": {
-            "cover": "/projects/Mindmaze/Mindmaze_Cover.webp",
+            "cover": "/projects/Mindmaze/Mindmaze_Cover_S.webp",
             "media": ["/projects/Mindmaze/mindmaze.gif"],
             "description": [
                 {
@@ -283,7 +283,7 @@
         "categories": ["Interaction", "Web Development", "Machine Learning"],
         "client": "ECAL",
         "content": {
-            "cover": "/projects/FULCRUM/FULCRUM_1.webp",
+            "cover": "/projects/FULCRUM/FULCRUM_Cover_S.webp",
             "media": [
                 {
                     "path": "/projects/FULCRUM/FULCRUM - Projects - ECAL.mp4",
@@ -320,7 +320,7 @@
         "categories": ["Interaction", "Electronics, Code", "Graphic Design"],
         "client": "ECAL",
         "content": {
-            "cover": "/projects/Scroll/Scroll_Cover.webp",
+            "cover": "/projects/Scroll/Scroll_Cover_S.webp",
             "media": [
                 {
                     "path": "/projects/Scroll/Physical_Scrollbar.mp4",
@@ -342,7 +342,7 @@
         "categories": ["Web Design", "Web Development", "Photography"],
         "client": "ECAL",
         "content": {
-            "cover": "/projects/Self_Tracking/Self_Tracking_Cover.webp",
+            "cover": "/projects/Self_Tracking/Self_Tracking_Cover_S.webp",
             "media": [
                 {
                     "path": "/projects/Self_Tracking/self_tracking_click_through (1440p).mp4",
@@ -364,7 +364,7 @@
         "categories": ["Graphic Design", "Visual Research"],
         "client": "ECAL",
         "content": {
-            "cover": "/projects/Small_World/Small_1.webp",
+            "cover": "/projects/Small_World/Small_Cover_S.webp",
             "media": [
                 "/projects/Small_World/Small_1.webp",
                 "/projects/Small_World/Small_2.webp",

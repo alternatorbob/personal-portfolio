@@ -93,10 +93,11 @@ const normalMap = textureLoader.load("assets/textures/mat/worn-shiny-metal-bl/wo
 // Add initialization flag
 let isInitialized = false;
 let texturesLoaded = false;
+let projectCoversLoaded = false;
 
 // Function to handle loading completion and blackout
 function checkLoadingComplete() {
-    if (isInitialized && texturesLoaded) {
+    if (isInitialized && texturesLoaded && projectCoversLoaded) {
         console.log("Loading complete - starting fade sequence");
 
         // Mark JavaScript as loaded and show content
@@ -424,7 +425,11 @@ async function threeInit() {
 
     // Load projects from JSON and initialize
     const projects = await loadProjects();
-    addProjects(projects);
+    addProjects(projects, () => {
+        // Callback when all project covers are loaded
+        projectCoversLoaded = true;
+        checkLoadingComplete();
+    });
     dragInit();
     uiInit(projects);
 
@@ -535,30 +540,6 @@ function enableFallbackMode() {
     // Mark JavaScript as loaded and show content
     document.body.classList.add("js-loaded");
 
-    const loadingScreen = document.getElementById("loading-screen");
-    if (loadingScreen) {
-        // Keep blackout for a brief moment, then fade out smoothly
-        setTimeout(() => {
-            loadingScreen.classList.add("hide");
-            setTimeout(() => {
-                loadingScreen.remove();
-            }, 1250);
-        }, 300); // Brief pause before fade
-    }
-
-    // Trigger intro fade
-    const introFade = document.querySelector(".intro-fade");
-    if (introFade) {
-        // Add extra delay on mobile to allow GPU warmup and shader loading
-        const baseDelay = 500;
-        const mobileExtraDelay = isMobileDevice() ? 500 : 0;
-        const totalDelay = baseDelay + mobileExtraDelay;
-        
-        setTimeout(() => {
-            introFade.classList.add("fade-out");
-        }, totalDelay);
-    }
-
     // Show the index view as fallback
     const indexView = document.querySelector(".index-view");
     const viewToggle = document.querySelector(".view-toggle");
@@ -593,12 +574,84 @@ function enableFallbackMode() {
         if (typeof uiInit === "function") {
             loadProjects()
                 .then((projects) => {
+                    // In fallback mode, we still need to wait for project covers to load
+                    // Create a simple loader for the index view images
+                    let loadedCount = 0;
+                    const totalProjects = projects.length;
+                    
+                    if (totalProjects === 0) {
+                        // No projects to load, show content immediately
+                        showFallbackContent();
+                        return;
+                    }
+                    
+                    // Load all project cover images for the index view
+                    projects.forEach(project => {
+                        const coverImage = project.content.cover || 
+                                         (project.content.media && project.content.media.length > 0 ? project.content.media[0] : null) ||
+                                         (project.content.images && project.content.images.length > 0 ? project.content.images[0] : null);
+                        
+                        if (coverImage) {
+                            const img = new Image();
+                            img.onload = () => {
+                                loadedCount++;
+                                if (loadedCount === totalProjects) {
+                                    showFallbackContent();
+                                }
+                            };
+                            img.onerror = () => {
+                                loadedCount++;
+                                if (loadedCount === totalProjects) {
+                                    showFallbackContent();
+                                }
+                            };
+                            img.src = coverImage;
+                        } else {
+                            loadedCount++;
+                            if (loadedCount === totalProjects) {
+                                showFallbackContent();
+                            }
+                        }
+                    });
+                    
                     uiInit(projects);
                 })
                 .catch((error) => {
                     console.error("Error loading projects in fallback mode:", error);
                     uiInit([]); // Initialize with empty array if loading fails
+                    showFallbackContent();
                 });
+        } else {
+            showFallbackContent();
         }
+    } else {
+        showFallbackContent();
+    }
+}
+
+// Helper function to show fallback content and hide loading screen
+function showFallbackContent() {
+    const loadingScreen = document.getElementById("loading-screen");
+    if (loadingScreen) {
+        // Keep blackout for a brief moment, then fade out smoothly
+        setTimeout(() => {
+            loadingScreen.classList.add("hide");
+            setTimeout(() => {
+                loadingScreen.remove();
+            }, 1250);
+        }, 300); // Brief pause before fade
+    }
+
+    // Trigger intro fade
+    const introFade = document.querySelector(".intro-fade");
+    if (introFade) {
+        // Add extra delay on mobile to allow GPU warmup and shader loading
+        const baseDelay = 500;
+        const mobileExtraDelay = isMobileDevice() ? 500 : 0;
+        const totalDelay = baseDelay + mobileExtraDelay;
+        
+        setTimeout(() => {
+            introFade.classList.add("fade-out");
+        }, totalDelay);
     }
 }

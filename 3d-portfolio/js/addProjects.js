@@ -12,15 +12,27 @@ const targetVisualSize = 18; // Increased from 12 to make images bigger
 
 //used for 3D Cubes Projects
 // Projects are randomized on each page load for a fresh experience
-export function addProjects(projects) {
+export function addProjects(projects, onAllCoversLoaded) {
     const scale = 30; // Scale of the cubes
     const radius = 40; // Distance from center
+    
+    // Handle empty projects array
+    if (!projects || projects.length === 0) {
+        if (onAllCoversLoaded) {
+            onAllCoversLoaded();
+        }
+        return;
+    }
     
     // Create a shuffled copy of projects to randomize the layout on each load
     const shuffledProjects = [...projects].sort(() => Math.random() - 0.5);
         
     // Calculate positions on a sphere for equal distribution
     const positions = calculateEvenlySpacedPointsOnSphere(shuffledProjects.length, radius);
+
+    // Track loading progress
+    let loadedCount = 0;
+    const totalProjects = shuffledProjects.length;
 
     for (let i = 0; i < shuffledProjects.length; i++) {
         const loader = new THREE.TextureLoader();
@@ -70,6 +82,10 @@ export function addProjects(projects) {
         // If still no cover image, use a placeholder
         if (!coverImage) {
             console.warn(`No cover image found for project: ${shuffledProjects[i].title}`);
+            loadedCount++;
+            if (loadedCount === totalProjects && onAllCoversLoaded) {
+                onAllCoversLoaded();
+            }
             return;
         }
         
@@ -137,6 +153,19 @@ export function addProjects(projects) {
             
             // Ensure the cube is looking at the sphere after dimension change
             cube.lookAt(sphere.position);
+
+            // Track loading progress
+            loadedCount++;
+            if (loadedCount === totalProjects && onAllCoversLoaded) {
+                onAllCoversLoaded();
+            }
+        }, undefined, (error) => {
+            console.error(`Error loading texture for project ${shuffledProjects[i].title}:`, error);
+            // Still count as loaded to prevent infinite waiting
+            loadedCount++;
+            if (loadedCount === totalProjects && onAllCoversLoaded) {
+                onAllCoversLoaded();
+            }
         });
 
         // Position the cube at the calculated position
