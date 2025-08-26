@@ -25,7 +25,7 @@
         "title": "R&D",
         "id": "Apple",
         "year": "2025",
-        "categories": ["Interaction Design", "Interface Design", "Research"],
+        "categories": ["Interaction", "Interface Design", "Research"],
         "client": "Apple",
         "content": {
             "cover": "/projects/Random_Studio/Apple/Apple_Cover.png",
@@ -46,7 +46,7 @@
         "title": "Digital Twin",
         "id": "DTOO",
         "year": "2024",
-        "categories": ["Interaction Design", "CGI", "Sound Design"],
+        "categories": ["Interaction", "CGI", "Sound Design"],
         "client": "Random Studio",
         "content": {
             "cover": "/projects/Random_Studio/Digital_Twin/Digital Twin Cover Photo.webp",
@@ -165,7 +165,7 @@
         "title": "A Living Entrance",
         "id": "Living_Entrance",
         "year": "2024",
-        "categories": ["Interaction Design", "Installation", "Graphic Design", "Sound Design"],
+        "categories": ["Interaction", "Installation", "Graphic Design", "Sound Design"],
         "client": "Random Studio",
         "content": {
             "cover": "/projects/Random_Studio/Living Entrance/Living_Entrance-Cover.webp",
@@ -456,6 +456,35 @@
                 {
                     "type": "paragraph",
                     "html": "<p>During a one week workshop with Zach Lieberman I got to learn how to use OpenFrameworks. Having long wanted to explore GLSL and shaders, I concentrated by week's efforts on adding interaction to these realtime sketches themed around the circle.</p>"
+                }
+            ]
+        }
+    },
+    {
+        "title": "Past and Future Fabrics",
+        "id": "Fabrics",
+        "year": "2025",
+        "categories": ["Sound Design"],
+        "client": "Zara",
+        "content": {
+            "cover": "/projects/Random_Studio/Zara/Zara_Cover.webp",
+            "media": [
+                {
+                    "path": "/projects/Random_Studio/Zara/Zara-Fabrics_Sound-Design.mp3"
+                }
+            ],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>Random Studio designed this exhibition for Zara’s headquarters in Galicia, Spain; an in-house exhibition that inspires and educates staff on the creative potential of recycled fabrics.</p>"
+                },
+                {
+                    "type": "paragraph",
+                    "html": "<p>My role was to design the sound for the exhibition space, in collaboration with the team of architects at Random and the client, we developed this sound loop to accentuate and compliment the spatial experience.</p>"
+                },
+                {
+                    "type": "paragraph",
+                    "html": "<p>For the full case study please visit <a href='https://random.studio/projects/past-and-future-fabrics-exhibition-for-zara'>this link</a></p>"
                 }
             ]
         }

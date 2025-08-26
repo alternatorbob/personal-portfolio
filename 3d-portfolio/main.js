@@ -1,6 +1,7 @@
 import "./css/style.css";
 import "./css/global_styles.css";
 import "./css/mobile.css";
+import "player.style/microvideo";
 import * as THREE from "three";
 import { dragInit, updateCubesForSphereRotation, worldRotation, rotationVelocity, animateInertia } from "./js/dragControl";
 import { addProjects } from "./js/addProjects";
@@ -206,7 +207,22 @@ async function threeInit() {
             }
         `,
         fragmentShader: `
+            precision highp float;
             varying vec3 vWorldPosition;
+    
+            float Dither = 4.0;
+    
+            //https://www.shadertoy.com/view/lscGDr
+            vec3 dithered(in vec3 color, in vec2 uv, in float dither)
+            {
+                if (dither > 0.0)
+                {
+                    const vec3 magic = vec3( 0.06711056, 0.00583715, 52.9829189 );
+                    float f = fract( magic.z * fract( dot( uv, magic.xy ) ) );
+                    color = clamp(color + (dither/255.0) * f - ((dither*0.5)/255.0), vec3(0.0), vec3(1.0));
+                }
+                return color;
+            }
     
             void main() {
                 float y = vWorldPosition.y;
@@ -220,6 +236,9 @@ async function threeInit() {
                 
                 // Ensure colors stay in valid range
                 color = clamp(color, 0.0, 1.0);
+                
+                // Apply dithering to reduce banding
+                color = dithered(color, gl_FragCoord.xy, Dither);
     
                 gl_FragColor = vec4(color, 1.0);
             }
@@ -235,7 +254,7 @@ async function threeInit() {
 
         // Option 2: Sphere (smoothest, most faces)
         // new THREE.SphereGeometry(700, 64, 32), // radius, widthSegments, heightSegments
-        new THREE.SphereGeometry(700, 16, 16), // radius, widthSegments, heightSegments
+        new THREE.SphereGeometry(700, isMobileDevice() ? 16 : 24, isMobileDevice() ? 16 : 24), // radius, widthSegments, heightSegments
 
         // Option 3: Icosahedron (organic, spherical but faceted)
         // new THREE.IcosahedronGeometry(700, 4), // radius, subdivision_level (0-5)

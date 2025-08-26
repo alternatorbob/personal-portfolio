@@ -101,19 +101,8 @@ export function uiInit(projects) {
 
                 // Only close index mode if no project card or about card is open
                 if (viewToggle && viewToggle.classList.contains("active") && !hasOpenProjectCard && !hasOpenAboutCard) {
-                    viewToggle.classList.remove("active");
-                    if (indexView) indexView.classList.remove("active");
-                    if (threeCanvas) threeCanvas.style.pointerEvents = "auto";
-
-                    // Make sure to handle the blur div properly
-                    if (blur) {
-                        // Update blur properties back to full blur before hiding
-                        updateBlurProperties("full");
-                        blur.classList.add("hide");
-                    }
-
-                    // Resume rendering
-                    resumeRenderer();
+                    uiSwitchState("3d");
+                    viewToggle.textContent = "Index";
                 }
             }
         });

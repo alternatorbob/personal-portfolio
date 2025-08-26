@@ -335,9 +335,7 @@ export class AboutCard extends Card {
                     title: "LinkedIn",
                     url: "https://www.linkedin.com/in/your-linkedin",
                 },
-                {
-
-                },
+                {},
             ],
         };
 
@@ -430,7 +428,7 @@ export class AboutCard extends Card {
     render() {
         // Call the parent render method first
         const result = super.render();
-        
+
         // Set up touch handling only on mobile devices
         if (this.element && isMobileDevice()) {
             // Use a small delay to ensure DOM is fully ready
@@ -438,7 +436,7 @@ export class AboutCard extends Card {
                 this.setupAboutCardTouchHandling();
             }, 50);
         }
-        
+
         return result;
     }
 
@@ -452,17 +450,29 @@ export class AboutCard extends Card {
         }
 
         // Touch handlers for entire card (vertical swipes for closing)
-        this.element.addEventListener("touchstart", (e) => {
-            this.handleCardTouchStart(e);
-        }, { passive: true });
+        this.element.addEventListener(
+            "touchstart",
+            (e) => {
+                this.handleCardTouchStart(e);
+            },
+            { passive: true }
+        );
 
-        this.element.addEventListener("touchmove", (e) => {
-            this.handleCardTouchMove(e);
-        }, { passive: false });
+        this.element.addEventListener(
+            "touchmove",
+            (e) => {
+                this.handleCardTouchMove(e);
+            },
+            { passive: false }
+        );
 
-        this.element.addEventListener("touchend", (e) => {
-            this.handleCardTouchEnd(e);
-        }, { passive: true });
+        this.element.addEventListener(
+            "touchend",
+            (e) => {
+                this.handleCardTouchEnd(e);
+            },
+            { passive: true }
+        );
     }
 
     /**
@@ -472,7 +482,7 @@ export class AboutCard extends Card {
     handleCardTouchStart(e) {
         try {
             if (!e.touches || e.touches.length === 0) return;
-            
+
             // Store touch position for card-level swipe detection
             this.cardTouchStartY = e.touches[0].clientY;
             this.cardTouchStartX = e.touches[0].clientX;
@@ -492,25 +502,25 @@ export class AboutCard extends Card {
 
             const currentY = e.touches[0].clientY;
             const currentX = e.touches[0].clientX;
-            
+
             const deltaY = currentY - this.cardTouchStartY;
             const deltaX = Math.abs(currentX - this.cardTouchStartX);
 
             // Check if this is a vertical swipe down (more vertical than horizontal movement)
             if (Math.abs(deltaY) > deltaX && deltaY > 20) {
                 this.isSwipingDown = true;
-                
+
                 // Create visual feedback for swipe down
                 const cardElement = this.element;
                 if (cardElement && deltaY > 0) {
                     // Only allow downward swipes
                     const swipeProgress = Math.min(deltaY / 150, 1); // Normalize to 0-1 over 150px
-                    
+
                     // Apply transform and opacity changes
                     cardElement.style.transition = "none";
                     cardElement.style.transform = `translate(-50%, -50%) translateY(${deltaY * 0.5}px)`;
-                    cardElement.style.opacity = `${1 - (swipeProgress * 0.3)}`; // Fade slightly
-                    
+                    cardElement.style.opacity = `${1 - swipeProgress * 0.3}`; // Fade slightly
+
                     // Prevent default to avoid page scrolling during swipe
                     e.preventDefault();
                 }
@@ -547,7 +557,6 @@ export class AboutCard extends Card {
             this.cardTouchStartY = 0;
             this.cardTouchStartX = 0;
             this.isSwipingDown = false;
-
         } catch (error) {
             console.warn("Error handling about card touch end:", error);
             // Reset touch state and card position on error
@@ -568,7 +577,7 @@ export class AboutCard extends Card {
                 cardElement.style.transition = "transform 0.3s ease-out, opacity 0.3s ease-out";
                 cardElement.style.transform = "translate(-50%, -50%)";
                 cardElement.style.opacity = "1";
-                
+
                 // Clear transition after animation completes
                 setTimeout(() => {
                     if (cardElement) {
@@ -580,6 +589,35 @@ export class AboutCard extends Card {
             console.warn("Error resetting about card position:", error);
         }
     }
+}
+
+/**
+ * Create a styled video element using player.style
+ * @param {string} videoSrc - Video source URL
+ * @param {Object} options - Video options
+ * @returns {HTMLElement} - The styled video container element
+ */
+function createStyledVideo(videoSrc, options = {}) {
+    const { controls = false, preload = "none", playsinline = true, muted = true, autoplay = false, controlsList = "nodownload" } = options;
+
+    const template = document.createElement("template");
+    template.innerHTML = `
+        <media-theme-microvideo style="width: 100%; height: 100%;">
+            <video
+                slot="media"
+                src="${videoSrc}"
+                ${controls ? "controls" : ""}
+                preload="${preload}"
+                ${playsinline ? "playsinline" : ""}
+                ${muted ? "muted" : ""}
+                ${autoplay ? "autoplay" : ""}
+                controlsList="${controlsList}"
+                style="width: 100%; height: 100%; object-fit: contain;"
+            ></video>
+        </media-theme-microvideo>
+    `;
+
+    return template.content.cloneNode(true);
 }
 
 /**
@@ -606,7 +644,6 @@ export class ProjectCard extends Card {
         this.slides = [];
         this.intersectionObserver = null;
 
-        
         // Touch/swipe handling for mobile
         this.touchStartX = 0;
         this.touchStartY = 0;
@@ -749,7 +786,7 @@ export class ProjectCard extends Card {
 
             // Move next button directly to the project card for mobile
             const nextButton = card.querySelector(".button-next");
-            
+
             if (nextButton) {
                 // Remove from gallery and append to card
                 nextButton.remove();
@@ -816,10 +853,6 @@ export class ProjectCard extends Card {
         // Note: Touch handling will be set up after the card is rendered
     }
 
-
-
-
-
     /**
      * Complete the swipe animation to the next or previous slide
      * @param {boolean} isNext - Whether to go to next slide (true) or previous (false)
@@ -845,7 +878,6 @@ export class ProjectCard extends Card {
                     this.showPreviousSlide();
                 }
             }
-
         } catch (error) {
             console.warn("Error completing swipe animation:", error);
         }
@@ -862,21 +894,21 @@ export class ProjectCard extends Card {
         if (!currentSlide || !prevSlide) return;
 
         // Position previous slide off-screen to the left
-        prevSlide.style.position = 'absolute';
-        prevSlide.style.top = '0';
-        prevSlide.style.left = '0';
-        prevSlide.style.width = '100%';
-        prevSlide.style.height = 'auto';
-        prevSlide.style.transform = 'translateX(-100%)';
-        prevSlide.style.zIndex = '2';
+        prevSlide.style.position = "absolute";
+        prevSlide.style.top = "0";
+        prevSlide.style.left = "0";
+        prevSlide.style.width = "100%";
+        prevSlide.style.height = "auto";
+        prevSlide.style.transform = "translateX(-100%)";
+        prevSlide.style.zIndex = "2";
 
         // Force reflow
         prevSlide.offsetHeight;
 
         // Animate current slide out to the right and previous slide in
-        currentSlide.style.transform = 'translateX(100%)';
-        currentSlide.style.zIndex = '1';
-        prevSlide.style.transform = 'translateX(0%)';
+        currentSlide.style.transform = "translateX(100%)";
+        currentSlide.style.zIndex = "1";
+        prevSlide.style.transform = "translateX(0%)";
 
         // Update current index
         this.currentSlideIndex = prevIndex;
@@ -884,16 +916,16 @@ export class ProjectCard extends Card {
         // After animation, make previous slide static for container sizing
         setTimeout(() => {
             if (prevSlide) {
-                prevSlide.style.position = 'static';
-                prevSlide.style.top = 'auto';
-                prevSlide.style.left = 'auto';
-                prevSlide.style.transform = 'translateX(0%)';
+                prevSlide.style.position = "static";
+                prevSlide.style.top = "auto";
+                prevSlide.style.left = "auto";
+                prevSlide.style.transform = "translateX(0%)";
             }
             if (currentSlide) {
-                currentSlide.style.position = 'absolute';
-                currentSlide.style.top = '0';
-                currentSlide.style.left = '0';
-                currentSlide.style.transform = 'translateX(100%)';
+                currentSlide.style.position = "absolute";
+                currentSlide.style.top = "0";
+                currentSlide.style.left = "0";
+                currentSlide.style.transform = "translateX(100%)";
             }
         }, 300);
 
@@ -908,7 +940,7 @@ export class ProjectCard extends Card {
         try {
             if (!this.slides || this.slides.length <= 1) return;
 
-            const slideGroup = this.element.querySelector('.slide-group');
+            const slideGroup = this.element.querySelector(".slide-group");
             if (!slideGroup) return;
 
             // Initialize the current position if not set
@@ -918,28 +950,27 @@ export class ProjectCard extends Card {
 
             // Move to previous position
             this.currentPosition--;
-            
+
             // If we go below 0, jump to the end of duplicates
             if (this.currentPosition < 0) {
-                slideGroup.style.transition = 'none';
+                slideGroup.style.transition = "none";
                 this.currentPosition = this.totalSlides - 1;
                 slideGroup.style.transform = `translateX(-${this.currentPosition * 100}%)`;
-                
+
                 // Re-enable transition
                 setTimeout(() => {
-                    slideGroup.style.transition = 'transform 0.3s ease-in-out';
+                    slideGroup.style.transition = "transform 0.3s ease-in-out";
                 }, 50);
             } else {
                 // Normal previous slide
                 slideGroup.style.transform = `translateX(-${this.currentPosition * 100}%)`;
             }
-            
+
             // Update the logical slide index for video handling
             this.currentSlideIndex = this.currentPosition % this.totalSlides;
 
             // Handle video pause/play
             this.handleVideoPlayback();
-
         } catch (error) {
             console.warn("Error showing previous slide:", error);
         }
@@ -954,9 +985,7 @@ export class ProjectCard extends Card {
 
             const currentSlide = this.slides[this.currentSlideIndex];
             const nextSlide = this.slides[(this.currentSlideIndex + 1) % this.slides.length];
-            const prevSlide = this.slides[this.currentSlideIndex === 0 
-                ? this.slides.length - 1 
-                : this.currentSlideIndex - 1];
+            const prevSlide = this.slides[this.currentSlideIndex === 0 ? this.slides.length - 1 : this.currentSlideIndex - 1];
 
             if (!currentSlide) return;
 
@@ -974,7 +1003,6 @@ export class ProjectCard extends Card {
                 prevSlide.style.transition = "transform 0.3s ease-out";
                 prevSlide.style.transform = "translateX(-100%)";
             }
-
         } catch (error) {
             console.warn("Error snapping back to current slide:", error);
         }
@@ -990,22 +1018,21 @@ export class ProjectCard extends Card {
 
             const currentSlide = this.slides[this.currentSlideIndex];
             const nextSlide = this.slides[(this.currentSlideIndex + 1) % this.slides.length];
-            
+
             if (!currentSlide || !nextSlide) return;
 
             // Calculate swipe progress (0 to 1)
             const swipeProgress = Math.min(Math.abs(deltaX) / 100, 1);
-            
+
             // Apply transform to current slide (slide out)
             currentSlide.style.transition = "none";
             currentSlide.style.transform = `translateX(-${deltaX * 0.3}px)`;
-            
+
             // Apply transform to next slide (slide in)
             nextSlide.style.transition = "none";
-            nextSlide.style.transform = `translateX(${100 - (deltaX * 0.3)}%)`;
-            
+            nextSlide.style.transform = `translateX(${100 - deltaX * 0.3}%)`;
+
             // Remove opacity effects - use only transform for clean slide transition
-            
         } catch (error) {
             console.warn("Error creating pull effect:", error);
         }
@@ -1019,35 +1046,59 @@ export class ProjectCard extends Card {
             console.warn("ProjectCard element not yet created, skipping touch handling setup");
             return;
         }
-        
+
         const slideshowContainer = this.element.querySelector(".slideshow-container");
         if (slideshowContainer) {
             // Touch handlers for slideshow (horizontal swipes)
-            slideshowContainer.addEventListener("touchstart", (e) => {
-                this.handleSlideshowTouchStart(e);
-            }, { passive: true });
+            slideshowContainer.addEventListener(
+                "touchstart",
+                (e) => {
+                    this.handleSlideshowTouchStart(e);
+                },
+                { passive: true }
+            );
 
-            slideshowContainer.addEventListener("touchmove", (e) => {
-                this.handleSlideshowTouchMove(e);
-            }, { passive: false });
+            slideshowContainer.addEventListener(
+                "touchmove",
+                (e) => {
+                    this.handleSlideshowTouchMove(e);
+                },
+                { passive: false }
+            );
 
-            slideshowContainer.addEventListener("touchend", (e) => {
-                this.handleSlideshowTouchEnd(e);
-            }, { passive: true });
+            slideshowContainer.addEventListener(
+                "touchend",
+                (e) => {
+                    this.handleSlideshowTouchEnd(e);
+                },
+                { passive: true }
+            );
         }
 
         // Touch handlers for entire card (vertical swipes for closing)
-        this.element.addEventListener("touchstart", (e) => {
-            this.handleCardTouchStart(e);
-        }, { passive: true });
+        this.element.addEventListener(
+            "touchstart",
+            (e) => {
+                this.handleCardTouchStart(e);
+            },
+            { passive: true }
+        );
 
-        this.element.addEventListener("touchmove", (e) => {
-            this.handleCardTouchMove(e);
-        }, { passive: false });
+        this.element.addEventListener(
+            "touchmove",
+            (e) => {
+                this.handleCardTouchMove(e);
+            },
+            { passive: false }
+        );
 
-        this.element.addEventListener("touchend", (e) => {
-            this.handleCardTouchEnd(e);
-        }, { passive: true });
+        this.element.addEventListener(
+            "touchend",
+            (e) => {
+                this.handleCardTouchEnd(e);
+            },
+            { passive: true }
+        );
     }
 
     /**
@@ -1057,7 +1108,7 @@ export class ProjectCard extends Card {
     handleSlideshowTouchStart(e) {
         try {
             if (!e.touches || e.touches.length === 0) return;
-            
+
             this.touchStartX = e.touches[0].clientX;
             this.touchStartY = e.touches[0].clientY;
             this.isSwiping = false;
@@ -1073,7 +1124,7 @@ export class ProjectCard extends Card {
     handleCardTouchStart(e) {
         try {
             if (!e.touches || e.touches.length === 0) return;
-            
+
             // Store touch position for card-level swipe detection
             this.cardTouchStartY = e.touches[0].clientY;
             this.cardTouchStartX = e.touches[0].clientX;
@@ -1100,10 +1151,10 @@ export class ProjectCard extends Card {
             // Check if this is a horizontal swipe (more horizontal than vertical movement)
             if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
                 this.isSwiping = true;
-                
+
                 // Create animated pull effect during swipe
                 this.createPullEffect(deltaX);
-                
+
                 // Add visual feedback class
                 const slideshowContainer = this.element.querySelector(".slideshow-container");
                 if (slideshowContainer) {
@@ -1127,25 +1178,25 @@ export class ProjectCard extends Card {
 
             const currentY = e.touches[0].clientY;
             const currentX = e.touches[0].clientX;
-            
+
             const deltaY = currentY - this.cardTouchStartY;
             const deltaX = Math.abs(currentX - this.cardTouchStartX);
 
             // Check if this is a vertical swipe down (more vertical than horizontal movement)
             if (Math.abs(deltaY) > deltaX && deltaY > 20) {
                 this.isSwipingDown = true;
-                
+
                 // Create visual feedback for swipe down
                 const cardElement = this.element;
                 if (cardElement && deltaY > 0) {
                     // Only allow downward swipes
                     const swipeProgress = Math.min(deltaY / 150, 1); // Normalize to 0-1 over 150px
-                    
+
                     // Apply transform and opacity changes
                     cardElement.style.transition = "none";
                     cardElement.style.transform = `translateY(${deltaY * 0.5}px)`;
-                    cardElement.style.opacity = `${1 - (swipeProgress * 0.3)}`; // Fade slightly
-                    
+                    cardElement.style.opacity = `${1 - swipeProgress * 0.3}`; // Fade slightly
+
                     // Prevent default to avoid page scrolling during swipe
                     e.preventDefault();
                 }
@@ -1230,7 +1281,6 @@ export class ProjectCard extends Card {
             this.cardTouchStartY = 0;
             this.cardTouchStartX = 0;
             this.isSwipingDown = false;
-
         } catch (error) {
             console.warn("Error handling card touch end:", error);
             // Reset touch state and card position on error
@@ -1251,7 +1301,7 @@ export class ProjectCard extends Card {
                 cardElement.style.transition = "transform 0.3s ease-out, opacity 0.3s ease-out";
                 cardElement.style.transform = "translateY(0)";
                 cardElement.style.opacity = "1";
-                
+
                 // Clear transition after animation completes
                 setTimeout(() => {
                     if (cardElement) {
@@ -1264,19 +1314,13 @@ export class ProjectCard extends Card {
         }
     }
 
-
-
-
-
-
-
     /**
      * Override the base render method to set up touch handling after rendering
      */
     render() {
         // Call the parent render method first
         const result = super.render();
-        
+
         // Set up touch handling only on mobile devices
         if (this.element && isMobileDevice()) {
             // Use a small delay to ensure DOM is fully ready
@@ -1284,7 +1328,7 @@ export class ProjectCard extends Card {
                 this.setupTouchHandling();
             }, 50);
         }
-        
+
         return result;
     }
 
@@ -1302,17 +1346,17 @@ export class ProjectCard extends Card {
             // Use the new media array with custom ordering
             mediaItems = media.map((item) => {
                 // Handle both string and object formats
-                if (typeof item === 'string') {
+                if (typeof item === "string") {
                     return {
                         path: item,
                         type: detectMediaType(item),
-                        thumbnail: null
+                        thumbnail: null,
                     };
                 } else {
                     return {
                         path: item.path,
                         type: detectMediaType(item.path),
-                        thumbnail: item.thumbnail || null
+                        thumbnail: item.thumbnail || null,
                     };
                 }
             });
@@ -1337,7 +1381,7 @@ export class ProjectCard extends Card {
             container.className = "slideshow-container mobile";
             this.currentSlideIndex = 0;
             this.totalSlides = numSlides;
-            
+
             // Create slides with absolute positioning
             for (let i = 0; i < numSlides; i++) {
                 const slide = document.createElement("div");
@@ -1346,7 +1390,7 @@ export class ProjectCard extends Card {
                 const mediaItem = mediaItems[i];
 
                 this.createSlideContent(slide, mediaItem);
-                
+
                 // First slide is static to provide container dimensions, others are absolute
                 if (i === 0) {
                     slide.style.position = "static";
@@ -1364,7 +1408,7 @@ export class ProjectCard extends Card {
                     slide.style.zIndex = "1";
                 }
                 slide.style.transition = "transform 0.3s ease-in-out";
-                
+
                 container.appendChild(slide);
                 this.slides.push(slide);
             }
@@ -1373,10 +1417,10 @@ export class ProjectCard extends Card {
             container.className = "slideshow-container desktop";
             this.currentPosition = 0;
             this.totalSlides = numSlides;
-            
+
             const slideGroup = document.createElement("div");
             slideGroup.className = "slide-group";
-            
+
             // Create original slides
             for (let i = 0; i < numSlides; i++) {
                 const slide = document.createElement("div");
@@ -1421,18 +1465,30 @@ export class ProjectCard extends Card {
                     slide.innerHTML = `
                         <div class="video-container" data-video-src="${mediaItem.path}">
                             <img src="${mediaItem.thumbnail}" alt="Video thumbnail" class="video-thumbnail" />
-                            <div class="video-play-button">▶</div>
+                            <div class="video-play-button"><span id="video-play-icon">▶</span></div>
                         </div>
                     `;
                     this.setupVideoThumbnailClick(slide);
                 } else {
-                    // No thumbnail provided, show video directly
-                    slide.innerHTML = `<video controls preload="none" playsinline muted controlsList="nodownload"><source src="${mediaItem.path}" type="video/mp4">Your browser does not support the video tag.</video>`;
+                    // No thumbnail provided, show styled video directly
+                    const styledVideo = createStyledVideo(mediaItem.path);
+                    slide.appendChild(styledVideo);
                     this.setupVideoOptimization(slide);
                 }
                 break;
 
-
+            case "audio":
+                slide.innerHTML = `
+                    <media-theme-microvideo style="width: 100%">
+                        <audio
+                            slot="media"
+                            src="${mediaItem.path}"
+                            playsinline
+                            crossorigin="anonymous"
+                        ></audio>
+                    </media-theme-microvideo>
+                `;
+                break;
 
             default:
                 // Fallback to image for unknown types
@@ -1441,60 +1497,59 @@ export class ProjectCard extends Card {
         }
     }
 
-
-
-
-
-
-
     /**
      * Setup click handler for video thumbnails
      * @param {HTMLElement} slide - The slide element containing the video thumbnail
      */
     setupVideoThumbnailClick(slide) {
-        const videoContainer = slide.querySelector('.video-container');
-        const thumbnail = slide.querySelector('.video-thumbnail');
-        const playButton = slide.querySelector('.video-play-button');
-        
+        const videoContainer = slide.querySelector(".video-container");
+        const thumbnail = slide.querySelector(".video-thumbnail");
+        const playButton = slide.querySelector(".video-play-button");
+
         if (!videoContainer || !thumbnail) return;
-        
+
         // Position play button relative to thumbnail image content
         this.positionPlayButtonOnThumbnail(thumbnail, playButton);
-        
+
         const clickHandler = (event) => {
             // Prevent event bubbling to avoid closing the card
             event.stopPropagation();
             event.preventDefault();
-            
-            const videoSrc = videoContainer.getAttribute('data-video-src');
+
+            const videoSrc = videoContainer.getAttribute("data-video-src");
             if (!videoSrc) return;
-            
-            // Replace thumbnail with actual video
-            videoContainer.innerHTML = `<video controls preload="auto" playsinline muted controlsList="nodownload" autoplay><source src="${videoSrc}" type="video/mp4">Your browser does not support the video tag.</video>`;
-            
+
+            // Replace thumbnail with styled video
+            const styledVideo = createStyledVideo(videoSrc, {
+                preload: "auto",
+                autoplay: true,
+            });
+            videoContainer.innerHTML = "";
+            videoContainer.appendChild(styledVideo);
+
             // Setup video optimization for the new video element
             this.setupVideoOptimization(slide);
         };
-        
+
         // Add click handlers to both thumbnail and play button
-        if (thumbnail) thumbnail.addEventListener('click', clickHandler);
-        if (playButton) playButton.addEventListener('click', clickHandler);
-        
+        if (thumbnail) thumbnail.addEventListener("click", clickHandler);
+        if (playButton) playButton.addEventListener("click", clickHandler);
+
         // Add touch handlers for mobile with event prevention
         const touchHandler = (event) => {
             event.stopPropagation();
             event.preventDefault();
             clickHandler(event);
         };
-        
-        if (thumbnail) thumbnail.addEventListener('touchend', touchHandler);
-        if (playButton) playButton.addEventListener('touchend', touchHandler);
-        
+
+        if (thumbnail) thumbnail.addEventListener("touchend", touchHandler);
+        if (playButton) playButton.addEventListener("touchend", touchHandler);
+
         // Reposition play button when window is resized or image loads
         if (thumbnail && playButton) {
             const repositionHandler = () => this.positionPlayButtonOnThumbnail(thumbnail, playButton);
-            thumbnail.addEventListener('load', repositionHandler);
-            window.addEventListener('resize', repositionHandler);
+            thumbnail.addEventListener("load", repositionHandler);
+            window.addEventListener("resize", repositionHandler);
         }
     }
 
@@ -1505,33 +1560,33 @@ export class ProjectCard extends Card {
      */
     positionPlayButtonOnThumbnail(thumbnail, playButton) {
         if (!thumbnail || !playButton) return;
-        
+
         // Wait for image to load if it hasn't already
         const positionButton = () => {
             const containerRect = thumbnail.getBoundingClientRect();
             const containerStyle = window.getComputedStyle(thumbnail);
-            
+
             // Get the natural dimensions of the image
             const naturalWidth = thumbnail.naturalWidth;
             const naturalHeight = thumbnail.naturalHeight;
-            
+
             if (naturalWidth === 0 || naturalHeight === 0) {
                 // Image hasn't loaded yet, try again after a short delay
                 setTimeout(() => this.positionPlayButtonOnThumbnail(thumbnail, playButton), 100);
                 return;
             }
-            
+
             // Calculate the container dimensions (excluding padding/border)
             const containerWidth = thumbnail.offsetWidth;
             const containerHeight = thumbnail.offsetHeight;
-            
+
             // Calculate the actual image display dimensions with object-fit: contain
             const imageAspectRatio = naturalWidth / naturalHeight;
             const containerAspectRatio = containerWidth / containerHeight;
-            
+
             let imageDisplayWidth, imageDisplayHeight;
             let imageOffsetX, imageOffsetY;
-            
+
             if (imageAspectRatio > containerAspectRatio) {
                 // Image is wider than container ratio - limited by width
                 imageDisplayWidth = containerWidth;
@@ -1545,32 +1600,32 @@ export class ProjectCard extends Card {
                 imageOffsetX = (containerWidth - imageDisplayWidth) / 2;
                 imageOffsetY = 0;
             }
-            
+
             // Adjust offset based on object-position: left top
-            if (containerStyle.objectPosition && containerStyle.objectPosition.includes('left')) {
+            if (containerStyle.objectPosition && containerStyle.objectPosition.includes("left")) {
                 imageOffsetX = 0;
             }
-            if (containerStyle.objectPosition && containerStyle.objectPosition.includes('top')) {
+            if (containerStyle.objectPosition && containerStyle.objectPosition.includes("top")) {
                 imageOffsetY = 0;
             }
-            
+
             // Position the play button at the center of the actual image content
-            const centerX = imageOffsetX + (imageDisplayWidth / 2);
-            const centerY = imageOffsetY + (imageDisplayHeight / 2);
-            
+            const centerX = imageOffsetX + imageDisplayWidth / 2;
+            const centerY = imageOffsetY + imageDisplayHeight / 2;
+
             // Set the position using percentage for responsive behavior
             const leftPercent = (centerX / containerWidth) * 100;
             const topPercent = (centerY / containerHeight) * 100;
-            
+
             playButton.style.left = `${leftPercent}%`;
             playButton.style.top = `${topPercent}%`;
-            playButton.style.transform = 'translate(-50%, -50%)';
+            playButton.style.transform = "translate(-50%, -50%)";
         };
-        
+
         if (thumbnail.complete && thumbnail.naturalWidth > 0) {
             positionButton();
         } else {
-            thumbnail.addEventListener('load', positionButton, { once: true });
+            thumbnail.addEventListener("load", positionButton, { once: true });
         }
     }
 
@@ -1579,7 +1634,8 @@ export class ProjectCard extends Card {
      * @param {HTMLElement} slide - The slide element containing the video
      */
     setupVideoOptimization(slide) {
-        const video = slide.querySelector("video");
+        // Look for video element in both regular video tags and player.style containers
+        const video = slide.querySelector("video") || slide.querySelector("media-theme-minimal video");
         if (!video) return;
 
         // Set up intersection observer for lazy loading
@@ -1637,19 +1693,19 @@ export class ProjectCard extends Card {
      */
     preloadProjectMedia() {
         const { media = [] } = this.project.content || {};
-        
+
         if (!media || media.length === 0) return;
-        
+
         // Track loading progress
         let totalMedia = 0;
         let loadedMedia = 0;
-        
+
         // Preload all media items
         media.forEach((item) => {
-            const mediaPath = typeof item === 'string' ? item : item.path;
+            const mediaPath = typeof item === "string" ? item : item.path;
             const mediaType = detectMediaType(mediaPath);
-            
-            if (mediaType === 'image' || mediaType === 'gif') {
+
+            if (mediaType === "image" || mediaType === "gif") {
                 // Preload images and GIFs
                 totalMedia++;
                 const img = new Image();
@@ -1660,8 +1716,7 @@ export class ProjectCard extends Card {
                     console.warn(`Failed to load image: ${mediaPath}`);
                 };
                 img.src = mediaPath;
-                
-            } else if (mediaType === 'video') {
+            } else if (mediaType === "video") {
                 // Preload video thumbnails if available
                 if (item.thumbnail) {
                     totalMedia++;
@@ -1674,11 +1729,11 @@ export class ProjectCard extends Card {
                     };
                     thumbnailImg.src = item.thumbnail;
                 }
-                
+
                 // Preload video metadata (doesn't download the full video, just gets metadata)
                 totalMedia++;
-                const video = document.createElement('video');
-                video.preload = 'metadata';
+                const video = document.createElement("video");
+                video.preload = "metadata";
                 video.onloadedmetadata = () => {
                     loadedMedia++;
                 };
@@ -1686,14 +1741,13 @@ export class ProjectCard extends Card {
                     console.warn(`Failed to load video metadata: ${mediaPath}`);
                 };
                 video.src = mediaPath;
-                
-            } else if (mediaType === 'iframe') {
+            } else if (mediaType === "iframe") {
                 // For iframes (Vimeo), just count them as loaded
                 totalMedia++;
                 loadedMedia++;
             }
         });
-        
+
         // Log completion
         if (totalMedia > 0) {
             console.log(`Preloading ${totalMedia} media items for ${this.project.title}`);
@@ -1716,7 +1770,6 @@ export class ProjectCard extends Card {
                 // Desktop: Use flexbox infinite carousel
                 this.showNextSlideDesktop();
             }
-
         } catch (error) {
             console.warn("Error showing next slide:", error);
         }
@@ -1733,21 +1786,21 @@ export class ProjectCard extends Card {
         if (!currentSlide || !nextSlide) return;
 
         // Position next slide off-screen to the right
-        nextSlide.style.position = 'absolute';
-        nextSlide.style.top = '0';
-        nextSlide.style.left = '0';
-        nextSlide.style.width = '100%';
-        nextSlide.style.height = 'auto';
-        nextSlide.style.transform = 'translateX(100%)';
-        nextSlide.style.zIndex = '2';
+        nextSlide.style.position = "absolute";
+        nextSlide.style.top = "0";
+        nextSlide.style.left = "0";
+        nextSlide.style.width = "100%";
+        nextSlide.style.height = "auto";
+        nextSlide.style.transform = "translateX(100%)";
+        nextSlide.style.zIndex = "2";
 
         // Force reflow
         nextSlide.offsetHeight;
 
         // Animate current slide out to the left and next slide in
-        currentSlide.style.transform = 'translateX(-100%)';
-        currentSlide.style.zIndex = '1';
-        nextSlide.style.transform = 'translateX(0%)';
+        currentSlide.style.transform = "translateX(-100%)";
+        currentSlide.style.zIndex = "1";
+        nextSlide.style.transform = "translateX(0%)";
 
         // Update current index
         this.currentSlideIndex = nextIndex;
@@ -1755,16 +1808,16 @@ export class ProjectCard extends Card {
         // After animation, make next slide static for container sizing
         setTimeout(() => {
             if (nextSlide) {
-                nextSlide.style.position = 'static';
-                nextSlide.style.top = 'auto';
-                nextSlide.style.left = 'auto';
-                nextSlide.style.transform = 'translateX(0%)';
+                nextSlide.style.position = "static";
+                nextSlide.style.top = "auto";
+                nextSlide.style.left = "auto";
+                nextSlide.style.transform = "translateX(0%)";
             }
             if (currentSlide) {
-                currentSlide.style.position = 'absolute';
-                currentSlide.style.top = '0';
-                currentSlide.style.left = '0';
-                currentSlide.style.transform = 'translateX(100%)';
+                currentSlide.style.position = "absolute";
+                currentSlide.style.top = "0";
+                currentSlide.style.left = "0";
+                currentSlide.style.transform = "translateX(100%)";
             }
         }, 300);
 
@@ -1776,7 +1829,7 @@ export class ProjectCard extends Card {
      * Show next slide on desktop using infinite carousel
      */
     showNextSlideDesktop() {
-        const slideGroup = this.element.querySelector('.slide-group');
+        const slideGroup = this.element.querySelector(".slide-group");
         if (!slideGroup) return;
 
         // Initialize the current position if not set
@@ -1786,24 +1839,24 @@ export class ProjectCard extends Card {
 
         // Move to next position
         this.currentPosition++;
-        
+
         // Apply the transform
         slideGroup.style.transform = `translateX(-${this.currentPosition * 100}%)`;
-        
+
         // Update the logical slide index for video handling
         this.currentSlideIndex = this.currentPosition % this.totalSlides;
-        
+
         // Check if we've reached the end of original slides (need to reset)
         if (this.currentPosition === this.totalSlides) {
             // After transition completes, reset to position 0 without animation
             setTimeout(() => {
-                slideGroup.style.transition = 'none';
+                slideGroup.style.transition = "none";
                 this.currentPosition = 0;
-                slideGroup.style.transform = 'translateX(0%)';
-                
+                slideGroup.style.transform = "translateX(0%)";
+
                 // Re-enable transition
                 setTimeout(() => {
-                    slideGroup.style.transition = 'transform 0.3s ease-in-out';
+                    slideGroup.style.transition = "transform 0.3s ease-in-out";
                 }, 50);
             }, 300); // Match CSS transition duration
         }
@@ -1821,7 +1874,7 @@ export class ProjectCard extends Card {
         // Pause all videos (both actual video elements and thumbnails)
         this.slides.forEach((slide, index) => {
             const video = slide.querySelector("video");
-            
+
             if (index !== this.currentSlideIndex) {
                 this.pauseVideoInSlide(slide, video);
             }
@@ -1831,20 +1884,18 @@ export class ProjectCard extends Card {
         const currentSlide = this.slides[this.currentSlideIndex];
         if (currentSlide) {
             const video = currentSlide.querySelector("video");
-            
+
             // Note: We don't auto-play videos anymore - user must click to play
             // This applies to both thumbnail approach and direct video elements
         }
     }
-
-
 
     /**
      * Set up keyboard navigation for the card (only for desktop)
      */
     setupKeyboardNavigation() {
         // Only enable keyboard navigation on desktop
-        if (window.innerWidth > 768 && !('ontouchstart' in window)) {
+        if (window.innerWidth > 768 && !("ontouchstart" in window)) {
             const keyHandler = (e) => {
                 if (e.key === "ArrowRight") {
                     this.showNextSlide();
@@ -1939,8 +1990,6 @@ export class ProjectCard extends Card {
         //         console.log("Video play failed:", error);
         //     });
         // }
-
-
     }
 
     /**
@@ -1952,7 +2001,5 @@ export class ProjectCard extends Card {
         if (video && !video.paused) {
             video.pause();
         }
-
-
     }
 }

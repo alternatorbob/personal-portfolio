@@ -223,6 +223,15 @@ export function detectMediaType(mediaPath) {
         return 'video';
     }
     
+    // Check for audio file extensions
+    const audioExtensions = ['.mp3', '.wav', '.ogg', '.m4a', '.aac'];
+    const hasAudioExtension = audioExtensions.some(ext => 
+        mediaPath.toLowerCase().includes(ext)
+    );
+    if (hasAudioExtension) {
+        return 'audio';
+    }
+    
     // Check for GIF
     if (mediaPath.toLowerCase().includes('.gif')) {
         return 'gif';
