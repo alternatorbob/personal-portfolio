@@ -409,12 +409,19 @@ export class AboutCard extends Card {
         linksGrid.appendChild(column1);
         linksGrid.appendChild(column2);
 
+        // Create copyright notice
+        const copyrightNotice = document.createElement("div");
+        copyrightNotice.id = "copyright-notice";
+        copyrightNotice.className = "text-xs";
+        copyrightNotice.textContent = "© 2025 Bogdan Năstase. All Rights Reserved";
+
         // Setup external links to open in new tabs (inherited from base Card class)
         this.setupExternalLinks(description);
 
         // Append elements
         info.appendChild(title);
         info.appendChild(description);
+        info.appendChild(copyrightNotice);
 
         // Add close button to the info div
         this.addCloseButton(info);
@@ -1695,7 +1702,7 @@ export class ProjectCard extends Card {
         // Check if this project's media has already been preloaded to avoid duplicates
         const projectId = this.project.id;
         const cacheKey = `${projectId}_remaining_media`;
-        
+
         // Check if remaining media preloading has already been done for this project
         if (this.constructor.remainingMediaPreloadCache && this.constructor.remainingMediaPreloadCache.has(cacheKey)) {
             return; // Already preloaded, skip
