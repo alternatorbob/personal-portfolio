@@ -46,9 +46,26 @@ export function uiInit(projects) {
             const indexView = document.querySelector(".index-view");
             const threeCanvas = document.querySelector(".three-canvas");
 
-            if (viewToggle) viewToggle.classList.remove("active");
-            if (indexView) indexView.classList.remove("active");
-            if (threeCanvas) threeCanvas.style.pointerEvents = "auto";
+            // Check if currently in index view (2D mode)
+            const isIndexActive = indexView && indexView.classList.contains("active");
+            
+            if (isIndexActive) {
+                // In index view - switch to 3D (same as close/escape)
+                uiSwitchState('3d');
+            } else {
+                // In 3D view - apply random rotation to sphere
+                // Import applyRandomRotation function dynamically
+                import('../main.js').then(module => {
+                    if (module.applyRandomRotation) {
+                        module.applyRandomRotation();
+                    }
+                });
+                
+                // Keep existing functionality for manual cleanup
+                if (viewToggle) viewToggle.classList.remove("active");
+                if (indexView) indexView.classList.remove("active");
+                if (threeCanvas) threeCanvas.style.pointerEvents = "auto";
+            }
         });
     }
 

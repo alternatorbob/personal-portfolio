@@ -2,7 +2,7 @@ import "./css/style.css";
 import "./css/global_styles.css";
 import "./css/mobile.css";
 import * as THREE from "three";
-import { dragInit, updateCubesForSphereRotation } from "./js/dragControl";
+import { dragInit, updateCubesForSphereRotation, worldRotation, rotationVelocity, animateInertia } from "./js/dragControl";
 import { addProjects } from "./js/addProjects";
 import { isRendering, easeInOutCubic, loadProjects, detectFontLoading, isMobileDevice } from "./js/utils";
 import { uiInit } from "./js/ui";
@@ -12,6 +12,12 @@ import { uiInit } from "./js/ui";
 const mainContainer = document.querySelector(".main-container");
 
 export let wasSelected = false;
+
+// Random rotation parameters for navbar name click
+const RANDOM_ROTATION_MIN_VELOCITY = 0.02;
+const RANDOM_ROTATION_MAX_VELOCITY = 0.08;
+const RANDOM_ROTATION_MIN_DIRECTION = -1;
+const RANDOM_ROTATION_MAX_DIRECTION = 1;
 
 let camera, scene, renderer;
 let sphere;
@@ -40,6 +46,27 @@ export function toggleSphereMaterial() {
         isGlassMaterial = !isGlassMaterial;
         transitionInProgress = true;
         transitionStartTime = performance.now();
+    }
+}
+
+// Function to apply random rotation to sphere
+export function applyRandomRotation() {
+    if (!sphere || !worldRotation || !rotationVelocity) return;
+    
+    // Generate random velocities for X and Y rotation
+    const randomVelX = (Math.random() * (RANDOM_ROTATION_MAX_VELOCITY - RANDOM_ROTATION_MIN_VELOCITY) + RANDOM_ROTATION_MIN_VELOCITY) 
+                      * (Math.random() > 0.5 ? RANDOM_ROTATION_MAX_DIRECTION : RANDOM_ROTATION_MIN_DIRECTION);
+    const randomVelY = (Math.random() * (RANDOM_ROTATION_MAX_VELOCITY - RANDOM_ROTATION_MIN_VELOCITY) + RANDOM_ROTATION_MIN_VELOCITY) 
+                      * (Math.random() > 0.5 ? RANDOM_ROTATION_MAX_DIRECTION : RANDOM_ROTATION_MIN_DIRECTION);
+    
+    // Apply the random velocities to the rotation system
+    rotationVelocity.x = randomVelX;
+    rotationVelocity.y = randomVelY;
+    rotationVelocity.z = 0; // Keep Z rotation at 0 for cleaner movement
+    
+    // Trigger inertia animation to start the rotation
+    if (rotationVelocity.length() > 0.0001) {
+        animateInertia();
     }
 }
 
@@ -194,7 +221,8 @@ async function threeInit() {
         // new THREE.BoxGeometry(1000, 1000, 1000, 10, 10, 10), // 20x20x20 subdivision
 
         // Option 2: Sphere (smoothest, most faces)
-        new THREE.SphereGeometry(700, 64, 32), // radius, widthSegments, heightSegments
+        // new THREE.SphereGeometry(700, 64, 32), // radius, widthSegments, heightSegments
+        new THREE.SphereGeometry(700, 16, 16), // radius, widthSegments, heightSegments
 
         // Option 3: Icosahedron (organic, spherical but faceted)
         // new THREE.IcosahedronGeometry(700, 4), // radius, subdivision_level (0-5)

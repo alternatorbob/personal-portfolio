@@ -4,7 +4,7 @@
         "id": "Agora",
         "year": "2023",
         "categories": ["Installation", "Interaction", "Realtime"],
-        "client": "ECAL",
+        "client": "EPFL",
         "content": {
             "cover": "/projects/Agora_Installation/Agora_Cover.webp",
             "media": [

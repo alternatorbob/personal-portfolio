@@ -404,7 +404,7 @@ export class AboutCard extends Card {
         // Add social media links and CV as comma-separated
         const socialLinks = document.createElement("div");
         socialLinks.innerHTML =
-            '<a href="https://www.instagram.com/__bogdan__n/" class="external-link">Instagram</a>, <a href="https://www.linkedin.com/in/cbogdann/" class="external-link">LinkedIn</a>, <a href="/assets/files/08.08.2025_CV_Bogdan-Nastase.pdf" class="external-link">CV</a>';
+            '<a href="https://www.linkedin.com/in/cbogdann/" class="external-link">LinkedIn</a>, <a href="https://www.instagram.com/__bogdan__n/" class="external-link">Instagram</a>, <a href="/assets/files/08.08.2025_CV_Bogdan-Nastase.pdf" class="external-link">CV</a>';
         column2.appendChild(socialLinks);
 
         // Add columns to links grid

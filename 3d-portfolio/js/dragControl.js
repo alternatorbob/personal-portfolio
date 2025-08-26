@@ -35,8 +35,8 @@ const raycaster = new THREE.Raycaster();
 
 // ROTARY ENCODER SYSTEM - Complete separation of sphere and world
 // The sphere stays visually stable, only the world rotates
-const worldRotation = new THREE.Quaternion();  // Controls cube orbital positions
-let rotationVelocity = new THREE.Vector3();
+export const worldRotation = new THREE.Quaternion();  // Controls cube orbital positions
+export let rotationVelocity = new THREE.Vector3();
 const dampingFactor = 0.975; // Reduced damping for quicker settling
 const velocityFactor = 0.004; // Reduced sensitivity for smoother control
 const mobileVelocityFactor = 0.008; // Reduced mobile sensitivity 
@@ -492,7 +492,7 @@ function onMouseLeave(e) {
     }
 }
 
-function animateInertia() {
+export function animateInertia() {
     if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
     }
