@@ -87,8 +87,8 @@ textureManager.onLoad = function () {
 
 const textureLoader = new THREE.TextureLoader(textureManager);
 
-const roughnessMap = textureLoader.load("assets/textures/mat/worn-shiny-metal-bl/worn-shiny-metal-Roughness.png");
-const normalMap = textureLoader.load("assets/textures/mat/worn-shiny-metal-bl/worn-shiny-metal-Normal-ogl.png");
+const roughnessMap = textureLoader.load("assets/textures/mat/worn-shiny-metal-bl/worn-shiny-metal-Roughness_S.png");
+const normalMap = textureLoader.load("assets/textures/mat/worn-shiny-metal-bl/worn-shiny-metal-Normal-ogl_S.png");
 
 // Add initialization flag
 let isInitialized = false;
