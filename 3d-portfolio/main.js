@@ -116,9 +116,14 @@ function checkLoadingComplete() {
         // Trigger intro fade
         const introFade = document.querySelector(".intro-fade");
         if (introFade) {
+            // Add extra delay on mobile to allow GPU warmup and shader loading
+            const baseDelay = 500;
+            const mobileExtraDelay = isMobileDevice() ? 500 : 0;
+            const totalDelay = baseDelay + mobileExtraDelay;
+            
             setTimeout(() => {
                 introFade.classList.add("fade-out");
-            }, 500); // Brief pause before fade
+            }, totalDelay);
         }
     }
 }
@@ -525,9 +530,14 @@ function enableFallbackMode() {
     // Trigger intro fade
     const introFade = document.querySelector(".intro-fade");
     if (introFade) {
+        // Add extra delay on mobile to allow GPU warmup and shader loading
+        const baseDelay = 500;
+        const mobileExtraDelay = isMobileDevice() ? 500 : 0;
+        const totalDelay = baseDelay + mobileExtraDelay;
+        
         setTimeout(() => {
             introFade.classList.add("fade-out");
-        }, 500); // Brief pause before fade
+        }, totalDelay);
     }
 
     // Show the index view as fallback

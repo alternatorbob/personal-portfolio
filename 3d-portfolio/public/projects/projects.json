@@ -22,11 +22,11 @@
         }
     },
     {
-        "title": "Apple",
+        "title": "R&D",
         "id": "Apple",
         "year": "2025",
         "categories": ["Interaction Design", "Interface Design", "Research"],
-        "client": "Random Studio",
+        "client": "Apple",
         "content": {
             "cover": "/projects/Random_Studio/Apple/Apple_Cover.png",
             "media": ["/projects/Random_Studio/Apple/Apple_Cover.png"],
@@ -100,11 +100,11 @@
         }
     },
     {
-        "title": "Glossier",
+        "title": "Fleur",
         "id": "Glossier",
         "year": "2025",
         "categories": ["Interaction", "Experience Design", "Sound Design"],
-        "client": "Random Studio",
+        "client": "Glossier",
         "content": {
             "cover": "/projects/Random_Studio/Glossier/Glossier_Cover.webp",
             "media": [
@@ -157,6 +157,41 @@
                 {
                     "type": "paragraph",
                     "html": "Photos by Kim Winder, Maikel Jay, Jan Willem Kaldenbach."
+                }
+            ]
+        }
+    },
+    {
+        "title": "A Living Entrance",
+        "id": "Living_Entrance",
+        "year": "2024",
+        "categories": ["Interaction Design", "Installation", "Graphic Design", "Sound Design"],
+        "client": "Random Studio",
+        "content": {
+            "cover": "/projects/Random_Studio/Living Entrance/Living_Entrance-Cover.webp",
+            "media": [
+                {
+                    "path": "/projects/Random_Studio/Living Entrance/The-Entrance_720p.mp4",
+                    "thumbnail": "/projects/Random_Studio/Living Entrance/Living_Entrance-Thumbnail.webp"
+                },
+                "/projects/Random_Studio/Living Entrance/Living_Entrance_1.webp",
+                "/projects/Random_Studio/Living Entrance/Living_Entrance_2.avif",
+                "/projects/Random_Studio/Living Entrance/Living_Entrance_3.avif",
+                "/projects/Random_Studio/Living Entrance/Living_Entrance_4.avif",
+                "/projects/Random_Studio/Living Entrance/Living_Entrance_5.avif"
+            ],
+            "description": [
+                {
+                    "type": "paragraph",
+                    "html": "<p>A Living Entrance is an interactive installation hosted by Het Hem in Zaandam, in collaboration with artist <a href='https://www.johannesofferhaus.nl/' class='external-link'> Johannes Offerhaus </a>. It is an internal artistic research project that explores the first impression and how an AI might make one based on our presence in a space.</p>"
+                },
+                {
+                    "type": "paragraph",
+                    "html": "<p>My role on the project was to research and develop the concept in a collaboration between the artist and Random Studio. I also designed the interface for the web app which controlled the installation and did the sound design for the documentation video.</p>"
+                },
+                {
+                    "type": "paragraph",
+                    "html": "A research zine was also printed to be handed out at the event. I designed the layout of it and you can find it <a href='https://www.datocms-assets.com/60650/1715688920-the_entrance_zine_scan.pdf'>here</a>. For the full case study, please visit <a href='https://random.studio/projects/the-entrance'>this link</a>."
                 }
             ]
         }

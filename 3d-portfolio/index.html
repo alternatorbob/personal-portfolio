@@ -10,6 +10,11 @@
         <meta property="og:url" content="https://bogdan-nastase.com" />
         <meta property="og:type" content="website" />
 
+        <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicon_io/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon_io/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon_io/favicon-16x16.png" />
+        <link rel="manifest" href="/assets/img/favicon_io/site.webmanifest" />
+
         <!-- Inline loading screen CSS - loads immediately to prevent FOUC -->
         <style>
             /* Immediate loading screen - inline to prevent FOUC */
@@ -25,12 +30,12 @@
                 align-items: center;
                 z-index: 1000000;
                 opacity: 1;
-                transition: opacity 1250ms cubic-bezier(0.4, 0.0, 0.2, 1);
+                transition: opacity 1250ms cubic-bezier(0.4, 0, 0.2, 1);
             }
 
             #loading-screen.hide {
                 opacity: 0;
-                transition: opacity 1250ms cubic-bezier(0.4, 0.0, 0.2, 1);
+                transition: opacity 1250ms cubic-bezier(0.4, 0, 0.2, 1);
                 pointer-events: none;
             }
 
