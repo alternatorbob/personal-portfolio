@@ -25,12 +25,12 @@
                 align-items: center;
                 z-index: 1000000;
                 opacity: 1;
-                transition: opacity 5s ease-out;
+                transition: opacity 1250ms cubic-bezier(0.4, 0.0, 0.2, 1);
             }
 
             #loading-screen.hide {
                 opacity: 0;
-                transition: opacity 5s ease-out;
+                transition: opacity 1250ms cubic-bezier(0.4, 0.0, 0.2, 1);
                 pointer-events: none;
             }
 
@@ -148,5 +148,6 @@
         <script type="module" src="/main.js"></script>
         <script type="module" src="js/ui.js"></script>
         <div class="invert"></div>
+        <div class="intro-fade"></div>
     </body>
 </html>

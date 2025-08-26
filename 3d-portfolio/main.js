@@ -109,8 +109,16 @@ function checkLoadingComplete() {
                 // Remove the loading screen after fade completes
                 setTimeout(() => {
                     loadingScreen.remove();
-                }, 5000); // Match CSS transition duration
+                }, 1550); // Match CSS transition duration
             }, 300); // Brief pause before fade
+        }
+
+        // Trigger intro fade
+        const introFade = document.querySelector(".intro-fade");
+        if (introFade) {
+            setTimeout(() => {
+                introFade.classList.add("fade-out");
+            }, 500); // Brief pause before fade
         }
     }
 }
@@ -510,8 +518,16 @@ function enableFallbackMode() {
             loadingScreen.classList.add("hide");
             setTimeout(() => {
                 loadingScreen.remove();
-            }, 1000);
+            }, 1250);
         }, 300); // Brief pause before fade
+    }
+
+    // Trigger intro fade
+    const introFade = document.querySelector(".intro-fade");
+    if (introFade) {
+        setTimeout(() => {
+            introFade.classList.add("fade-out");
+        }, 500); // Brief pause before fade
     }
 
     // Show the index view as fallback
