@@ -430,7 +430,7 @@ async function threeInit() {
         projectCoversLoaded = true;
         checkLoadingComplete();
     });
-    dragInit();
+    dragInit(projects);
     uiInit(projects);
 
     // Mark as initialized after successful setup

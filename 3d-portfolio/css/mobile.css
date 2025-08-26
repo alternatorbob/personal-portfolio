@@ -245,8 +245,8 @@
         background-repeat: no-repeat !important;
     }
 
-    /* ===== ABOUT CARD MOBILE ADJUSTMENTS ===== */
-    .about-card {
+    /* ===== info CARD MOBILE ADJUSTMENTS ===== */
+    .info-card {
         width: 90vw !important;
         max-width: 400px !important;
         aspect-ratio: auto !important;
@@ -256,12 +256,12 @@
         left: 50% !important;
     }
 
-    .about-card-title {
+    .info-card-title {
         margin-bottom: 24px !important;
         font-size: 1.5rem !important;
     }
 
-    .about-card-description {
+    .info-card-description {
         flex-grow: 1 !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
@@ -270,7 +270,7 @@
         line-height: 1.6 !important;
     }
 
-    .about-card-info {
+    .info-card-info {
         height: 100% !important;
         display: flex !important;
         flex-direction: column !important;
@@ -283,30 +283,30 @@
         /* margin-top: 12px !important; */
     }
 
-    .about-card .external-link:hover {
+    .info-card .external-link:hover {
         border-bottom-color: var(--text-color) !important;
     }
 
-    .about-card .button-close {
+    .info-card .button-close {
         top: 0px !important;
         right: 0px !important;
         transform: none !important;
     }
 
-    .about-card.show {
+    .info-card.show {
         transform: translate(-50%, -50%) !important;
         rotate: 0deg !important;
     }
 
-    .about-card-description > div {
+    .info-card-description > div {
         margin-bottom: 16px !important;
     }
 
-    .about-card-description > div:last-child {
+    .info-card-description > div:last-child {
         margin-bottom: 0 !important;
     }
 
-    #about-button:hover {
+    #info-button:hover {
         opacity: 1 !important;
     }
 

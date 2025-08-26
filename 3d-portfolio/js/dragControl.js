@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { sphere, envMesh, originalSphereScale, camera, renderer } from "../main.js";
 import { cubes, cubeOriginalDimensions } from "./addProjects";
 import { uiSwitchState, addProjectCardToPage, setIndexStateForProjectOpening } from "./ui";
-import { createEnvironment, isMobileDevice, pauseRenderer } from "./utils";
+import { createEnvironment, isMobileDevice, pauseRenderer, preloadProjectMedia, projectPreloadCache } from "./utils";
 
 let isDragging = false;
 let wasDragged = false;
@@ -84,6 +84,11 @@ const maxNudgeVelocity = 0.1; // Maximum velocity from keyboard controls
 let keyState = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
 let keyHoldTime = { ArrowUp: 0, ArrowDown: 0, ArrowLeft: 0, ArrowRight: 0 };
 
+// Add project preloading system
+let hoveredCube = null; // Currently hovered cube
+let hoverTimeout = null; // Timeout for hover detection
+let projectsData = []; // Store projects data for preloading
+
 // Define touch event handlers before they're used
 // Touch event handlers - Pure 2D screen input
 const onTouchStart = function (e) {
@@ -129,6 +134,14 @@ const onTouchStart = function (e) {
         // Only open project if sphere is not hit
         const intersectedObject = cubeIntersections[0].object;
         if (cubes.includes(intersectedObject)) {
+            // Preload project media on touch for mobile devices
+            if (projectsData.length > 0) {
+                const project = projectsData.find(p => p.id === intersectedObject.name);
+                if (project) {
+                    preloadProjectMedia(project);
+                }
+            }
+            
             // If a cube is clicked, switch to 2D mode and open the gallery
             const projectId = intersectedObject.name;
 
@@ -208,7 +221,13 @@ const onTouchEnd = function () {
 // Global flag to track if interactions are disabled
 let interactionsDisabled = false;
 
-export function dragInit() {
+export function dragInit(projects = []) {
+    // Store projects data for preloading
+    projectsData = projects;
+    
+    // Clear any existing preload cache
+    projectPreloadCache.clear();
+    
     // isMobile is already initialized at the top of the file
     
     // Initialize camera control after environment creation
@@ -435,6 +454,14 @@ function onMouseDown(e) {
         // Only open project if sphere is not hit
         const intersectedObject = cubeIntersections[0].object;
         if (cubes.includes(intersectedObject)) {
+            // Preload project media on mouse click
+            if (projectsData.length > 0) {
+                const project = projectsData.find(p => p.id === intersectedObject.name);
+                if (project) {
+                    preloadProjectMedia(project);
+                }
+            }
+            
             // If a cube is clicked, switch to 2D mode and open the gallery
             const projectId = intersectedObject.name;
 

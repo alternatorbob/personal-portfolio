@@ -320,7 +320,7 @@ export class AboutCard extends Card {
         });
 
         this.content = options.content || {
-            title: "About",
+            title: "Info",
             description: "",
             externalLinks: [
                 {

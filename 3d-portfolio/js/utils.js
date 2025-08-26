@@ -240,3 +240,75 @@ export function detectMediaType(mediaPath) {
     // Default to image for all other cases
     return 'image';
 }
+
+// Project preloading system
+export const projectPreloadCache = new Map(); // Cache for preloaded images
+
+/**
+ * Check if media is preloaded for a project
+ * @param {string} projectId - Project ID to check
+ * @returns {boolean} True if media is preloaded
+ */
+export function isMediaPreloaded(projectId) {
+    return projectPreloadCache.has(projectId);
+}
+
+/**
+ * Get preloaded media for a project
+ * @param {string} projectId - Project ID to get media for
+ * @returns {Image|null} Preloaded image or null if not available
+ */
+export function getPreloadedMedia(projectId) {
+    return projectPreloadCache.get(projectId) || null;
+}
+
+/**
+ * Preload the first image or video thumbnail for a project
+ * @param {Object} project - Project data from projects.json
+ */
+export function preloadProjectMedia(project) {
+    if (!project || !project.content) return;
+    
+    const projectId = project.id;
+    
+    // Skip if already preloaded
+    if (projectPreloadCache.has(projectId)) return;
+    
+    const { media = [] } = project.content;
+    if (media.length === 0) return;
+    
+    // Find the first image or video thumbnail
+    let mediaToPreload = null;
+    
+    for (const item of media) {
+        if (typeof item === 'string') {
+            // Direct image path
+            mediaToPreload = item;
+            break;
+        } else if (item.thumbnail) {
+            // Video with thumbnail
+            mediaToPreload = item.thumbnail;
+            break;
+        } else if (item.path) {
+            // Check if it's an image
+            const path = item.path.toLowerCase();
+            if (path.match(/\.(jpg|jpeg|png|webp|gif|avif)$/)) {
+                mediaToPreload = item.path;
+                break;
+            }
+        }
+    }
+    
+    if (mediaToPreload) {
+        // Create and preload the image
+        const img = new Image();
+        img.onload = () => {
+            projectPreloadCache.set(projectId, img);
+            console.log(`Preloaded media for project: ${project.title}`);
+        };
+        img.onerror = () => {
+            console.warn(`Failed to preload media for project: ${project.title}`);
+        };
+        img.src = mediaToPreload;
+    }
+}

@@ -207,7 +207,7 @@ function initBottomNavbar() {
 
 // About page content
 const aboutContent = {
-    title: "About",
+    title: "Info",
     description: `
        <p>I am an Interaction Designer based in Amsterdam working across 
        interaction, digital, and sound design. Currently working as an Interaction Designer at 
