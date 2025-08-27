@@ -297,6 +297,12 @@
         opacity: 1 !important;
     }
 
+    .index-view {
+        overflow-y: scroll;
+        overflow-x: hidden;
+        padding-top: 68px;
+    }
+
     .index-view-grid {
         grid-template-columns: 4fr 1fr;
     }
@@ -306,6 +312,6 @@
     }
 
     .control-group {
-        scale: 0.7;
+        /* scale: 0.7; */
     }
 }

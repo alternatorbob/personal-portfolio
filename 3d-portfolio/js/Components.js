@@ -343,7 +343,7 @@ export class AboutCard extends Card {
         this.cardTouchStartY = 0;
         this.cardTouchStartX = 0;
         this.isSwipingDown = false;
-        this.minSwipeDistance = 50;
+        this.minSwipeDistance = 20;
     }
 
     /**

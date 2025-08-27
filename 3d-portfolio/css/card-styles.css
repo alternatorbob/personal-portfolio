@@ -10,7 +10,7 @@
     text-align: left;
     display: flex;
     flex-direction: column;
-    /* gap: 2.4rem; */
+    gap: 1.25rem;
 }
 
 .about-card-links-grid {

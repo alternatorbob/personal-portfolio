@@ -567,7 +567,7 @@ const preloadedCoverImages = new Set();
 let indexTouchStartX = 0;
 let indexTouchStartY = 0;
 let isIndexSwiping = false;
-const indexMinSwipeDistance = 50;
+const indexMinSwipeDistance = 75; // Increased slightly for more intentional swipes
 
 /**
  * Initialize blur properties with 3D view settings
@@ -668,12 +668,12 @@ function handleIndexTouchMove(e) {
             const indexView = document.querySelector(".index-view");
             if (indexView && deltaX > 0) {
                 // Only allow leftward swipes
-                const swipeProgress = Math.min(deltaX / 200, 1); // Normalize to 0-1 over 200px
+                const swipeProgress = Math.min(deltaX / 150, 1); // Normalize to 0-1 over 150px (more responsive)
                 
-                // Apply transform and opacity changes
+                // Apply transform and opacity changes - make it feel like dragging
                 indexView.style.transition = "none";
-                indexView.style.transform = `translateX(-${deltaX * 0.3}px)`;
-                indexView.style.opacity = `${1 - (swipeProgress * 0.2)}`; // Fade slightly
+                indexView.style.transform = `translateX(-${deltaX * 0.8}px)`; // More direct translation (0.8 instead of 0.3)
+                indexView.style.opacity = `${1 - (swipeProgress * 0.5)}`; // More dramatic fade (0.5 instead of 0.2)
                 
                 // Prevent default to avoid page scrolling during swipe
                 e.preventDefault();
@@ -681,6 +681,8 @@ function handleIndexTouchMove(e) {
         }
     } catch (error) {
         console.warn("Error handling index touch move:", error);
+        // Reset position on error to prevent stuck state
+        resetIndexPosition();
     }
 }
 
@@ -690,9 +692,17 @@ function handleIndexTouchMove(e) {
  */
 function handleIndexTouchEnd(e) {
     try {
+        // Always reset touch state at the end
+        const resetTouchState = () => {
+            indexTouchStartX = 0;
+            indexTouchStartY = 0;
+            isIndexSwiping = false;
+        };
+
         if (!isIndexSwiping) {
             // Reset index position if no swipe was detected
             resetIndexPosition();
+            resetTouchState();
             return;
         }
 
@@ -700,21 +710,35 @@ function handleIndexTouchEnd(e) {
 
         // Check if swipe left distance is sufficient to close the index
         if (deltaX > indexMinSwipeDistance) {
-            // Close the index view
-            uiSwitchState("3d");
-            const viewToggle = document.querySelector(".view-toggle");
-            if (viewToggle) {
-                viewToggle.textContent = "Index";
+            // Complete the swipe animation smoothly - continue the motion
+            const indexView = document.querySelector(".index-view");
+            if (indexView) {
+                // Continue the swipe motion smoothly off-screen
+                indexView.style.transition = "transform 0.3s ease-out, opacity 0.3s ease-out";
+                indexView.style.transform = "translateX(-100vw)"; // Slide completely off screen
+                indexView.style.opacity = "0";
+                
+                // Close the index view after animation completes
+                setTimeout(() => {
+                    uiSwitchState("3d");
+                    const viewToggle = document.querySelector(".view-toggle");
+                    if (viewToggle) {
+                        viewToggle.textContent = "Index";
+                    }
+                    // Reset position after state change to prepare for next time
+                    if (indexView) {
+                        indexView.style.transition = "";
+                        indexView.style.transform = "";
+                        indexView.style.opacity = "";
+                    }
+                }, 300);
             }
         } else {
             // Swipe not sufficient, animate back to original position
             resetIndexPosition();
         }
 
-        // Reset touch state
-        indexTouchStartX = 0;
-        indexTouchStartY = 0;
-        isIndexSwiping = false;
+        resetTouchState();
 
     } catch (error) {
         console.warn("Error handling index touch end:", error);
@@ -733,16 +757,21 @@ function resetIndexPosition() {
     try {
         const indexView = document.querySelector(".index-view");
         if (indexView) {
+            // Enable smooth transitions for reset animation
             indexView.style.transition = "transform 0.3s ease-out, opacity 0.3s ease-out";
+            
+            // Reset transform and opacity to original values
             indexView.style.transform = "translateX(0)";
             indexView.style.opacity = "1";
             
-            // Clear transition after animation completes
+            // Clear all inline styles after animation completes to avoid conflicts
             setTimeout(() => {
                 if (indexView) {
                     indexView.style.transition = "";
+                    indexView.style.transform = "";
+                    indexView.style.opacity = "";
                 }
-            }, 300);
+            }, 320); // Slightly longer than transition to ensure completion
         }
     } catch (error) {
         console.warn("Error resetting index position:", error);
